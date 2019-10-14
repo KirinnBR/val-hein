@@ -6,34 +6,54 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
+	#region Movement Settings
 	[Header("Movement Settings")]
 	[SerializeField]
+	[Tooltip("The reference camera to move.")]
 	private CameraBehaviour cam;
 	[SerializeField]
+	[Tooltip("Speed when moving sideways.")]
 	private float strafeSpeed = 10f;
 	[SerializeField]
+	[Tooltip("Speed when moving forward.")]
 	private float forwardSpeed = 10f;
 	[SerializeField]
+	[Tooltip("Speed when moving backwards.")]
 	private float backwardsSpeed = 10f;
 	[SerializeField]
+	[Tooltip("Speed to turn to direction.")]
 	private float turnSpeed = 5f;
-
+	#endregion
 	[Space]
+	#region Physics
 	[Header("Physics")]
 	[SerializeField]
+	[Tooltip("The force of gravity that affects the player")]
 	private float gravityForce = 20f;
 	[SerializeField]
+	[Tooltip("The force of the jumping.")]
 	private float jumpForce = 15.0f;
-
+	[SerializeField]
+	[Range(0, 180)]
+	[Tooltip("The maximum slope, in degrees, that the player can climb.")]
+	private float slopeLimit = 45f;
+	[SerializeField]
+	[Tooltip("The maximum height, in meters, that the player can move up.")]
+	private float stepOffset = 0.5f;
+	#endregion
 	[Space]
+	#region Input Settings
 	[Header("Input Settings")]
 	[SerializeField]
 	private KeyCode keyToJump = KeyCode.Space;
-
+	#endregion
 	[Space]
+	#region Advanced
 	[Header("Advanced")]
 	[SerializeField]
+	[Tooltip("This should ONLY be changed by the creator of the script.")]
 	private float distanceToGroundOffset = 0.2f;
+	#endregion
 
 	private float distanceToGround;
 	private float verticalVelocity;
@@ -46,6 +66,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
 		controller = GetComponent<CharacterController>();
+		controller.slopeLimit = slopeLimit;
+		controller.stepOffset = stepOffset;
 		distanceToGround = controller.bounds.extents.y + distanceToGroundOffset;
 	}
 
