@@ -114,10 +114,10 @@ MonoBehaviour:
   strafeSpeed: 10
   forwardSpeed: 10
   backwardsSpeed: 10
-  turnSpeed: 5
+  turnSpeed: 10
   gravityForce: 20
-  jumpForce: 15
-  slopeLimit: 45
+  jumpForce: 12
+  slopeLimit: 50
   stepOffset: 0.5
   keyToJump: 32
   distanceToGroundOffset: 0.2

@@ -57,7 +57,8 @@ public class PlayerController : MonoBehaviour
 
 	private float distanceToGround;
 	private float verticalVelocity;
-	private bool IsGrounded => Physics.Raycast(transform.position, Vector3.down, distanceToGround);
+	//private bool IsGrounded => Physics.Raycast(transform.position, Vector3.down, distanceToGround);
+	private bool IsGrounded { get; set; }
 	private CharacterController controller;
 	private Vector3 input = Vector3.zero;
 	private Vector3 camR, camF;
@@ -82,26 +83,23 @@ public class PlayerController : MonoBehaviour
 
 	private void ProccessGravity()
 	{
-		if (IsGrounded || controller.isGrounded)
+		IsGrounded = Physics.Raycast(transform.position, Vector3.down, distanceToGround);
+		if (IsGrounded)
 		{
-			verticalVelocity = -gravityForce * Time.deltaTime;
-			ProccessJump();
+			if (Input.GetKeyDown(keyToJump))
+				ProccessJump();
 		}
 		else
 		{
 			verticalVelocity -= gravityForce * Time.deltaTime;
 		}
-
 		Vector3 jumpVector = new Vector3(0, verticalVelocity, 0);
 		controller.Move(jumpVector * Time.deltaTime);
 	}
 
 	private void ProccessJump()
 	{
-		if (Input.GetKeyDown(keyToJump))
-		{
-			verticalVelocity = jumpForce;
-		}
+		verticalVelocity = jumpForce;
 	}
 
 	private void CalculateInput()
