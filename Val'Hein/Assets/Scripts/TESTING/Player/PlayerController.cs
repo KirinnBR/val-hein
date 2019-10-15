@@ -13,14 +13,8 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("The reference camera to move.")]
 	private CameraBehaviour cam;
 	[SerializeField]
-	[Tooltip("Speed when moving sideways.")]
-	private float strafeSpeed = 10f;
-	[SerializeField]
-	[Tooltip("Speed when moving forward.")]
-	private float forwardSpeed = 10f;
-	[SerializeField]
-	[Tooltip("Speed when moving backwards.")]
-	private float backwardsSpeed = 10f;
+	[Tooltip("Movement Speed.")]
+	private float speed = 10f;
 	[SerializeField]
 	[Tooltip("Speed to turn to direction.")]
 	private float turnSpeed = 5f;
@@ -49,6 +43,13 @@ public class PlayerController : MonoBehaviour
 	private KeyCode keyToJump = KeyCode.Space;
 	#endregion
 	[Space]
+	#region Animation Settings
+	[Header("Animation Settings")]
+	[SerializeField]
+	[Tooltip("The speed on wich animations will be produced.")]
+	private float animationSpeed = 10f;
+	#endregion
+	[Space]
 	#region Advanced
 	[Header("Advanced")]
 	[SerializeField]
@@ -58,13 +59,13 @@ public class PlayerController : MonoBehaviour
 
 	private float distanceToGround;
 	private float verticalVelocity;
-	//private bool IsGrounded => Physics.Raycast(transform.position, Vector3.down, distanceToGround);
-	private bool IsGrounded { get; set; }
+	private bool IsGrounded => Physics.Raycast(transform.position, Vector3.down, distanceToGround);
 	public bool CanMove { get; private set; }
 	private CharacterController controller;
-	private Vector3 input = Vector3.zero;
-	private Vector3 camR, camF;
+	private float inputHorizontal, inputVertical;
+	private Vector3 camRight, camForward;
 	private Vector3 motion;
+	private Vector3 animSpeed = Vector3.zero;
 	private Animator anim;
     // Start is called before the first frame update
     void Start()
@@ -91,7 +92,6 @@ public class PlayerController : MonoBehaviour
 
 	private void ProccessGravity()
 	{
-		IsGrounded = Physics.Raycast(transform.position, Vector3.down, distanceToGround);
 		if (IsGrounded)
 		{
 			if (Input.GetKeyDown(keyToJump))
@@ -114,35 +114,32 @@ public class PlayerController : MonoBehaviour
 
 	private void CalculateInput()
 	{
-		input = new Vector3(Input.GetAxis("Horizontal") * strafeSpeed, 0, Input.GetAxis("Vertical"));
-		if (input.z > 0)
-			input.z *= forwardSpeed;
-		else if (input.z < 0)
-			input.z *= backwardsSpeed;
+		inputHorizontal = Input.GetAxisRaw("Horizontal");
+		inputVertical = Input.GetAxisRaw("Vertical");
 	}
 
 	private void CalculateCamera()
 	{
-		camF = cam.transform.forward;
-		camR = cam.transform.right;
-		camF.y = 0;
-		camR.y = 0;
-		camF = camF.normalized;
-		camR = camR.normalized;
+		camForward = cam.transform.forward;
+		camRight = cam.transform.right;
+		camForward.y = 0;
+		camRight.y = 0;
+		camForward = camForward.normalized;
+		camRight = camRight.normalized;
 	}
 
 	private void Move()
 	{
-		motion = camR * input.x + camF * input.z;
-		if (input.x != 0 || input.z != 0)
+		motion = Vector3.ClampMagnitude(camForward * inputVertical + camRight * inputHorizontal, 1f) * speed;
+		if (inputHorizontal != 0 || inputVertical != 0)
 		{
 			Quaternion rot = Quaternion.LookRotation(motion);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
-		anim.SetFloat("Speed", motion.magnitude);
+		animSpeed = Vector3.Lerp(animSpeed, motion, animationSpeed * Time.deltaTime);
+		anim.SetFloat("Speed", animSpeed.magnitude);
 		controller.Move(motion * Time.deltaTime);
 	}
-
 	
 
 }
