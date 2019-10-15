@@ -4,6 +4,7 @@ using UnityEngine;
 
 #pragma warning disable CS0649 //Disable warnings in console
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
 	#region Movement Settings
@@ -59,17 +60,21 @@ public class PlayerController : MonoBehaviour
 	private float verticalVelocity;
 	//private bool IsGrounded => Physics.Raycast(transform.position, Vector3.down, distanceToGround);
 	private bool IsGrounded { get; set; }
+	public bool CanMove { get; private set; }
 	private CharacterController controller;
 	private Vector3 input = Vector3.zero;
 	private Vector3 camR, camF;
 	private Vector3 motion;
+	private Animator anim;
     // Start is called before the first frame update
     void Start()
     {
 		controller = GetComponent<CharacterController>();
+		anim = GetComponent<Animator>();
 		controller.slopeLimit = slopeLimit;
 		controller.stepOffset = stepOffset;
 		distanceToGround = controller.bounds.extents.y + distanceToGroundOffset;
+		CanMove = true;
 	}
 
     // Update is called once per frame
@@ -78,7 +83,10 @@ public class PlayerController : MonoBehaviour
 		ProccessGravity();
 		CalculateInput();
 		CalculateCamera();
-		Move();
+		if (CanMove)
+		{
+			Move();
+		}
     }
 
 	private void ProccessGravity()
@@ -94,12 +102,14 @@ public class PlayerController : MonoBehaviour
 			verticalVelocity -= gravityForce * Time.deltaTime;
 		}
 		Vector3 jumpVector = new Vector3(0, verticalVelocity, 0);
+		anim.SetBool("IsGrounded", IsGrounded);
 		controller.Move(jumpVector * Time.deltaTime);
 	}
 
 	private void ProccessJump()
 	{
 		verticalVelocity = jumpForce;
+		anim.SetTrigger("Jump");
 	}
 
 	private void CalculateInput()
@@ -129,6 +139,7 @@ public class PlayerController : MonoBehaviour
 			Quaternion rot = Quaternion.LookRotation(motion);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
+		anim.SetFloat("Speed", motion.magnitude);
 		controller.Move(motion * Time.deltaTime);
 	}
 
