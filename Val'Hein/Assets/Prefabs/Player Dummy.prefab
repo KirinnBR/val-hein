@@ -1249,7 +1249,7 @@ MonoBehaviour:
   strafeSpeed: 10
   forwardSpeed: 10
   backwardsSpeed: 10
-  turnSpeed: 5
+  turnSpeed: 8
   gravityForce: 20
   jumpForce: 15
   slopeLimit: 45
