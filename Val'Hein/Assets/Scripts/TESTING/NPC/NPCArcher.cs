@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class NPCDummy : NPC, IDamageable
+[RequireComponent(typeof(NavMeshAgent))]
+public class NPCArcher : NPC
 {
-	#region Agent Settings
 	[Header("Agent Settings")]
-	[Tooltip("Speed when patrolling.")]
-	public float patrollingSpeed = 5f;
-	[Tooltip("Speed when chasing enemy.")]
-	public float pursuitSpeed = 15f;
+	[Tooltip("Speed when in battle.")]
+	public float battleSpeed = 15f;
 	public bool IsCloseEnoughToDestination => Vector3.Distance(agent.destination, transform.position) < agent.stoppingDistance;
 	private NavMeshAgent agent;
-	#endregion
 	[Space]
-	#region Combat Settings
 	[Header("Combat Settings")]
 	[SerializeField]
 	[Tooltip("The delay, in seconds, to attack.")]
@@ -26,47 +22,93 @@ public class NPCDummy : NPC, IDamageable
 	[SerializeField]
 	[Tooltip("The damage points it will inflict.")]
 	private float damagePoints = 20f;
-	#endregion
+	[SerializeField]
+	[Tooltip("The minimum distance between the target and the NPC to retreat.")]
+	private float distanceToRetreat = 5f;
+	[SerializeField]
+	[Tooltip("The attack range of the NPC.")]
+	private float attackRange = 15f;
 
 	public float CurrentHealth { get; private set; }
 	private bool attackOnCooldown = false;
 	private float currentCooldown = 0;
 	private Vector3 inicialPosition;
+	private Quaternion inicialRotation;
 
-	protected override void Start()
-	{
+    // Start is called before the first frame update
+    protected override void Start()
+    {
 		base.Start();
 		agent = GetComponent<NavMeshAgent>();
-		agent.acceleration = 80;
-		agent.angularSpeed = 1200;
-		agent.speed = patrollingSpeed;
-		agent.stoppingDistance = 2f;
 		CurrentHealth = healthPoints;
+		agent.stoppingDistance = attackRange - 1;
 		inicialPosition = transform.position;
+		inicialRotation = transform.rotation;
 	}
 
 	// Update is called once per frame
 	void Update()
     {
-		SearchObjects();
 		UpdateCooldown();
-		//Animate walk.
+		SearchObjects();
 		if (visibleObjects.Count > 0)
 		{
 			foreach (var visibleObject in visibleObjects)
 			{
-				//Condicao para ver se o inimigo se interessa em atacar aquele objeto.
-				//Atualmente, ele procura o primeiro objeto que seja um player e ataca.
 				if (visibleObject.tag == "Player")
 				{
-					StartPursuit(visibleObject.transform);
+					StartPursuit(visibleObject);
 				}
 			}
 		}
 		else
 		{
 			agent.destination = inicialPosition;
+			transform.rotation = inicialRotation;
 		}
+	}
+
+	private bool IsCloseEnoughToTarget(Vector3 target)
+	{
+		return Vector3.Distance(transform.position, target) < agent.stoppingDistance;
+	}
+
+	private void StartPursuit(Transform target)
+	{
+		agent.speed = battleSpeed;
+		transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
+		if (Vector3.Distance(transform.position, target.position) <= distanceToRetreat)
+		{
+			agent.stoppingDistance = 0;
+			agent.destination = -transform.forward.normalized * distanceToRetreat;
+		}
+		else
+		{
+			agent.stoppingDistance = attackRange - 2;
+			agent.SetDestination(target.position);
+		}
+		if (IsCloseEnoughToTarget(target.position))
+		{
+			if (!attackOnCooldown)
+			{
+				Attack(target);
+			}
+		}
+	}
+
+	private void Attack(Transform target)
+	{
+		if (target.TryGetComponent(out IDamageable dmg))
+		{
+			dmg.TakeDamage(damagePoints);
+			Debug.Log("Attack");
+		}
+		else
+		{
+			Debug.Log("Couldn't attack");
+		}
+		attackOnCooldown = true;
+		currentCooldown = attackDelay;
 	}
 
 	private void UpdateCooldown()
@@ -81,56 +123,12 @@ public class NPCDummy : NPC, IDamageable
 		}
 	}
 
-	private void StartPursuit(Transform target)
+	private void OnDrawGizmosSelected()
 	{
-		transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
-		agent.speed = pursuitSpeed;
-		agent.SetDestination(target.position);
-		if (IsCloseEnoughToTarget(target.position))
-		{
-			if (!attackOnCooldown)
-			{
-				Attack(target);
-			}
-		}
-	}
-
-	private void Attack(Transform target)
-	{
-		//Animation of attack.
-		//Sound of attack.
-		attackOnCooldown = true;
-		currentCooldown = attackDelay;
-		if (target.TryGetComponent(out IDamageable dmg))
-		{
-			Debug.Log($"{gameObject.name} dealt damage to {target.name}.");
-			dmg.TakeDamage(damagePoints);
-		}
-		else
-		{
-			Debug.Log($"{target.name} is not damageable.");
-		}
-	}
-
-	private bool IsCloseEnoughToTarget(Vector3 target)
-	{
-		return Vector3.Distance(transform.position, target) < agent.stoppingDistance;
-	}
-
-	void IDamageable.TakeDamage(float ammount)
-	{
-		CurrentHealth -= ammount;
-		if (CurrentHealth <= 0)
-		{
-			Die();
-		}
-	}
-
-	private void Die()
-	{
-		CurrentHealth = 0;
-		Debug.Log($"{gameObject.name} has died.");
-		Destroy(gameObject);
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawWireSphere(transform.position, distanceToRetreat);
+		Gizmos.color = Color.green;
+		Gizmos.DrawWireSphere(transform.position, attackRange - 1);
 	}
 
 }

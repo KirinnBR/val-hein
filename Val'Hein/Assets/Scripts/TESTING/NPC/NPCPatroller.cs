@@ -57,7 +57,7 @@ public class NPCPatroller : NPC, IDamageable
     }
 
 	// Update is called once per frame
-	private void Update()
+	void Update()
     {
 		UpdateCooldown();
 		SearchObjects();
