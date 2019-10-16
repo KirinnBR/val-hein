@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 #pragma warning disable CS0649
-public class NPC : MonoBehaviour
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))]
+public class NPC : MonoBehaviour, IDamageable
 {
 	#region Object Detection Settings
 	[Header("Object Detection Settings")]
@@ -22,10 +25,54 @@ public class NPC : MonoBehaviour
 	private LayerMask obstacleObjectsLayer;
 	protected List<Transform> visibleObjects;
 	#endregion
+	[Space]
+	#region Combat Settings
+	[Header("Combat Settings")]
+	[Tooltip("Stats of the NPC.")]
+	[SerializeField]
+	protected Stats stats;
+	[Tooltip("Speed when in battle.")]
+	[SerializeField]
+	protected float battleSpeed = 10f;
+	#endregion
+	[Space]
+	#region Agent Settings
+	protected NavMeshAgent agent;
+	public bool IsCloseEnoughToDestination => Vector3.Distance(agent.destination, transform.position) < agent.stoppingDistance;
+	protected bool IsCloseEnoughToTarget (Vector3 target) { return Vector3.Distance(transform.position, target) < agent.stoppingDistance; }
+	#endregion
+
+	protected Animator anim;
+	protected float CurrentHealth { get; set; }
+	protected bool attackOnCooldown = false;
+	protected float currentCooldown = 0;
 
 	protected virtual void Start()
 	{
 		visibleObjects = new List<Transform>();
+		agent = GetComponent<NavMeshAgent>();
+		anim = GetComponent<Animator>();
+		CurrentHealth = stats.health;
+		agent.acceleration = 80;
+		agent.angularSpeed = 1200;
+		agent.stoppingDistance = 2f;
+	}
+
+	protected virtual void Update()
+	{
+		UpdateCooldown();
+	}
+
+	private void UpdateCooldown()
+	{
+		if (attackOnCooldown)
+		{
+			currentCooldown -= Time.deltaTime;
+			if (currentCooldown <= 0)
+			{
+				attackOnCooldown = false;
+			}
+		}
 	}
 
 	protected void SearchObjects()
@@ -65,6 +112,52 @@ public class NPC : MonoBehaviour
 		if (!isGlobal)
 			angle += transform.eulerAngles.y;
 		return new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), 0, Mathf.Cos(angle * Mathf.Deg2Rad));
+	}
+
+	protected void Attack(Transform target)
+	{
+		//Animation of attack.
+		//Sound of attack.
+		if (target.TryGetComponent(out IDamageable dmg))
+		{
+			if (Random.Range(0, 100) <= stats.precision)
+			{
+				Debug.Log($"{gameObject.name} dealt damage to {target.name}.");
+				dmg.TakeDamage(stats.strength);
+			}
+			else
+			{
+				Debug.Log($"{gameObject.name} missed the attack.");
+			}
+		}
+		else
+		{
+			Debug.Log($"{target.name} is not damageable.");
+		}
+		attackOnCooldown = true;
+		//TODO: Agility cooldown.
+		currentCooldown = 2;
+	}
+
+	void IDamageable.TakeDamage(float ammount)
+	{
+		CurrentHealth = CurrentHealth - (ammount - stats.resistance);
+		if (CurrentHealth <= 0)
+		{
+			Die();
+		}
+	}
+
+	private void Die()
+	{
+		CurrentHealth = 0;
+		Debug.Log($"{gameObject.name} has died.");
+		Destroy(gameObject);
+	}
+
+	protected virtual void FixedUpdate()
+	{
+		SearchObjects();
 	}
 
 }
