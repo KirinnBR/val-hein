@@ -110,7 +110,6 @@ public class PlayerController : MonoBehaviour
 
 	private void CalculateInput()
 	{
-		if (GameController.instance.CurrentState == GameStates.Paused) return;
 
 		inputHorizontal = Input.GetAxisRaw("Horizontal");
 		inputVertical = Input.GetAxisRaw("Vertical");
