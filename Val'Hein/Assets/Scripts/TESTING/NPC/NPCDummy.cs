@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))]
 public class NPCDummy : NPC, IDamageable
 {
 	#region Agent Settings
@@ -28,14 +30,17 @@ public class NPCDummy : NPC, IDamageable
 	private float damagePoints = 20f;
 	#endregion
 
+
 	public float CurrentHealth { get; private set; }
 	private bool attackOnCooldown = false;
 	private float currentCooldown = 0;
 	private Vector3 inicialPosition;
+	private Animator anim;
 
 	protected override void Start()
 	{
 		base.Start();
+		anim = GetComponent<Animator>();
 		agent = GetComponent<NavMeshAgent>();
 		agent.acceleration = 80;
 		agent.angularSpeed = 1200;

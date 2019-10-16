@@ -8,6 +8,12 @@ using UnityEditor;
 [System.Serializable]
 public class GameStateEvent : UnityEvent<GameStates> { }
 
+[System.Serializable]
+public enum GameStates
+{
+	Resumed = 0, Paused = 1
+}
+
 public class GameController : MonoBehaviour
 {
 	#region Singleton
