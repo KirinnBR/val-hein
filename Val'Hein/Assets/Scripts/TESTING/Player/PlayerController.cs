@@ -17,8 +17,10 @@ public class PlayerController : MonoBehaviour
 	private float speed = 10f;
 	[SerializeField]
 	[Tooltip("Acceleration speed. 0 - No acceleration. 1 - Instant max speed on movement.")]
-	[Range(0,1)]
-	private float acceleration = 0.2f;
+	private float acceleration = 10f;
+	[SerializeField]
+	[Tooltip("The force to stop the player.")]
+	private float stoppingForce = 1.5f;
 	[SerializeField]
 	[Tooltip("Speed to turn to direction.")]
 	private float turnSpeed = 5f;
@@ -77,6 +79,9 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+		if (GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
+
+
 		ProccessGravity();
 		CalculateInput();
 		CalculateCamera();
@@ -127,9 +132,13 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-		motion = Vector3.Lerp(motion, Vector3.ClampMagnitude(camForward * inputVertical + camRight * inputHorizontal, 1f) * speed, acceleration);
+		if (inputHorizontal == 0 && inputVertical == 0)
+		{
+			motion = Vector3.Lerp(motion, Vector3.ClampMagnitude(camForward * inputVertical + camRight * inputHorizontal, 1f) * speed, acceleration * Time.deltaTime * stoppingForce);
+		}
 		if (inputHorizontal != 0 || inputVertical != 0)
 		{
+			motion = Vector3.Lerp(motion, Vector3.ClampMagnitude(camForward * inputVertical + camRight * inputHorizontal, 1f) * speed, acceleration * Time.deltaTime);
 			Quaternion rot = Quaternion.LookRotation(motion);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}

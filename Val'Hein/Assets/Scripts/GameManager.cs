@@ -1,19 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+
+
 
 public class GameManager : Singleton<GameManager>
 {
-
-	public GameObject[] SystemPrefabs;
-
+	[System.Serializable]
+	public class GameStateEvent : UnityEvent { }
 
 	[System.Serializable]
 	public enum GameState
 	{
 		MainMenu = 0, Running = 1, Paused = 2
 	}
+
+	public GameObject[] SystemPrefabs;
+	public GameState CurrentGameState { get; private set; }
+	public GameStateEvent onGameStateChanged;
+	
 
 	private List<GameObject> instancedSystemPrefabs;
 	private List<AsyncOperation> loadOperations;
@@ -27,8 +34,7 @@ public class GameManager : Singleton<GameManager>
 		instancedSystemPrefabs = new List<GameObject>();
 		
 		InstantiateSystemPrefabs();
-
-		LoadLevel("SampleScene");
+		onGameStateChanged.AddListener(UIManager.Instance.UpdateUI);
 	}
 
 	public void OnLoadOperationComplete(AsyncOperation ao)
@@ -41,7 +47,7 @@ public class GameManager : Singleton<GameManager>
 			//Transition between scenes.
 		}
 
-		Debug.Log($"Loaded");
+		Debug.Log($"{currentLevel} loaded.");
 	}
 
 	public void OnUnloadOperationComplete(AsyncOperation ao)
@@ -76,7 +82,31 @@ public class GameManager : Singleton<GameManager>
 		ao.completed += OnUnloadOperationComplete;
 	}
 
+	public void ChangeGameState (GameState state)
+	{
+		if (state == GameState.Paused)
+		{
+			PauseGame();
+		}
+		else if (state == GameState.Running)
+		{
+			ResumeGame();
+		}
+	}
 
+	public void PauseGame()
+	{
+		Time.timeScale = 0f;
+		CurrentGameState = GameState.Paused;
+		onGameStateChanged.Invoke();
+	}
+
+	public void ResumeGame()
+	{
+		Time.timeScale = 1f;
+		CurrentGameState = GameState.Running;
+		onGameStateChanged.Invoke();
+	}
 
 	private void InstantiateSystemPrefabs()
 	{

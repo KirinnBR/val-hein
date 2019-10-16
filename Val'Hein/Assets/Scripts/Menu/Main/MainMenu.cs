@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+#pragma warning disable CS0649
 [RequireComponent(typeof(Animation))]
 public class MainMenu : MonoBehaviour
 {
@@ -10,20 +10,15 @@ public class MainMenu : MonoBehaviour
 	
 	private Animation mainMenuAnimator;
 
-	private void Start()
+	private void Awake()
 	{
 		mainMenuAnimator = GetComponent<Animation>();
-		FadeIn();
 	}
 
 	public void OnFadeOutComplete()
 	{
-		UIManager.Instance.SetCameraActive(false);
-	}
-
-	public void OnFadeInComplete()
-	{
-		UIManager.Instance.SetCameraActive(true);
+		GameManager.Instance.LoadLevel("SampleScene");
+		GameManager.Instance.ChangeGameState(GameManager.GameState.Running);
 	}
 
 	public void FadeIn()
