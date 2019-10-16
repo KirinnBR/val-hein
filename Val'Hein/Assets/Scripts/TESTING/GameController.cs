@@ -15,8 +15,7 @@ public class GameController : MonoBehaviour
 	#endregion
 
 	public GameStates CurrentState { get; private set; }
-	[SerializeField]
-	private GameStateEvent onGameStateChanged;
+	public GameStateEvent onGameStateChanged;
 
 	private void Awake()
 	{

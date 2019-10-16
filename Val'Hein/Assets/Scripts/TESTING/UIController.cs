@@ -11,6 +11,11 @@ public class UIController : MonoBehaviour
 	[SerializeField]
 	private Canvas pauseCanvas;
 
+	private void Start()
+	{
+		
+	}
+
 	// Update is called once per frame
 	private void Update()
     {
@@ -25,18 +30,17 @@ public class UIController : MonoBehaviour
 			{
 				GameController.instance.PauseGame();
 			}
-			PauseUISetActive(currentState);
 		}
     }
 
 	public void PauseUISetActive (GameStates state)
 	{
 		bool active;
-		if (state == GameStates.Resumed)
+		if (state == GameStates.Paused)
 			active = true;
 		else
 			active = false;
 		pauseCanvas.gameObject.SetActive(active);
 	}
-	
+
 }

@@ -16,6 +16,10 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("Movement Speed.")]
 	private float speed = 10f;
 	[SerializeField]
+	[Tooltip("Acceleration speed. 0 - No acceleration. 1 - Instant max speed on movement.")]
+	[Range(0,1)]
+	private float acceleration = 0.2f;
+	[SerializeField]
 	[Tooltip("Speed to turn to direction.")]
 	private float turnSpeed = 5f;
 	#endregion
@@ -43,13 +47,6 @@ public class PlayerController : MonoBehaviour
 	private KeyCode keyToJump = KeyCode.Space;
 	#endregion
 	[Space]
-	#region Animation Settings
-	[Header("Animation Settings")]
-	[SerializeField]
-	[Tooltip("The speed on wich animations will be produced.")]
-	private float animationSpeed = 10f;
-	#endregion
-	[Space]
 	#region Advanced
 	[Header("Advanced")]
 	[SerializeField]
@@ -65,7 +62,6 @@ public class PlayerController : MonoBehaviour
 	private float inputHorizontal, inputVertical;
 	private Vector3 camRight, camForward;
 	private Vector3 motion;
-	private Vector3 animSpeed = Vector3.zero;
 	private Animator anim;
     // Start is called before the first frame update
     void Start()
@@ -130,14 +126,13 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-		motion = Vector3.ClampMagnitude(camForward * inputVertical + camRight * inputHorizontal, 1f) * speed;
+		motion = Vector3.Lerp(motion, Vector3.ClampMagnitude(camForward * inputVertical + camRight * inputHorizontal, 1f) * speed, acceleration);
 		if (inputHorizontal != 0 || inputVertical != 0)
 		{
 			Quaternion rot = Quaternion.LookRotation(motion);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
-		animSpeed = Vector3.Lerp(animSpeed, motion, animationSpeed * Time.deltaTime);
-		anim.SetFloat("Speed", animSpeed.magnitude);
+		anim.SetFloat("Speed", motion.magnitude);
 		controller.Move(motion * Time.deltaTime);
 	}
 	
