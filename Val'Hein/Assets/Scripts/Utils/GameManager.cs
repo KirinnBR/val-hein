@@ -8,8 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
-	[System.Serializable]
-	public class GameStateEvent : UnityEvent { }
+	
 
 	[System.Serializable]
 	public enum GameState
@@ -19,7 +18,8 @@ public class GameManager : Singleton<GameManager>
 
 	public GameObject[] SystemPrefabs;
 	public GameState CurrentGameState { get; private set; }
-	public GameStateEvent onGameStateChanged;
+	public UnityEvent onGameStateChanged;
+	public UnityEvent onSceneLoadedComplete;
 	
 
 	private List<GameObject> instancedSystemPrefabs;
@@ -48,6 +48,7 @@ public class GameManager : Singleton<GameManager>
 		}
 
 		Debug.Log($"{currentLevel} loaded.");
+		onSceneLoadedComplete.Invoke();
 	}
 
 	public void OnUnloadOperationComplete(AsyncOperation ao)
@@ -92,20 +93,19 @@ public class GameManager : Singleton<GameManager>
 		{
 			ResumeGame();
 		}
+		onGameStateChanged.Invoke();
 	}
 
 	public void PauseGame()
 	{
 		Time.timeScale = 0f;
 		CurrentGameState = GameState.Paused;
-		onGameStateChanged.Invoke();
 	}
 
 	public void ResumeGame()
 	{
 		Time.timeScale = 1f;
 		CurrentGameState = GameState.Running;
-		onGameStateChanged.Invoke();
 	}
 
 	public void QuitGame()
@@ -122,8 +122,6 @@ public class GameManager : Singleton<GameManager>
 			instancedSystemPrefabs.Add(prefabInstance);
 		}
 	}
-
-	
 
 	protected override void OnDestroy()
 	{

@@ -52,7 +52,7 @@ public class NPC : MonoBehaviour, IDamageable
 		visibleObjects = new List<Transform>();
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
-		CurrentHealth = stats.health;
+		CurrentHealth = stats.baseHealth;
 		agent.acceleration = 80;
 		agent.angularSpeed = 1200;
 		agent.stoppingDistance = 2f;
@@ -120,10 +120,10 @@ public class NPC : MonoBehaviour, IDamageable
 		//Sound of attack.
 		if (target.TryGetComponent(out IDamageable dmg))
 		{
-			if (Random.Range(0, 100) <= stats.precision)
+			if (Random.Range(0, 100) <= stats.basePrecision)
 			{
 				Debug.Log($"{gameObject.name} dealt damage to {target.name}.");
-				dmg.TakeDamage(stats.strength);
+				dmg.TakeDamage(stats.baseStrength);
 			}
 			else
 			{
@@ -141,7 +141,7 @@ public class NPC : MonoBehaviour, IDamageable
 
 	void IDamageable.TakeDamage(float ammount)
 	{
-		CurrentHealth = CurrentHealth - (ammount - stats.resistance);
+		CurrentHealth = CurrentHealth - (ammount - stats.baseResistance);
 		if (CurrentHealth <= 0)
 		{
 			Die();

@@ -10,17 +10,22 @@ public class MainMenu : MonoBehaviour
 	[SerializeField] private Button optButton;
 	[SerializeField] private Button quitButton;
 
-	private void Awake()
+	private void Start()
 	{
 		startButton.onClick.AddListener(StartButtonClicked);
 		optButton.onClick.AddListener(OptionsButtonClicked);
 		quitButton.onClick.AddListener(QuitButtonClicked);
+		GameManager.Instance.onSceneLoadedComplete.AddListener(OnLoad);
+	}
+
+	public void OnLoad()
+	{
+		GameManager.Instance.ChangeGameState(GameManager.GameState.Running);
 	}
 
 	public void StartButtonClicked()
 	{
 		GameManager.Instance.LoadLevel("SampleScene");
-		GameManager.Instance.ChangeGameState(GameManager.GameState.Running);
 	}
 
 	public void OptionsButtonClicked()

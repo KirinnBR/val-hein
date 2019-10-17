@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b117d39c90c07bc468af48779c92fc98, type: 3}
+  m_Name: PlayerStats
+  m_EditorClassIdentifier: 
+  baseHealth: 100
+  baseResistance: 10
+  baseStrength: 10
+  basePrecision: 50
+  basePower: 10
+  baseIntelligence: 10
+  baseRunicKnowledge: 10
+  baseAgility: 10
+  experience: 0
+  experienceToLevelUp: 0
+  level: 0
+  onLevelUps:
+  - healthModifier: 0
+    resistanceModifier: 0
+    strengthModifier: 0
+    precisionModifier: 0
+    powerModifier: 0
+    intelligenceModifier: 0
+    runicKnowledgeModifier: 0
+    agilityModifier: 0
+    experienceToLevelUpModifier: 0

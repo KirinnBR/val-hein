@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+#pragma warning disable CS0649
 public class OptionsMenu : MonoBehaviour
 {
 	[SerializeField] private Button backButton;

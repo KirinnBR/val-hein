@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("Movement Speed.")]
 	private float speed = 10f;
 	[SerializeField]
-	[Tooltip("Acceleration speed. 0 - No acceleration. 1 - Instant max speed on movement.")]
+	[Tooltip("Acceleration, in meters per squared second.")]
 	private float acceleration = 10f;
 	[SerializeField]
 	[Tooltip("The force to stop the player.")]
@@ -24,6 +24,13 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	[Tooltip("Speed to turn to direction.")]
 	private float turnSpeed = 5f;
+	[SerializeField]
+	[Range(0, 180)]
+	[Tooltip("The maximum slope, in degrees, that the player can climb.")]
+	private float slopeLimit = 45f;
+	[SerializeField]
+	[Tooltip("The maximum height, in meters, that the player can move up.")]
+	private float stepOffset = 0.5f;
 	#endregion
 	[Space]
 	#region Physics
@@ -34,13 +41,6 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	[Tooltip("The force of the jumping.")]
 	private float jumpForce = 15.0f;
-	[SerializeField]
-	[Range(0, 180)]
-	[Tooltip("The maximum slope, in degrees, that the player can climb.")]
-	private float slopeLimit = 45f;
-	[SerializeField]
-	[Tooltip("The maximum height, in meters, that the player can move up.")]
-	private float stepOffset = 0.5f;
 	#endregion
 	[Space]
 	#region Input Settings
