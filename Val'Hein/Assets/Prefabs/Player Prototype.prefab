@@ -1248,7 +1248,7 @@ MonoBehaviour:
   cam: {fileID: 0}
   speed: 10
   acceleration: 5
-  stoppingForce: 1.5
+  stoppingForce: 3
   turnSpeed: 8
   gravityForce: 20
   jumpForce: 15

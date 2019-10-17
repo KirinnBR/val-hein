@@ -108,6 +108,11 @@ public class GameManager : Singleton<GameManager>
 		onGameStateChanged.Invoke();
 	}
 
+	public void QuitGame()
+	{
+		Application.Quit();
+	}
+
 	private void InstantiateSystemPrefabs()
 	{
 		GameObject prefabInstance;
@@ -117,6 +122,8 @@ public class GameManager : Singleton<GameManager>
 			instancedSystemPrefabs.Add(prefabInstance);
 		}
 	}
+
+	
 
 	protected override void OnDestroy()
 	{

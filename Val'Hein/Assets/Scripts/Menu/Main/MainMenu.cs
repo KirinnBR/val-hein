@@ -1,38 +1,37 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
 #pragma warning disable CS0649
-[RequireComponent(typeof(Animation))]
 public class MainMenu : MonoBehaviour
 {
-	[SerializeField] private AnimationClip fadeInAnimation;
-	[SerializeField] private AnimationClip fadeOutAnimation;
-	
-	private Animation mainMenuAnimator;
+	[SerializeField] private Button startButton;
+	[SerializeField] private Button optButton;
+	[SerializeField] private Button quitButton;
 
 	private void Awake()
 	{
-		mainMenuAnimator = GetComponent<Animation>();
+		startButton.onClick.AddListener(StartButtonClicked);
+		optButton.onClick.AddListener(OptionsButtonClicked);
+		quitButton.onClick.AddListener(QuitButtonClicked);
 	}
 
-	public void OnFadeOutComplete()
+	public void StartButtonClicked()
 	{
 		GameManager.Instance.LoadLevel("SampleScene");
 		GameManager.Instance.ChangeGameState(GameManager.GameState.Running);
 	}
 
-	public void FadeIn()
+	public void OptionsButtonClicked()
 	{
-		mainMenuAnimator.Stop();
-		mainMenuAnimator.clip = fadeInAnimation;
-		mainMenuAnimator.Play();
+		UIManager.Instance.LoadOptionsMenu();
+		UIManager.Instance.UnloadMainMenu();
 	}
 
-	public void FadeOut()
+	public void QuitButtonClicked()
 	{
-		mainMenuAnimator.Stop();
-		mainMenuAnimator.clip = fadeOutAnimation;
-		mainMenuAnimator.Play();
+		GameManager.Instance.QuitGame();
 	}
 
 }

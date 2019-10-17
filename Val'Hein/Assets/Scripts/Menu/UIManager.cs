@@ -8,6 +8,7 @@ public class UIManager : Singleton<UIManager>
 	[SerializeField] private KeyCode keyToPause = KeyCode.Escape;
 	[Space]
 	[Header("Variables")]
+	[SerializeField] private OptionsMenu optMenu;
 	[SerializeField] private MainMenu mainMenu;
 	[SerializeField] private PauseMenu pauseMenu;
 	[SerializeField] private Camera dummyCamera;
@@ -22,28 +23,22 @@ public class UIManager : Singleton<UIManager>
 		if (GameManager.Instance.CurrentGameState == GameManager.GameState.MainMenu)
 		{
 			//All the code here when in GameMenu.
-			if (Input.GetKeyDown(KeyCode.Space))
-			{
-				mainMenu.FadeOut();
-			}
+			
 		}
 		else if (GameManager.Instance.CurrentGameState == GameManager.GameState.Running)
 		{
 			//All the code here when in game.
+			if (Input.GetKeyDown(keyToPause))
+			{
+				GameManager.Instance.ChangeGameState(GameManager.GameState.Paused);
+			}
 		}
 		else if (GameManager.Instance.CurrentGameState == GameManager.GameState.Paused)
 		{
 			//All the code here when paused.
 			if (Input.GetKeyDown(keyToPause))
 			{
-				if (GameManager.Instance.CurrentGameState == GameManager.GameState.Running)
-				{
-					GameManager.Instance.ChangeGameState(GameManager.GameState.Paused);
-				}
-				else if (GameManager.Instance.CurrentGameState == GameManager.GameState.Paused)
-				{
-					GameManager.Instance.ChangeGameState(GameManager.GameState.Running);
-				}
+				GameManager.Instance.ChangeGameState(GameManager.GameState.Running);
 			}
 		}
 	}
@@ -64,35 +59,42 @@ public class UIManager : Singleton<UIManager>
 		}
 	}
 
-	private void UnloadAllUI()
+	public void UnloadAllUI()
 	{
 		UnloadMainMenu();
 		UnloadPauseMenu();
-	}
-
-
-	private void LoadPauseMenu()
-	{
-		pauseMenu.GetComponent<Canvas>().enabled = true;
-	}
-
-	private void UnloadPauseMenu()
-	{
-		pauseMenu.GetComponent<Canvas>().enabled = false;
-	}
-
-	private void LoadMainMenu()
-	{
-		mainMenu.FadeIn();
-		UnloadPauseMenu();
-	}
-
-	private void UnloadMainMenu()
-	{
-		mainMenu.GetComponent<Canvas>().enabled = false;
+		UnloadOptionsMenu();
 		dummyCamera.GetComponent<Camera>().enabled = false;
 	}
 
+	public void LoadMainMenu()
+	{
+		mainMenu.gameObject.SetActive(true);
+	}
 
+	public void UnloadMainMenu()
+	{
+		mainMenu.gameObject.SetActive(false);
+	}
+
+	public void LoadPauseMenu()
+	{
+		pauseMenu.gameObject.SetActive(true);
+	}
+
+	public void UnloadPauseMenu()
+	{
+		pauseMenu.gameObject.SetActive(false);
+	}
+
+	public void LoadOptionsMenu()
+	{
+		optMenu.gameObject.SetActive(true);
+	}
+
+	public void UnloadOptionsMenu()
+	{
+		optMenu.gameObject.SetActive(false);
+	}
 
 }
