@@ -29,13 +29,31 @@ public class CameraBehaviour : MonoBehaviour
 	#endregion
 
 	private float heading = 0, tilt = 20;
-    // Update is called once per frame
-    void LateUpdate()
+	private Vector3 forward, right;
+
+	public Vector3 Forward { get { return forward; } }
+	public Vector3 Right { get { return right; } }
+
+	// Update is called once per frame
+	private void LateUpdate()
     {
 		heading += Input.GetAxis("Mouse X") * Time.deltaTime * mouseSensitivityX;
 		tilt -= Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSensitivityY;
 		tilt = Mathf.Clamp(tilt, angleBounds.x, angleBounds.y);
 		transform.rotation = Quaternion.Euler(tilt, heading, 0);
 		transform.position = target.position - transform.forward * distance + Vector3.up * heightOffset;
+		CalculateDirections();
 	}
+
+	private void CalculateDirections()
+	{
+		forward = transform.forward;
+		right = transform.right;
+		forward.y = 0;
+		right.y = 0;
+		forward = forward.normalized;
+		right = right.normalized;
+	}
+
+
 }

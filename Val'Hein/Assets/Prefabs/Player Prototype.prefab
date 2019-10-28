@@ -1209,7 +1209,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: b8ba76e66e27104409dea2890af0a7c7, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -1245,17 +1245,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5bc4d14135b6445bf7015788a761ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
+  camera: {fileID: 0}
   speed: 10
-  acceleration: 5
-  stoppingForce: 3
+  acceleration: 10
   turnSpeed: 10
   slopeLimit: 50
   stepOffset: 0.5
-  gravityForce: 20
-  jumpForce: 15
+  jumpHeight: 3
   keyToJump: 32
-  distanceToGroundOffset: 0.2
+  gravityForce: 25
+  distanceGroundCheck: -1
+  sphereRadius: 0.3
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!1 &6778455547549812590
 GameObject:
   m_ObjectHideFlags: 0

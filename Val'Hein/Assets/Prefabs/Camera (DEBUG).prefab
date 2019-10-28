@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7655798943814805343}
   m_Layer: 0
   m_Name: Camera (DEBUG)
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,4 +100,5 @@ MonoBehaviour:
   distance: 5
   heightOffset: 1
   angleBounds: {x: 0, y: 60}
-  mouseSensitivity: 180
+  mouseSensitivityX: 180
+  mouseSensitivityY: 180
