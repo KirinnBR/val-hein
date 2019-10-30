@@ -15,24 +15,33 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("The reference camera to move.")]
 	private new CameraBehaviour camera;
 	[SerializeField]
-	[Tooltip("Movement Speed.")]
-	private float speed = 10f;
+	[Tooltip("Movement speed when walking.")]
+	private float walkSpeed = 5f;
+	[SerializeField]
+	[Tooltip("Movement speed when running.")]
+	private float runspeed = 10f;
 	[SerializeField]
 	[Tooltip("Acceleration, in meters per squared second.")]
 	private float acceleration = 10f;
 	[SerializeField]
 	[Tooltip("Speed to turn to direction.")]
-	private float turnSpeed = 5f;
+	private float turnSpeed = 10f;
 	[SerializeField]
 	[Range(0, 180)]
 	[Tooltip("The maximum slope, in degrees, that the player can climb.")]
-	private float slopeLimit = 45f;
+	private float slopeLimit = 50f;
 	[SerializeField]
 	[Tooltip("The maximum height, in meters, that the player can move up.")]
 	private float stepOffset = 0.5f;
 	[SerializeField]
 	[Tooltip("The maximum height when jumping.")]
-	private float jumpHeight = 2f;
+	private float jumpHeight = 3f;
+	[SerializeField]
+	[Tooltip("The maximum distance when dodging.")]
+	private float dodgeDistance = 3f;
+	[SerializeField]
+	[Tooltip("The time, in seconds, it takes for the player to dodge.")]
+	private float dodgeTime = 0.5f;
 
 	private bool CanMove { get; set; }
 	private bool IsJumping { get; set; }
@@ -50,10 +59,14 @@ public class PlayerController : MonoBehaviour
 	[Header("Input Settings")]
 
 	[SerializeField]
+	private KeyCode keyToRun = KeyCode.LeftShift;
+	[SerializeField]
 	private KeyCode keyToJump = KeyCode.Space;
+	[SerializeField]
+	private KeyCode keyToDodge = KeyCode.LeftControl;
 
 	private float inputHorizontal, inputVertical;
-	private bool inputJump;
+	private bool inputJump, inputDodge, inputRun;
 
 	#endregion
 	[Space]
@@ -62,11 +75,11 @@ public class PlayerController : MonoBehaviour
 	[Header("Physics Settings")]
 
 	[SerializeField]
-	private float gravityForce = 12f;
+	private float gravityForce = 25f;
 	[SerializeField]
-	private float distanceGroundCheck = 0.0f;
+	private float distanceGroundCheck = -1.05f;
 	[SerializeField]
-	private float sphereRadius = 0.2f;
+	private float sphereRadius = 0.3f;
 	[SerializeField]
 	private LayerMask groundLayer;
 	[SerializeField]
@@ -93,17 +106,19 @@ public class PlayerController : MonoBehaviour
 	private void Update()
     {
 		if (GameManager.Instance && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
-
+		CheckGrounded();
 		ApplyGravity();
-		if (CanMove)
-		{
-			CalculateInput();
-			Move();
-		}
+		CalculateInput();
+		Move();
 		ProccessAnimations();
     }
 
-	private void FixedUpdate()
+	public void EnableMovement(bool movement)
+	{
+		CanMove = movement;
+	}
+
+	private void CheckGrounded()
 	{
 		IsGrounded = controller.isGrounded;
 		if (Physics.SphereCast(transform.position + Vector3.down * distanceGroundCheck, sphereRadius, Vector3.down, out RaycastHit groundHit, 1.0f, groundLayer, QueryTriggerInteraction.UseGlobal))
@@ -116,11 +131,6 @@ public class PlayerController : MonoBehaviour
 			OnSlope = false;
 	}
 
-	public void EnableMovement(bool movement)
-	{
-		CanMove = movement;
-	}
-
 	private void ApplyGravity()
 	{
 		velocityY += -gravityForce * Time.deltaTime;
@@ -128,22 +138,51 @@ public class PlayerController : MonoBehaviour
 
 	private void CalculateInput()
 	{
-		inputHorizontal = Input.GetAxisRaw("Horizontal");
-		inputVertical = Input.GetAxisRaw("Vertical");
-		inputJump = Input.GetKeyDown(keyToJump);
+		if (CanMove)
+		{
+			inputHorizontal = Input.GetAxisRaw("Horizontal");
+			inputVertical = Input.GetAxisRaw("Vertical");
+			inputJump = Input.GetKeyDown(keyToJump);
+			inputDodge = Input.GetKeyDown(keyToDodge);
+			if (!IsJumping)
+			{
+				inputRun = Input.GetKey(keyToRun);
+			}
+		}
+		else
+		{
+			inputHorizontal = 0.0f;
+			inputVertical = 0.0f;
+			inputJump = false;
+			inputDodge = false;
+			inputRun = false;
+		}
 	}
 
 	private void Move()
 	{
-		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * speed;
+		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runspeed : walkSpeed);
 
-		if (inputJump && IsGrounded)
-			Jump();
+		if (OnSlope && !IsJumping)
+			ApplyExtraForce();
+
+		if (IsGrounded)
+		{
+			if (inputJump)
+				Jump();
+			//if (CanMove && inputDodge)
+				//Dodge();
+		}
+
+		if (IsJumping && controller.collisionFlags == CollisionFlags.Above)
+		{
+			velocityY -= 1f;
+		}
 
 		motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
 		motionVertical = new Vector3(0, velocityY, 0);
 
-		if (motionHorizontal != Vector3.zero)
+		if (motionHorizontal != Vector3.zero && CanMove)
 		{
 			Quaternion rot = Quaternion.LookRotation(motionHorizontal);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
@@ -152,15 +191,12 @@ public class PlayerController : MonoBehaviour
 		motion = motionHorizontal + motionVertical;
 		controller.Move(motion * Time.deltaTime);
 
-		if (controller.isGrounded)
+		if (IsGrounded && !IsJumping)
 		{
 			velocityY = 0;
 		}
-	}
 
-	private void LateUpdate()
-	{
-		ApplyExtraForce();
+		
 	}
 
 	private void Jump()
@@ -170,10 +206,14 @@ public class PlayerController : MonoBehaviour
 		StartCoroutine(OnJump());
 	}
 
+	private void Dodge()
+	{
+		StartCoroutine(OnDodge());
+	}
+
 	private void ApplyExtraForce()
 	{
-		if (OnSlope && !IsJumping)
-			controller.Move(Vector3.down * gravityForce * slopeForce * Time.deltaTime);
+		controller.Move(Vector3.down * gravityForce * slopeForce * Time.deltaTime);
 	}
 
 	private void ProccessAnimations()
@@ -187,9 +227,26 @@ public class PlayerController : MonoBehaviour
 	{
 		IsJumping = true;
 		controller.slopeLimit = 90.0f;
-		yield return new WaitWhile(() => velocityY != 0);
+
+		yield return new WaitUntil(() => !IsGrounded);
+		yield return new WaitUntil(() => IsGrounded);
+
 		controller.slopeLimit = origSlopeLimit;
 		IsJumping = false;
+	}
+
+	private IEnumerator OnDodge()
+	{
+		CanMove = false;
+		float timeDodging = 0.0f;
+		Vector3 destination = transform.forward * dodgeDistance;
+		while (timeDodging <= dodgeTime)
+		{
+			timeDodging += Time.deltaTime;
+
+			yield return null;
+		}
+		CanMove = true;
 	}
 
 	private void OnDrawGizmosSelected()
