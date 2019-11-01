@@ -37,11 +37,10 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("The maximum height when jumping.")]
 	private float jumpHeight = 3f;
 	[SerializeField]
-	[Tooltip("The maximum distance when dodging.")]
-	private float dodgeDistance = 3f;
-	[SerializeField]
 	[Tooltip("The time, in seconds, it takes for the player to dodge.")]
 	private float dodgeTime = 0.5f;
+	[SerializeField]
+	private float dodgeSpeed = 2f;
 
 	private bool CanMove { get; set; }
 	private bool IsJumping { get; set; }
@@ -59,11 +58,11 @@ public class PlayerController : MonoBehaviour
 	[Header("Input Settings")]
 
 	[SerializeField]
-	private KeyCode keyToRun = KeyCode.LeftShift;
+	private KeyCode runKey = KeyCode.LeftShift;
 	[SerializeField]
-	private KeyCode keyToJump = KeyCode.Space;
+	private KeyCode jumpKey = KeyCode.Space;
 	[SerializeField]
-	private KeyCode keyToDodge = KeyCode.LeftControl;
+	private KeyCode dodgeKey = KeyCode.LeftControl;
 
 	private float inputHorizontal, inputVertical;
 	private bool inputJump, inputDodge, inputRun;
@@ -142,11 +141,11 @@ public class PlayerController : MonoBehaviour
 		{
 			inputHorizontal = Input.GetAxisRaw("Horizontal");
 			inputVertical = Input.GetAxisRaw("Vertical");
-			inputJump = Input.GetKeyDown(keyToJump);
-			inputDodge = Input.GetKeyDown(keyToDodge);
+			inputJump = Input.GetKeyDown(jumpKey);
+			inputDodge = Input.GetKeyDown(dodgeKey);
 			if (!IsJumping)
 			{
-				inputRun = Input.GetKey(keyToRun);
+				inputRun = Input.GetKey(runKey);
 			}
 		}
 		else
@@ -170,8 +169,8 @@ public class PlayerController : MonoBehaviour
 		{
 			if (inputJump)
 				Jump();
-			//if (CanMove && inputDodge)
-				//Dodge();
+			if (CanMove && inputDodge)
+				Dodge();
 		}
 
 		if (IsJumping && controller.collisionFlags == CollisionFlags.Above)
@@ -238,12 +237,12 @@ public class PlayerController : MonoBehaviour
 	private IEnumerator OnDodge()
 	{
 		CanMove = false;
-		float timeDodging = 0.0f;
-		Vector3 destination = transform.forward * dodgeDistance;
-		while (timeDodging <= dodgeTime)
+		float timeDodging = dodgeTime;
+		Vector3 destination = transform.forward * dodgeSpeed;
+		while (timeDodging >= 0)
 		{
-			timeDodging += Time.deltaTime;
-
+			timeDodging -= Time.deltaTime;
+			controller.SimpleMove(destination);
 			yield return null;
 		}
 		CanMove = true;

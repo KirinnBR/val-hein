@@ -97,7 +97,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
+  minMaxDistance: {x: 1, y: 10}
   distance: 5
+  mouseScrollWheelSensitivity: 1
   heightOffset: 1
   angleBounds: {x: 0, y: 60}
   mouseSensitivityX: 180

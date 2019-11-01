@@ -281,16 +281,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 0}
-  speed: 10
+  walkSpeed: 5
+  runspeed: 10
   acceleration: 10
   turnSpeed: 10
   slopeLimit: 50
   stepOffset: 0.5
   jumpHeight: 3
   dodgeDistance: 3
-  dodgeTime: 0.5
-  keyToJump: 32
-  keyToDodge: 306
+  dodgeTime: 0.3
+  dodgeSpeed: 15
+  runKey: 304
+  jumpKey: 32
+  dodgeKey: 306
   gravityForce: 25
   distanceGroundCheck: -1.05
   sphereRadius: 0.3
