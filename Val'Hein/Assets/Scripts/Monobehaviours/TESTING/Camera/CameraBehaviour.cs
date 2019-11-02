@@ -14,7 +14,7 @@ public class CameraBehaviour : MonoBehaviour
 	private Transform target;
 	[SerializeField]
 	[Tooltip("The minimum and maximum distance between target and camera.")]
-	private Vector2 minMaxDistance = new Vector2(1f, 10f);
+	private Vector2 distanceLimits = new Vector2(1f, 10f);
 	[Tooltip("The distance between the camera and the target.")]
 	public float distance = 10f;
 	[Tooltip("The sensitivity of the mouse scroll wheel.")]
@@ -25,13 +25,25 @@ public class CameraBehaviour : MonoBehaviour
 	private float heightOffset = 1f;
 	[SerializeField]
 	[Tooltip("The minimum and maximum angle that the camera can go.")]
-	private Vector2 angleBounds = new Vector2(0, 60);
+	private Vector2 angleLimits = new Vector2(0, 60);
 	[SerializeField]
 	[Tooltip("The sensitivity of the mouse in the X axis.")]
 	private float mouseSensitivityX = 180f;
 	[SerializeField]
 	[Tooltip("The sensitivity of the mouse in the Y axis.")]
 	private float mouseSensitivityY = 180f;
+
+	#endregion
+	[Space]
+	#region Camera Collision Settings
+
+	[Header("Camera Collision Settings")]
+
+	[SerializeField]
+	private LayerMask collisionLayer;
+
+	[SerializeField]
+	private Vector3 rayOffset = new Vector3(0f, 1f, 0f);
 
 	#endregion
 
@@ -47,9 +59,11 @@ public class CameraBehaviour : MonoBehaviour
     {
 		heading += Input.GetAxis("Mouse X") * Time.deltaTime * mouseSensitivityX;
 		tilt -= Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSensitivityY;
-		tilt = Mathf.Clamp(tilt, angleBounds.x, angleBounds.y);
+		tilt = Mathf.Clamp(tilt, angleLimits.x, angleLimits.y);
+
 		transform.rotation = Quaternion.Euler(tilt, heading, 0);
-		transform.position = target.position - transform.forward * distance + Vector3.up * heightOffset;
+		Move(target.position - transform.forward * distance + Vector3.up * heightOffset);
+
 		CalculateDirections();
 	}
 
@@ -57,7 +71,15 @@ public class CameraBehaviour : MonoBehaviour
 	{
 		mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
 		distance += mouseScroll * mouseScrollWheelSensitivity;
-		distance = Mathf.Clamp(distance, minMaxDistance.x, minMaxDistance.y);
+		distance = Mathf.Clamp(distance, distanceLimits.x, distanceLimits.y);
+	}
+
+	private void Move(Vector3 point)
+	{
+		if (Physics.Linecast(target.position + rayOffset, point, out RaycastHit hit, collisionLayer, QueryTriggerInteraction.Ignore))
+			transform.position = hit.point;
+		else
+			transform.position = point;
 	}
 
 	private void CalculateDirections()
@@ -69,6 +91,8 @@ public class CameraBehaviour : MonoBehaviour
 		forward = forward.normalized;
 		right = right.normalized;
 	}
+
+	
 
 
 }

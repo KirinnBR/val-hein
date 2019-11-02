@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
 	private float walkSpeed = 5f;
 	[SerializeField]
 	[Tooltip("Movement speed when running.")]
-	private float runspeed = 10f;
+	private float runSpeed = 10f;
 	[SerializeField]
 	[Tooltip("Acceleration, in meters per squared second.")]
 	private float acceleration = 10f;
@@ -105,12 +105,16 @@ public class PlayerController : MonoBehaviour
 	private void Update()
     {
 		if (GameManager.Instance && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
-		CheckGrounded();
 		ApplyGravity();
 		CalculateInput();
 		Move();
 		ProccessAnimations();
     }
+
+	private void FixedUpdate()
+	{
+		CheckGrounded();
+	}
 
 	public void EnableMovement(bool movement)
 	{
@@ -160,7 +164,7 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runspeed : walkSpeed);
+		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (OnSlope && !IsJumping)
 			ApplyExtraForce();
@@ -225,12 +229,12 @@ public class PlayerController : MonoBehaviour
 	private IEnumerator OnJump()
 	{
 		IsJumping = true;
-		controller.slopeLimit = 90.0f;
+		//controller.slopeLimit = 90.0f;
 
 		yield return new WaitUntil(() => !IsGrounded);
 		yield return new WaitUntil(() => IsGrounded);
 
-		controller.slopeLimit = origSlopeLimit;
+		//controller.slopeLimit = origSlopeLimit;
 		IsJumping = false;
 	}
 
