@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New ArmorStatsIncreaser", menuName = "Entities/Armor/ArmorStatsIncreaser")]
+[CreateAssetMenu(fileName = "New Armor Stats Increaser", menuName = "Entities/Armor/ArmorStatsIncreaser")]
 public class ArmorStatsIncreaser : ScriptableObject
 {
 	[System.Serializable]
@@ -13,20 +13,19 @@ public class ArmorStatsIncreaser : ScriptableObject
 		public Stats modifiers;
 	};
 
-
 	[Header("Helmet")]
 	public Armor helmetArmor;
 
 	[Header("Chestplate")]
 	public Armor chestplateArmor;
 
-	[Header("eu esqueci essa parte")]
-	public Armor bracoArmor;
+	[Header("Gauntlet")]
+	public Armor gauntletArmor;
 
-	[Header("A mano serio")]
-	public Armor legArmor;
+	[Header("Greaves")]
+	public Armor greavesArmor;
 
-	[Header("A este ponto eu desisto de me lembrar.")]
-	public Armor aquelaDoPe;
+	[Header("Feet")]
+	public Armor feetArmor;
 
 }

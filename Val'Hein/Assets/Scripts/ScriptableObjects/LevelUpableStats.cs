@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New LevelUpableStats", menuName = "Entities/Stats/LevelUpableStats")]
+[CreateAssetMenu(fileName = "New Level-Upable Stats", menuName = "Entities/Stats/LevelUpableStats")]
 public class LevelUpableStats : Stats
 {
     [System.Serializable]
