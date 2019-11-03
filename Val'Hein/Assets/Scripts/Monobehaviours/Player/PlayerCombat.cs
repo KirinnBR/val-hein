@@ -10,7 +10,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	[Header("Combat Settings")]
 
 	[SerializeField]
-	private LevelUpableStats stats;
+	private Stats stats;
 	[SerializeField]
 	private ArmorStatsIncreaser armor;
 	[SerializeField]
@@ -39,6 +39,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private Vector3 hitBoxOffset = new Vector3(0f, 1f, 0.75f);
 	[SerializeField]
 	private Vector3 hitBoxSize = Vector3.one * 0.5f;
+	[SerializeField]
+	private float hitDistance = 1f;
 
 	#endregion
 
@@ -94,10 +96,13 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void Attack()
 	{
 		anim.SetTrigger("Light Attack");
-		var obj = Physics.BoxCast(transform.position + hitBoxOffset, hitBoxSize, transform.forward, out RaycastHit hit, Quaternion.identity, 1f, combatLayer, QueryTriggerInteraction.Ignore);
-		if (obj && hit.transform.TryGetComponent(out IDamageable dmg))
+		if (Physics.BoxCast(transform.position + hitBoxOffset, hitBoxSize / 2, transform.forward, out RaycastHit hit, Quaternion.LookRotation(transform.forward), hitDistance, combatLayer, QueryTriggerInteraction.Ignore))
 		{
-			dmg.TakeDamage(stats.baseStrength);
+			if (hit.transform.TryGetComponent(out IDamageable dmg))
+			{
+				//Do damage and instantiate blood and shit.
+				dmg.TakeDamage(stats.baseStrength);
+			}
 		}
 	}
 
@@ -124,7 +129,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.red;
-		Gizmos.DrawWireCube(transform.position + hitBoxOffset, hitBoxSize);
+		Gizmos.DrawWireCube(transform.position + hitBoxOffset + transform.forward * hitDistance, hitBoxSize);
 	}
 
 }

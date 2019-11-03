@@ -317,9 +317,13 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 8d4e9ee682a362041abe24f7358a1c05, type: 2}
   armor: {fileID: 11400000, guid: 920777b14556e9a48a1f4a32b9f06391, type: 2}
   timeBetweenAttacks: 0.5
+  combatLayer:
+    serializedVersion: 2
+    m_Bits: 256
   buttonToAttack: 0
-  hitBoxOffset: {x: 0, y: 1.2, z: 1}
-  hitBoxSize: {x: 0.5, y: 0.8, z: 0.5}
+  hitBoxOffset: {x: 0, y: 0.9, z: 0}
+  hitBoxSize: {x: 0.5, y: 1.5, z: 0.5}
+  hitDistance: 0.8
 --- !u!1 &627025326016288644
 GameObject:
   m_ObjectHideFlags: 0

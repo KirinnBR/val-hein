@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-[CreateAssetMenu(fileName = "New Level-Upable Stats", menuName = "Entities/Stats/LevelUpableStats")]
-public class LevelUpableStats : Stats
+[CreateAssetMenu(fileName = "New Level Definitions", menuName = "Entities/Stats/LevelDefinitions")]
+public class LevelDefinitions : ScriptableObject
 {
-    [System.Serializable]
+	[System.Serializable]
 	public class StatsLevelUp
 	{
 		public float healthModifier;
@@ -20,10 +19,15 @@ public class LevelUpableStats : Stats
 	}
 
 	[Header("Experience")]
+	[HideInInspector]
 	public float experience = 0f;
 	public float experienceToLevelUp = 100f;
-	public int level = 0;
+	[HideInInspector]
+	public int level = 1;
 	public StatsLevelUp[] onLevelUps;
+
+	[Header("References")]
+	public Stats statsToIncrease;
 
 	public void GiveExperience(float ammount)
 	{
@@ -39,14 +43,14 @@ public class LevelUpableStats : Stats
 		level++;
 		experience = 0;
 		var modifiers = onLevelUps[level - 1];
-		baseHealth += modifiers.healthModifier;
-		baseResistance += modifiers.resistanceModifier;
-		baseStrength += modifiers.strengthModifier;
-		basePrecision += modifiers.precisionModifier;
-		basePower += modifiers.powerModifier;
-		baseIntelligence += modifiers.intelligenceModifier;
-		baseRunicKnowledge += modifiers.runicKnowledgeModifier;
-		baseAgility += modifiers.agilityModifier;
+		statsToIncrease.baseHealth += modifiers.healthModifier;
+		statsToIncrease.baseResistance += modifiers.resistanceModifier;
+		statsToIncrease.baseStrength += modifiers.strengthModifier;
+		statsToIncrease.basePrecision += modifiers.precisionModifier;
+		statsToIncrease.basePower += modifiers.powerModifier;
+		statsToIncrease.baseIntelligence += modifiers.intelligenceModifier;
+		statsToIncrease.baseRunicKnowledge += modifiers.runicKnowledgeModifier;
+		statsToIncrease.baseAgility += modifiers.agilityModifier;
 		experienceToLevelUp += modifiers.experienceToLevelUpModifier;
 	}
 

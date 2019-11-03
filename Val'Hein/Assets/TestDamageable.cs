@@ -6,18 +6,6 @@ public class TestDamageable : MonoBehaviour, IDamageable
 {
 	public void TakeDamage(float ammount)
 	{
-		Debug.Log("Damage taken.");
+		Debug.Log($"{gameObject.name} took {ammount} damage points.");
 	}
-
-	// Start is called before the first frame update
-	void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
