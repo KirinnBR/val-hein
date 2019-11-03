@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable CS0649
-[RequireComponent(typeof(Camera))]
+[RequireComponent(typeof(UnityEngine.Camera))]
 public class CameraBehaviour : MonoBehaviour
 {
 	#region Target-Follow Settings
@@ -57,10 +57,8 @@ public class CameraBehaviour : MonoBehaviour
 		heading += Input.GetAxis("Mouse X") * Time.deltaTime * mouseSensitivityX;
 		tilt -= Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSensitivityY;
 		tilt = Mathf.Clamp(tilt, angleLimits.x, angleLimits.y);
-
 		transform.rotation = Quaternion.Euler(tilt, heading, 0);
 		Move(target.position - transform.forward * distance + playerOffset);
-
 		CalculateDirections();
 	}
 
@@ -74,7 +72,7 @@ public class CameraBehaviour : MonoBehaviour
 	private void Move(Vector3 point)
 	{
 		if (Physics.Linecast(target.position + playerOffset, point, out RaycastHit hit, collisionLayer, QueryTriggerInteraction.Ignore))
-			transform.position = hit.point;
+			transform.position = hit.point + transform.forward;
 		else
 			transform.position = point;
 	}
@@ -91,7 +89,7 @@ public class CameraBehaviour : MonoBehaviour
 
 	private void OnDrawGizmosSelected()
 	{
-		Gizmos.color = Color.cyan;
+		Gizmos.color = Color.green;
 		Gizmos.DrawLine(transform.position, target.position + playerOffset);
 	}
 

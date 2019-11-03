@@ -11,7 +11,7 @@ public class UIManager : Singleton<UIManager>
 	[SerializeField] private OptionsMenu optMenu;
 	[SerializeField] private MainMenu mainMenu;
 	[SerializeField] private PauseMenu pauseMenu;
-	[SerializeField] private Camera dummyCamera;
+	[SerializeField] private UnityEngine.Camera dummyCamera;
 
 	private void Start()
 	{
@@ -64,7 +64,7 @@ public class UIManager : Singleton<UIManager>
 		UnloadMainMenu();
 		UnloadPauseMenu();
 		UnloadOptionsMenu();
-		dummyCamera.GetComponent<Camera>().enabled = false;
+		dummyCamera.GetComponent<UnityEngine.Camera>().enabled = false;
 	}
 
 	public void LoadMainMenu()

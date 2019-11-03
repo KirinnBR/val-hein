@@ -200,8 +200,6 @@ public class PlayerController : MonoBehaviour
 		{
 			velocityY = 0;
 		}
-
-		
 	}
 
 	private void Jump()
@@ -255,6 +253,6 @@ public class PlayerController : MonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position + Vector3.down * distanceGroundCheck + Vector3.down, sphereRadius);
+		Gizmos.DrawWireSphere(transform.position + Vector3.down + Vector3.down * distanceGroundCheck, sphereRadius);
 	}
 }
