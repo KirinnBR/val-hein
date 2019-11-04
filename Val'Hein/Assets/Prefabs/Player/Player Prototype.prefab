@@ -320,10 +320,10 @@ MonoBehaviour:
   combatLayer:
     serializedVersion: 2
     m_Bits: 256
+  comboValidationSeconds: 2
   buttonToAttack: 0
-  hitBoxOffset: {x: 0, y: 0.9, z: 0}
   hitBoxSize: {x: 0.5, y: 1.5, z: 0.5}
-  hitDistance: 0.8
+  hitBoxOffset: {x: 0, y: 0.9, z: -0.3}
 --- !u!1 &627025326016288644
 GameObject:
   m_ObjectHideFlags: 0
