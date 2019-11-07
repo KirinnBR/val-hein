@@ -44,6 +44,7 @@ public class PlayerController : MonoBehaviour
 
 	private bool CanMove { get; set; }
 	private bool IsJumping { get; set; }
+	private bool IsValidKeepJump { get; set; } = true;
 	private float origSlopeLimit;
 	private CharacterController controller;
 	private Vector3 motion;
@@ -92,6 +93,7 @@ public class PlayerController : MonoBehaviour
 
 	#endregion
 
+	
 	private Animator anim;
 
 	private void Start()
@@ -106,7 +108,7 @@ public class PlayerController : MonoBehaviour
 
 	private void Update()
     {
-		if (GameManager.Instance && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
+		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
 		ApplyGravity();
 		CalculateInput();
 		Move();
@@ -139,6 +141,18 @@ public class PlayerController : MonoBehaviour
 	private void ApplyGravity()
 	{
 		velocityY += -gravityForce * Time.deltaTime;
+		motionVertical = new Vector3(0, velocityY, 0);
+
+		if (IsJumping && controller.collisionFlags == CollisionFlags.Above)
+			velocityY -= 1f;
+
+		controller.Move(motionVertical * Time.deltaTime);
+
+		if (velocityY <= 0)
+			IsValidKeepJump = false;
+
+		if (IsGrounded && !IsJumping)
+			velocityY = 0;
 	}
 
 	private void CalculateInput()
@@ -151,7 +165,7 @@ public class PlayerController : MonoBehaviour
 			inputDodge = Input.GetKeyDown(dodgeKey);
 			if (!IsJumping)
 			{
-				inputRun = Input.GetKey(runKey);
+				inputRun = invertRun ? !Input.GetKey(runKey) : Input.GetKey(runKey);
 			}
 		}
 		else
@@ -166,7 +180,7 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * ((invertRun ? !inputRun: inputRun) ? runSpeed : walkSpeed);
+		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (OnSlope && !IsJumping)
 			ApplyExtraForce();
@@ -179,13 +193,7 @@ public class PlayerController : MonoBehaviour
 				Dodge();
 		}
 
-		if (IsJumping && controller.collisionFlags == CollisionFlags.Above)
-		{
-			velocityY -= 1f;
-		}
-
 		motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
-		motionVertical = new Vector3(0, velocityY, 0);
 
 		if (motionHorizontal != Vector3.zero && CanMove)
 		{
@@ -193,13 +201,7 @@ public class PlayerController : MonoBehaviour
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
 
-		motion = motionHorizontal + motionVertical;
-		controller.Move(motion * Time.deltaTime);
-
-		if (IsGrounded && !IsJumping)
-		{
-			velocityY = 0;
-		}
+		controller.Move(motionHorizontal * Time.deltaTime);
 	}
 
 	private void Jump()
@@ -229,8 +231,14 @@ public class PlayerController : MonoBehaviour
 	private IEnumerator OnJump()
 	{
 		IsJumping = true;
+		IsValidKeepJump = true;
 
-		yield return new WaitUntil(() => !IsGrounded);
+		while (IsGrounded)
+		{
+			yield return new WaitForEndOfFrame();
+			if (!IsValidKeepJump)
+				break;
+		}
 		yield return new WaitUntil(() => IsGrounded);
 
 		IsJumping = false;

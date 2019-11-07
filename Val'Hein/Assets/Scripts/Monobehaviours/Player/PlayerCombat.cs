@@ -69,6 +69,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
     // Update is called once per frame
     void Update()
     {
+		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
 		UpdateCooldown();
 		CalculateInput();
 		TryCombat();
@@ -97,7 +98,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		{
 			if (attackInput)
 			{
-				Attack();
+				ProccessAttackAnimation();
 				ActivateCooldown();
 			}
 		}
@@ -105,7 +106,6 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private void Attack()
 	{
-		ProccessAttackAnimation();
 		var objects = Physics.OverlapBox(transform.position + hitBoxOffset + transform.forward, hitBoxSize / 2, Quaternion.LookRotation(transform.forward), combatLayer, QueryTriggerInteraction.Ignore);
 		bool resetedCombo = false;
 		foreach (var obj in objects)
@@ -129,7 +129,6 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private void ProccessAttackAnimation()
 	{
-		Debug.Log(CurrentAttackCombo);
 		switch (CurrentAttackCombo)
 		{
 			case (int)AttackComboType.LightAttack:
