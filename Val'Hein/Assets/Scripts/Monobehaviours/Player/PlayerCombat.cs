@@ -45,11 +45,9 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	[Header("Motion Calibration Settings")]
 
 	[Tooltip("The size of the hitbox.")]
-	[SerializeField]
-	private Vector3 hitBoxSize = Vector3.one * 0.5f;
+	public Vector3 hitBoxSize = Vector3.one * 0.5f;
 	[Tooltip("The position offset that calibrates the hitbox.")]
-	[SerializeField]
-	private Vector3 hitBoxOffset = new Vector3(0f, 1f, 0.75f);
+	public Vector3 hitBoxOffset = new Vector3(0f, 1f, 0.75f);
 
 	#endregion
 

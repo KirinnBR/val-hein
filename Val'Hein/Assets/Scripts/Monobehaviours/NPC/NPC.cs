@@ -139,7 +139,7 @@ public class NPC : MonoBehaviour, IDamageable
 		currentCooldown = 2;
 	}
 
-	public void TakeDamage(float ammount)
+	public virtual void TakeDamage(float ammount)
 	{
 		CurrentHealth = CurrentHealth - (ammount - stats.baseResistance);
 		if (CurrentHealth <= 0)
@@ -148,7 +148,7 @@ public class NPC : MonoBehaviour, IDamageable
 		}
 	}
 
-	private void Die()
+	protected virtual void Die()
 	{
 		CurrentHealth = 0;
 		Debug.Log($"{gameObject.name} has died.");

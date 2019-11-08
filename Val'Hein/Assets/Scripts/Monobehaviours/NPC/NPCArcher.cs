@@ -7,12 +7,10 @@ public class NPCArcher : NPC
 {
 	#region Archer Combat Settings
 	[Header("Archer Combat Settings")]
-	[SerializeField]
 	[Tooltip("The minimum distance between the target and the NPC to retreat.")]
-	private float distanceToRetreat = 5f;
-	[SerializeField]
+	public float distanceToRetreat = 5f;
 	[Tooltip("The attack range of the NPC.")]
-	private float attackRange = 15f;
+	public float attackRange = 15f;
 	#endregion
 	private Vector3 inicialPosition;
 	private Quaternion inicialRotation;
@@ -87,10 +85,10 @@ public class NPCArcher : NPC
 
 	private void OnDrawGizmosSelected()
 	{
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawWireSphere(transform.position, distanceToRetreat);
-		Gizmos.color = Color.green;
-		Gizmos.DrawWireSphere(transform.position, attackRange - 1);
+		//Gizmos.color = Color.yellow;
+		//Gizmos.DrawWireSphere(transform.position, distanceToRetreat);
+		//Gizmos.color = Color.green;
+		//Gizmos.DrawWireSphere(transform.position, attackRange - 1);
 	}
 
 }
