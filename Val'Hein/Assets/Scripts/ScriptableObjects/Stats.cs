@@ -23,5 +23,11 @@ public class Stats : ScriptableObject
 	[Header("Physical speed")]
 	public float baseAgility = 10f;
 
+	public override string ToString()
+	{
+		return $"Base Health: {baseHealth} - Base Resistance: {baseResistance} - Base Strength: {baseStrength} - " +
+			$"Base Precision: {basePrecision} - Base Power: {basePower} - " +
+			$"Base Intelligence: {baseIntelligence} - Base Runic Knowledge: {baseRunicKnowledge} - Base Agility: {baseAgility}";
+	}
 
 }

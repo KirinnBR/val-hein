@@ -83,12 +83,4 @@ public class NPCArcher : NPC
 		}
 	}
 
-	private void OnDrawGizmosSelected()
-	{
-		//Gizmos.color = Color.yellow;
-		//Gizmos.DrawWireSphere(transform.position, distanceToRetreat);
-		//Gizmos.color = Color.green;
-		//Gizmos.DrawWireSphere(transform.position, attackRange - 1);
-	}
-
 }

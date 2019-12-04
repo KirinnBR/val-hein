@@ -8,8 +8,7 @@ public class ArmorStatsIncreaser : ScriptableObject
 	[System.Serializable]
 	public struct Armor
 	{
-		public Mesh mesh;
-		public Texture2D texture;
+		public GameObject armorPrefab;
 		public Stats modifiers;
 	};
 

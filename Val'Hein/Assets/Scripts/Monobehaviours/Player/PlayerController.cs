@@ -43,11 +43,9 @@ public class PlayerController : MonoBehaviour
 	private float dodgeSpeed = 2f;
 
 	private bool CanMove { get; set; }
-	private bool IsJumping { get; set; }
+	public bool IsJumping { get; private set; }
 	private bool IsValidKeepJump { get; set; } = true;
-	private float origSlopeLimit;
 	private CharacterController controller;
-	private Vector3 motion;
 	Vector3 motionHorizontal = Vector3.zero;
 	Vector3 motionVertical = Vector3.zero;
 	private float velocityY;
@@ -88,13 +86,13 @@ public class PlayerController : MonoBehaviour
 	private float slopeForce = 50f;
 
 	private bool OnSlope { get; set; }
-	private bool IsGrounded { get; set; }
+	public bool IsGrounded { get; private set; }
 	private float JumpVelocity => Mathf.Sqrt(2 * gravityForce * jumpHeight);
 
 	#endregion
-
 	
 	private Animator anim;
+	private PlayerCombat combat;
 
 	private void Start()
     {
@@ -102,7 +100,7 @@ public class PlayerController : MonoBehaviour
 		anim = GetComponent<Animator>();
 		controller.slopeLimit = slopeLimit;
 		controller.stepOffset = stepOffset;
-		origSlopeLimit = slopeLimit;
+		combat = GetComponent<PlayerCombat>();
 		CanMove = true;
 	}
 
@@ -110,7 +108,7 @@ public class PlayerController : MonoBehaviour
     {
 		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
 		ApplyGravity();
-		CalculateInput();
+		GetInput();
 		Move();
 		ProccessAnimations();
     }
@@ -143,19 +141,22 @@ public class PlayerController : MonoBehaviour
 		velocityY += -gravityForce * Time.deltaTime;
 		motionVertical = new Vector3(0, velocityY, 0);
 
+		//Knock on the ceiling.
 		if (IsJumping && controller.collisionFlags == CollisionFlags.Above)
 			velocityY -= 1f;
 
 		controller.Move(motionVertical * Time.deltaTime);
 
+		//Check if is valid to keep the jump.
 		if (velocityY <= 0)
 			IsValidKeepJump = false;
 
+		//Check if player is grounded and not jumping.
 		if (IsGrounded && !IsJumping)
 			velocityY = 0;
 	}
 
-	private void CalculateInput()
+	private void GetInput()
 	{
 		if (CanMove)
 		{
@@ -180,6 +181,7 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
+
 		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (OnSlope && !IsJumping)

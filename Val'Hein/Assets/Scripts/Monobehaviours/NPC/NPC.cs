@@ -142,6 +142,7 @@ public class NPC : MonoBehaviour, IDamageable
 	public virtual void TakeDamage(float ammount)
 	{
 		CurrentHealth = CurrentHealth - (ammount - stats.baseResistance);
+		Debug.Log("NPC TOOK DAMAGE. LIFE: " + CurrentHealth);
 		if (CurrentHealth <= 0)
 		{
 			Die();
