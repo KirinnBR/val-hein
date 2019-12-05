@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	private float dodgeSpeed = 2f;
 
-	private bool CanMove { get; set; }
+	public bool CanMove { get; set; }
 	public bool IsJumping { get; private set; }
 	private bool IsValidKeepJump { get; set; } = true;
 	private CharacterController controller;
@@ -86,11 +86,21 @@ public class PlayerController : MonoBehaviour
 	private float slopeForce = 50f;
 
 	private bool OnSlope { get; set; }
+	private bool IsMoving => inputHorizontal != 0 || inputVertical != 0;
 	public bool IsGrounded { get; private set; }
 	private float JumpVelocity => Mathf.Sqrt(2 * gravityForce * jumpHeight);
 
 	#endregion
-	
+	[Space]
+	#region Advanced Settings
+
+	[Header("Advanced Settings")]
+
+	[SerializeField]
+	private float minimumMagnitudeToStop = 0.2f;
+
+	#endregion
+
 	private Animator anim;
 	private PlayerCombat combat;
 
@@ -116,11 +126,6 @@ public class PlayerController : MonoBehaviour
 	private void FixedUpdate()
 	{
 		CheckGrounded();
-	}
-
-	public void EnableMovement(bool movement)
-	{
-		CanMove = movement;
 	}
 
 	private void CheckGrounded()
@@ -181,8 +186,15 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-
 		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
+
+		if (!IsMoving)
+		{
+			if (motionHorizontal.magnitude <= minimumMagnitudeToStop)
+			{
+				motionHorizontal = Vector3.zero;
+			}
+		}
 
 		if (OnSlope && !IsJumping)
 			ApplyExtraForce();
@@ -202,7 +214,6 @@ public class PlayerController : MonoBehaviour
 			Quaternion rot = Quaternion.LookRotation(motionHorizontal);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
-
 		controller.Move(motionHorizontal * Time.deltaTime);
 	}
 
@@ -250,9 +261,14 @@ public class PlayerController : MonoBehaviour
 	{
 		CanMove = false;
 		float timeDodging = dodgeTime;
-		Vector3 destination = transform.forward * dodgeSpeed;
+		Vector3 dir = motionHorizontal.normalized;
+		if (dir == Vector3.zero)
+			dir = -transform.forward;
+		Vector3 destination = dir * dodgeSpeed;
 		while (timeDodging >= 0)
 		{
+			Quaternion rot = Quaternion.LookRotation(dir);
+			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 			timeDodging -= Time.deltaTime;
 			controller.SimpleMove(destination);
 			yield return null;

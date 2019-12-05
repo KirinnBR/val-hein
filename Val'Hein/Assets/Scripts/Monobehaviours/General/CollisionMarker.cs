@@ -14,13 +14,9 @@ public class CollisionMarker : MonoBehaviour
 		foreach (var target in targets)
 		{
 			if (target.TryGetComponent(out dmg) && target.tag != ownerTag)
-			{
-				Debug.Log("Target found: " + target.name);
 				return true;
-			}
 		}
 		dmg = null;
-		Debug.Log("Target not found.");
 		return false;
 	}
 
