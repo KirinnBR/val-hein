@@ -28,6 +28,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	[HideInInspector]
 	public float continuousDamageInterval = 1f;
 	[Space(20f)]
+	[Tooltip("The radius of detection of an enemy.")]
+	public float enemyDetectionRadius = 10f;
 	[SerializeField]
 	private List<CollisionMarker> collisionMarkers;
 	[SerializeField]
@@ -42,6 +44,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private bool onCombat = false;
 	private bool LastHit => attacks.Length == CurrentAttackCombo + 1;
 	private Attack CurrentAttack => attacks[CurrentAttackCombo];
+	private Transform focusedEnemy;
 	public float CurrentHealth { get; private set; }
 	private float currentDelayToEndCombat;
 	private float currentIntervalToHitAgain;
@@ -52,10 +55,13 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	#region Input Settings
 
 	[Header("Input Settings")]
+
 	[SerializeField]
 	private MouseButtonCode buttonToAttack = MouseButtonCode.LeftButton;
+	[SerializeField]
+	private KeyCode keyToFocus = KeyCode.F;
 	
-	private bool attackInput;
+	private bool attackInput, focusInput;
 
 	#endregion
 
@@ -134,6 +140,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void GetInput()
 	{
 		attackInput = Input.GetMouseButtonDown((int)buttonToAttack);
+		focusInput = Input.GetKeyDown(keyToFocus);
 	}
 
 	private void ProccessInput()
@@ -143,6 +150,30 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			if (!IsAttacking && !controller.IsJumping)
 				ProccessAttackAnimation();
 		}
+		if (focusInput)
+		{
+			SetFocus();
+		}
+	}
+
+	private void SetFocus()
+	{
+		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.Ignore);
+		float closestDistance = float.MaxValue;
+		Transform closestEnemy = null;
+		foreach (var enemy in enemies)
+		{
+			Transform enemyTransform = enemy.transform;
+			if (enemyTransform.Equals(transform)) continue;
+
+			float distanceEnemy = Vector3.Distance(transform.position, enemyTransform.position);
+			if (distanceEnemy < closestDistance)
+			{
+				closestDistance = distanceEnemy;
+				closestEnemy = enemyTransform;
+			}
+		}
+		focusedEnemy = closestEnemy;
 	}
 
 	private void UpdateAnimationVariables()

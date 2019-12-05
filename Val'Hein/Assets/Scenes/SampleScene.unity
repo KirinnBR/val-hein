@@ -1760,7 +1760,7 @@ PrefabInstance:
     - target: {fileID: 4526481740357702130, guid: bf1e459bd4aa54f47b3281aaf86377cc,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9
+      value: 8.741
       objectReference: {fileID: 0}
     - target: {fileID: 4526481740357702130, guid: bf1e459bd4aa54f47b3281aaf86377cc,
         type: 3}
@@ -1812,5 +1812,9 @@ PrefabInstance:
       propertyPath: camera
       value: 
       objectReference: {fileID: 963194229}
+    - target: {fileID: 639859286, guid: bf1e459bd4aa54f47b3281aaf86377cc, type: 3}
+      propertyPath: enemyDetectionRadius
+      value: 15
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf1e459bd4aa54f47b3281aaf86377cc, type: 3}

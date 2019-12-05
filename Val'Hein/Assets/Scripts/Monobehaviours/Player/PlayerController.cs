@@ -267,7 +267,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 destination = dir * dodgeSpeed;
 		while (timeDodging >= 0)
 		{
-			Quaternion rot = Quaternion.LookRotation(dir);
+			Quaternion rot = Quaternion.LookRotation(motionHorizontal == Vector3.zero ? transform.forward : motionHorizontal);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 			timeDodging -= Time.deltaTime;
 			controller.SimpleMove(destination);
