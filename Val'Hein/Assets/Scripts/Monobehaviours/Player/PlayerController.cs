@@ -12,9 +12,6 @@ public class PlayerController : MonoBehaviour
 	[Header("Movement Settings")]
 
 	[SerializeField]
-	[Tooltip("The reference camera to move.")]
-	private new CameraBehaviour camera;
-	[SerializeField]
 	[Tooltip("Movement speed when walking.")]
 	private float walkSpeed = 5f;
 	[SerializeField]
@@ -23,9 +20,8 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	[Tooltip("Acceleration, in meters per squared second.")]
 	private float acceleration = 10f;
-	[SerializeField]
 	[Tooltip("Speed to turn to direction.")]
-	private float turnSpeed = 10f;
+	public float turnSpeed = 10f;
 	[SerializeField]
 	[Range(0, 180)]
 	[Tooltip("The maximum slope, in degrees, that the player can climb.")]
@@ -44,9 +40,10 @@ public class PlayerController : MonoBehaviour
 
 	public bool CanMove { get; set; }
 	public bool IsJumping { get; private set; }
+	private CameraBehaviour Camera { get { return PlayerCenterControl.Instance.playerCamera; } }
 	private bool IsValidKeepJump { get; set; } = true;
 	private CharacterController controller;
-	Vector3 motionHorizontal = Vector3.zero;
+	public Vector3 motionHorizontal = Vector3.zero;
 	Vector3 motionVertical = Vector3.zero;
 	private float velocityY;
 
@@ -102,7 +99,7 @@ public class PlayerController : MonoBehaviour
 	#endregion
 
 	private Animator anim;
-	private PlayerCombat combat;
+	private PlayerCombat Combat { get { return PlayerCenterControl.Instance.playerCombat; } }
 
 	private void Start()
     {
@@ -110,7 +107,6 @@ public class PlayerController : MonoBehaviour
 		anim = GetComponent<Animator>();
 		controller.slopeLimit = slopeLimit;
 		controller.stepOffset = stepOffset;
-		combat = GetComponent<PlayerCombat>();
 		CanMove = true;
 	}
 
@@ -126,19 +122,6 @@ public class PlayerController : MonoBehaviour
 	private void FixedUpdate()
 	{
 		CheckGrounded();
-	}
-
-	private void CheckGrounded()
-	{
-		IsGrounded = controller.isGrounded;
-		if (Physics.SphereCast(transform.position + Vector3.down * distanceGroundCheck, sphereRadius, Vector3.down, out RaycastHit groundHit, 1.0f, groundLayer, QueryTriggerInteraction.UseGlobal))
-		{
-			if (!IsGrounded)
-				IsGrounded = true;
-			OnSlope = groundHit.normal != Vector3.up;
-		}
-		else
-			OnSlope = false;
 	}
 
 	private void ApplyGravity()
@@ -165,10 +148,20 @@ public class PlayerController : MonoBehaviour
 	{
 		if (CanMove)
 		{
-			inputHorizontal = Input.GetAxisRaw("Horizontal");
-			inputVertical = Input.GetAxisRaw("Vertical");
+			if (!Combat.IsAttacking)
+			{
+				inputHorizontal = Input.GetAxisRaw("Horizontal");
+				inputVertical = Input.GetAxisRaw("Vertical");
+			}
+			else
+			{
+				inputHorizontal = 0.0f;
+				inputVertical = 0.0f;
+			}
+
 			inputJump = Input.GetKeyDown(jumpKey);
 			inputDodge = Input.GetKeyDown(dodgeKey);
+
 			if (!IsJumping)
 			{
 				inputRun = invertRun ? !Input.GetKey(runKey) : Input.GetKey(runKey);
@@ -186,34 +179,31 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-		Vector3 dir = (camera.Forward * inputVertical + camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
+		Vector3 dir = (Camera.Forward * inputVertical + Camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (!IsMoving)
-		{
 			if (motionHorizontal.magnitude <= minimumMagnitudeToStop)
-			{
 				motionHorizontal = Vector3.zero;
-			}
-		}
 
 		if (OnSlope && !IsJumping)
-			ApplyExtraForce();
+			controller.Move(Vector3.down * gravityForce * slopeForce * Time.deltaTime);
 
 		if (IsGrounded)
 		{
 			if (inputJump)
 				Jump();
 			if (CanMove && inputDodge)
-				Dodge();
+				StartCoroutine(OnDodge());
 		}
 
 		motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
 
-		if (motionHorizontal != Vector3.zero && CanMove)
+		if (motionHorizontal != Vector3.zero && CanMove && !Combat.HasTarget)
 		{
 			Quaternion rot = Quaternion.LookRotation(motionHorizontal);
 			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
+
 		controller.Move(motionHorizontal * Time.deltaTime);
 	}
 
@@ -224,21 +214,24 @@ public class PlayerController : MonoBehaviour
 		StartCoroutine(OnJump());
 	}
 
-	private void Dodge()
-	{
-		StartCoroutine(OnDodge());
-	}
-
-	private void ApplyExtraForce()
-	{
-		controller.Move(Vector3.down * gravityForce * slopeForce * Time.deltaTime);
-	}
-
 	private void ProccessAnimations()
 	{
 		Vector2 velocity = new Vector2(controller.velocity.x, controller.velocity.z);
 		anim.SetFloat("Speed", velocity.magnitude);
 		anim.SetBool("IsGrounded", IsGrounded);
+	}
+
+	private void CheckGrounded()
+	{
+		IsGrounded = controller.isGrounded;
+		if (Physics.SphereCast(transform.position + Vector3.down * distanceGroundCheck, sphereRadius, Vector3.down, out RaycastHit groundHit, 1.0f, groundLayer, QueryTriggerInteraction.UseGlobal))
+		{
+			if (!IsGrounded)
+				IsGrounded = true;
+			OnSlope = groundHit.normal != Vector3.up;
+		}
+		else
+			OnSlope = false;
 	}
 
 	private IEnumerator OnJump()
@@ -268,7 +261,8 @@ public class PlayerController : MonoBehaviour
 		while (timeDodging >= 0)
 		{
 			Quaternion rot = Quaternion.LookRotation(motionHorizontal == Vector3.zero ? transform.forward : motionHorizontal);
-			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
+			if(!Combat.HasTarget)
+				transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 			timeDodging -= Time.deltaTime;
 			controller.SimpleMove(destination);
 			yield return null;

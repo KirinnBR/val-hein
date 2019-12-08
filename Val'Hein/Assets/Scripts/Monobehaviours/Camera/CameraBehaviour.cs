@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable CS0649
-[RequireComponent(typeof(UnityEngine.Camera))]
+[RequireComponent(typeof(Camera))]
+[ExecuteInEditMode]
 public class CameraBehaviour : MonoBehaviour
 {
 	#region Target-Follow Settings
@@ -12,9 +13,6 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	[Tooltip("The target to follow.")]
 	private Transform target;
-	[SerializeField]
-	[Tooltip("The minimum and maximum distance between target and camera.")]
-	private Vector2 distanceLimits = new Vector2(1f, 10f);
 	[Tooltip("The distance between the camera and the target.")]
 	public float distance = 10f;
 	[Tooltip("The sensitivity of the mouse scroll wheel.")]
@@ -43,30 +41,76 @@ public class CameraBehaviour : MonoBehaviour
 	private LayerMask collisionLayer;
 
 	#endregion
+	[Space]
+	#region Camera Focus Settings
+
+	[Header("Camera Focus Settings")]
+
+	[SerializeField]
+	private float distanceFocused = 1f;
+	[SerializeField]
+	private float distanceTransitionSpeed = 5f;
+	[SerializeField]
+	private SideSelector cameraSide = SideSelector.Left;
+
+	public Transform Focus { get; set; }
+
+	#endregion
 
 	private float heading = 0f, tilt = 20f;
 	private float mouseScroll = 0f;
+	private float currentDistance;
+	
 
 	private Vector3 forward, right;
 	public Vector3 Forward { get { return forward; } }
 	public Vector3 Right { get { return right; } }
 
+	private void Start()
+	{
+		currentDistance = distance;
+	}
+
 	// Update is called once per frame
 	private void LateUpdate()
     {
-		heading += Input.GetAxis("Mouse X") * Time.deltaTime * mouseSensitivityX;
-		tilt -= Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSensitivityY;
-		tilt = Mathf.Clamp(tilt, angleLimits.x, angleLimits.y);
-		transform.rotation = Quaternion.Euler(tilt, heading, 0);
-		Move(target.position - transform.forward * distance + playerOffset);
+		if (Focus == null)
+		{
+			currentDistance = Mathf.Lerp(currentDistance, distance, distanceTransitionSpeed * Time.deltaTime);
+			Move(target.position - transform.forward * currentDistance + playerOffset);
+		}
+		else
+		{
+			currentDistance = Mathf.Lerp(currentDistance, distanceFocused, distanceTransitionSpeed * Time.deltaTime);
+			transform.LookAt(Focus.position);
+			if (cameraSide == SideSelector.Left)
+				Move(target.position - transform.forward * currentDistance + (playerOffset + (-transform.right / 2)));
+			else
+				Move(target.position - transform.forward * currentDistance + (playerOffset + (transform.right / 2)));
+		}
 		CalculateDirections();
 	}
-
+	
 	private void Update()
 	{
-		mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
-		distance += mouseScroll * mouseScrollWheelSensitivity;
-		distance = Mathf.Clamp(distance, distanceLimits.x, distanceLimits.y);
+		if (Focus == null)
+		{
+			heading += Input.GetAxis("Mouse X") * Time.deltaTime * mouseSensitivityX;
+			if (heading >= 360f)
+				heading = 0f;
+			if (heading <= -360f)
+				heading = 0f;
+			tilt -= Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSensitivityY;
+			tilt = Mathf.Clamp(tilt, angleLimits.x, angleLimits.y);
+			transform.rotation = Quaternion.Euler(tilt, heading, 0);
+			mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
+			distance += mouseScroll * mouseScrollWheelSensitivity;
+		}
+		else
+		{
+			tilt = transform.eulerAngles.x;
+			heading = transform.eulerAngles.y;
+		}
 	}
 
 	private void Move(Vector3 point)
@@ -86,7 +130,7 @@ public class CameraBehaviour : MonoBehaviour
 		forward = forward.normalized;
 		right = right.normalized;
 	}
-
+	
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.green;
@@ -94,4 +138,9 @@ public class CameraBehaviour : MonoBehaviour
 	}
 
 
+}
+
+public enum SideSelector : int
+{
+	Right, Left
 }

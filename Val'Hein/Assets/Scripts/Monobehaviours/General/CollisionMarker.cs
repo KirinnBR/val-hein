@@ -1,16 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+#pragma warning disable CS0649
 public class CollisionMarker : MonoBehaviour
 {
-	public float markerRadius = 0.05f;
-	public LayerMask enemiesLayer;
-	public string ownerTag;
+	[SerializeField]
+	private float markerRadius = 0.05f;
+	[SerializeField]
+	private LayerMask enemiesLayer;
+	[SerializeField]
+	private string ownerTag = "Entity";
+	[SerializeField]
+	private QueryTriggerInteraction triggerCollision = QueryTriggerInteraction.Ignore;
 
 	public bool TryGetDamageable(out IDamageable dmg)
 	{
-		var targets = Physics.OverlapSphere(transform.position, markerRadius, enemiesLayer, QueryTriggerInteraction.Collide);
+		var targets = Physics.OverlapSphere(transform.position, markerRadius, enemiesLayer, triggerCollision);
 		foreach (var target in targets)
 		{
 			if (target.TryGetComponent(out dmg) && target.tag != ownerTag)

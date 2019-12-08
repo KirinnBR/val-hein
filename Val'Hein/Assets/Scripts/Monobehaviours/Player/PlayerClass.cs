@@ -1,13 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+#pragma warning disable CS0649
 public class PlayerClass : MonoBehaviour
 {
-	[SerializeField]
-	private LevelDefinitions playerLevels;
 
-	public int Level { get { return playerLevels.level; } }
+	public int Level { get { return PlayerCenterControl.Instance.playerLevel.level; } }
 
     // Start is called before the first frame update
     void Start()

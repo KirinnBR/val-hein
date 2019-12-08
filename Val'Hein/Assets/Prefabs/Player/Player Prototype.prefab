@@ -48,6 +48,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
+  triggerCollision: 1
 --- !u!1 &287526088
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,6 +97,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
+  triggerCollision: 1
 --- !u!1 &785173246
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,6 +146,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
+  triggerCollision: 1
 --- !u!1 &1004287392
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,6 +195,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
+  triggerCollision: 1
 --- !u!1 &1352217052
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,6 +244,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
+  triggerCollision: 1
 --- !u!1 &1427790699
 GameObject:
   m_ObjectHideFlags: 0
@@ -288,6 +293,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
+  triggerCollision: 1
 --- !u!1 &193223315986717829
 GameObject:
   m_ObjectHideFlags: 0
@@ -494,6 +500,7 @@ GameObject:
   - component: {fileID: 4526481740357702130}
   - component: {fileID: 5790301910242475144}
   - component: {fileID: 8911497657865321197}
+  - component: {fileID: 30323921}
   - component: {fileID: 8911497657865321194}
   - component: {fileID: 804828824}
   - component: {fileID: 639859286}
@@ -551,13 +558,29 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.8
+  m_Height: 1.7
   m_Radius: 0.3
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &30323921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615325129542919137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de0e29c2fc56218498bee9bcf0688c7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCamera: {fileID: 0}
+  playerArmor: {fileID: 11400000, guid: 920777b14556e9a48a1f4a32b9f06391, type: 2}
+  playerStats: {fileID: 11400000, guid: 8d4e9ee682a362041abe24f7358a1c05, type: 2}
+  playerLevel: {fileID: 11400000, guid: 65db46cf7444dcb499a25559b032c512, type: 2}
 --- !u!114 &8911497657865321194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -570,7 +593,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5bc4d14135b6445bf7015788a761ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camera: {fileID: 0}
   walkSpeed: 5
   runSpeed: 10
   acceleration: 10
@@ -604,7 +626,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbd643a9f0f65c140b162f6196e67439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerLevels: {fileID: 11400000, guid: 65db46cf7444dcb499a25559b032c512, type: 2}
 --- !u!114 &639859286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,8 +638,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 396c49d6454ecf446af7ae9febe5414f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: 8d4e9ee682a362041abe24f7358a1c05, type: 2}
-  armor: {fileID: 11400000, guid: 920777b14556e9a48a1f4a32b9f06391, type: 2}
   maxSecondsToEndCombat: 5
   combatLayer:
     serializedVersion: 2
@@ -626,6 +645,7 @@ MonoBehaviour:
   comboValidationSeconds: 2
   continuousDamage: 0
   continuousDamageInterval: 1
+  enemyDetectionRadius: 15
   collisionMarkers:
   - {fileID: 785173248}
   - {fileID: 1004287394}
@@ -643,6 +663,7 @@ MonoBehaviour:
   - triggerName: Attack4
     damageMultiplier: 1
   buttonToAttack: 0
+  keyToFocus: 102
 --- !u!1 &627025326016288644
 GameObject:
   m_ObjectHideFlags: 0

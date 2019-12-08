@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
-	
 
 	[System.Serializable]
 	public enum GameState
@@ -20,7 +19,6 @@ public class GameManager : Singleton<GameManager>
 	public GameState CurrentGameState { get; private set; }
 	public UnityEvent onGameStateChanged;
 	public UnityEvent onSceneLoadedComplete;
-	
 
 	private List<GameObject> instancedSystemPrefabs;
 	private List<AsyncOperation> loadOperations;

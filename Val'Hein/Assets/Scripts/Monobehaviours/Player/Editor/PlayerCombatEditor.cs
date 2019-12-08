@@ -6,11 +6,10 @@ using UnityEditor;
 [CustomEditor(typeof(PlayerCombat))]
 public class PlayerCombatEditor : Editor
 {
-	PlayerCombat player;
 	public override void OnInspectorGUI()
 	{
 		base.OnInspectorGUI();
-		player = target as PlayerCombat;
+		PlayerCombat player = target as PlayerCombat;
 		if (player.continuousDamage)
 		{
 			Rect aux = new Rect(15, 190 - EditorGUIUtility.singleLineHeight * 2.3f, 560, EditorGUIUtility.singleLineHeight);
@@ -20,7 +19,7 @@ public class PlayerCombatEditor : Editor
 
 	private void OnSceneGUI()
 	{
-		player = target as PlayerCombat;
+		PlayerCombat player = target as PlayerCombat;
 		Handles.color = Color.yellow;
 		Handles.DrawWireArc(player.transform.position, Vector3.up, player.transform.forward, 360, player.enemyDetectionRadius);
 	}
