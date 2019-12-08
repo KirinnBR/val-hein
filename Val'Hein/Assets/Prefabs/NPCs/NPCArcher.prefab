@@ -445,8 +445,8 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3906970427443776249}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 5917c0e93d180a842b61d1ebc62a195c, type: 3}
-  m_Controller: {fileID: 0}
+  m_Avatar: {fileID: 9000000, guid: c3d2c1bdd8df2884b911909ccb0467e6, type: 3}
+  m_Controller: {fileID: 9100000, guid: 401f95fa7cd5c5e4d8f0a3bcbf213723, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -498,7 +498,7 @@ MonoBehaviour:
   obstacleObjectsLayer:
     serializedVersion: 2
     m_Bits: 512
-  stats: {fileID: 11400000, guid: 5ad49b7c22c13b8498936c87447a4dff, type: 2}
+  stats: {fileID: 0}
   battleSpeed: 10
   distanceToRetreat: 5
   attackRange: 15
