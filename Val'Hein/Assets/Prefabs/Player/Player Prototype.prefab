@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cba5e4de7886e45b404b78e604d82d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerRadius: 0.06
+  radius: 0.05
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cba5e4de7886e45b404b78e604d82d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerRadius: 0.06
+  radius: 0.05
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -108,6 +108,7 @@ GameObject:
   m_Component:
   - component: {fileID: 785173247}
   - component: {fileID: 785173248}
+  - component: {fileID: 403629861}
   m_Layer: 8
   m_Name: Marker (4)
   m_TagString: Untagged
@@ -141,12 +142,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cba5e4de7886e45b404b78e604d82d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerRadius: 0.06
+  radius: 0.05
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 256
   ownerTag: Player
   triggerCollision: 1
+--- !u!114 &403629861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785173246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b40f9abe038971b42a7f37c0b2ff507d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1004287392
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,7 +203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cba5e4de7886e45b404b78e604d82d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerRadius: 0.06
+  radius: 0.05
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -239,7 +252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cba5e4de7886e45b404b78e604d82d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerRadius: 0.06
+  radius: 0.05
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -288,7 +301,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cba5e4de7886e45b404b78e604d82d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerRadius: 0.06
+  radius: 0.05
   enemiesLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -581,6 +594,9 @@ MonoBehaviour:
   playerArmor: {fileID: 11400000, guid: 920777b14556e9a48a1f4a32b9f06391, type: 2}
   playerStats: {fileID: 11400000, guid: 8d4e9ee682a362041abe24f7358a1c05, type: 2}
   playerLevel: {fileID: 11400000, guid: 65db46cf7444dcb499a25559b032c512, type: 2}
+  playerController: {fileID: 0}
+  playerCombat: {fileID: 0}
+  playerClass: {fileID: 0}
 --- !u!114 &8911497657865321194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -602,6 +618,7 @@ MonoBehaviour:
   jumpHeight: 3
   dodgeTime: 0.3
   dodgeSpeed: 15
+  motionHorizontal: {x: 0, y: 0, z: 0}
   runKey: 304
   invertRun: 1
   jumpKey: 32
@@ -641,18 +658,19 @@ MonoBehaviour:
   maxSecondsToEndCombat: 5
   combatLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   comboValidationSeconds: 2
   continuousDamage: 0
   continuousDamageInterval: 1
   enemyDetectionRadius: 15
-  collisionMarkers:
-  - {fileID: 785173248}
-  - {fileID: 1004287394}
-  - {fileID: 149828878}
+  hasWeapon: 0
+  hitMarkers:
   - {fileID: 1352217054}
   - {fileID: 1427790701}
   - {fileID: 287526090}
+  - {fileID: 785173248}
+  - {fileID: 1004287394}
+  - {fileID: 149828878}
   attacks:
   - triggerName: Attack1
     damageMultiplier: 1
@@ -662,6 +680,7 @@ MonoBehaviour:
     damageMultiplier: 1
   - triggerName: Attack4
     damageMultiplier: 1
+  weapon: {fileID: 0}
   buttonToAttack: 0
   keyToFocus: 102
 --- !u!1 &627025326016288644

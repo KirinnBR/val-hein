@@ -13,11 +13,9 @@ public class NPCEditor : Editor
 		Vector3 dirAngleB = npc.DirFromAngle(npc.visionAngle / 2, false);
 		Handles.color = Color.white;
 		Handles.DrawWireArc(npc.transform.position, Vector3.up, dirAngleB, 360 - npc.visionAngle, npc.visionRadius);
-		Handles.color = Color.red;
-		Handles.DrawLine(npc.transform.position, npc.transform.position + dirAngleA * npc.visionRadius);
-		Handles.DrawLine(npc.transform.position, npc.transform.position + dirAngleB * npc.visionRadius);
-		Handles.DrawWireArc(npc.transform.position, Vector3.up, Vector3.forward, 360, npc.shortDistanceVisionRadius);
-		Handles.DrawWireArc(npc.transform.position, Vector3.up, dirAngleA, npc.visionAngle, npc.visionRadius);
+		Handles.color = Color.red - new Color(0f, 0f, 0f, 0.5f);
+		Handles.DrawSolidArc(npc.transform.position, Vector3.up, Vector3.forward, 360, npc.shortDistanceVisionRadius);
+		Handles.DrawSolidArc(npc.transform.position, Vector3.up, dirAngleA, npc.visionAngle, npc.visionRadius);
 		if (npc is NPCArcher)
 		{
 			NPCArcher npcArcher = target as NPCArcher;
@@ -25,6 +23,14 @@ public class NPCEditor : Editor
 			Handles.DrawWireArc(npcArcher.transform.position, Vector3.up, Vector3.forward, 360, npcArcher.attackRange);
 			Handles.color = Color.yellow;
 			Handles.DrawWireArc(npcArcher.transform.position, Vector3.up, Vector3.forward, 360, npcArcher.distanceToRetreat);
+		}
+		if (npc is NPCPatroller)
+		{
+			NPCPatroller npcPatroller = target as NPCPatroller;
+			Handles.color = Color.green;
+			foreach (var point in npcPatroller.patrolPoints)
+				if (point != null)
+					Handles.SphereHandleCap(0, point.position, Quaternion.identity, 0.5f, EventType.Repaint);
 		}
 	}
 }

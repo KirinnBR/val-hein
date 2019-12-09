@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MyBox;
 #pragma warning disable CS0649
 [RequireComponent(typeof(Animator))]
 public class PlayerCombat : MonoBehaviour, IDamageable
@@ -8,26 +9,21 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	#region Combat Settings
 
 	[Header("Combat Settings")]
-
+	
 	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
-	[SerializeField]
-	private float maxSecondsToEndCombat = 5f;
-	[SerializeField]
+	public float maxSecondsToEndCombat = 5f;
 	[Tooltip("The layer to search for enemies to combat.")]
-	private LayerMask combatLayer;
+	public LayerMask combatLayer;
 	[Tooltip("The time, in seconds, to validate the combo. PS: It validates after the attack is dealt.")]
-	[SerializeField]
-	private float comboValidationSeconds = 1f;
+	public float comboValidationSeconds = 1f;
 	public bool continuousDamage = false;
-	[HideInInspector]
 	public float continuousDamageInterval = 1f;
-	[Space(20f)]
 	[Tooltip("The radius of detection of an enemy.")]
 	public float enemyDetectionRadius = 10f;
-	[SerializeField]
-	private List<CollisionMarker> collisionMarkers;
-	[SerializeField]
-	private Attack[] attacks;
+	public bool hasWeapon = true;
+	public List<HitMarker> hitMarkers;
+	public Attack[] attacks;
+	public Weapon weapon;
 
 	public bool HasTarget { get; private set; }
 	public float CurrentHealth { get; private set; }
@@ -130,7 +126,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			{
 				if (canHitAgain)
 				{
-					foreach (var marker in collisionMarkers)
+					foreach (var marker in hitMarkers)
 					{
 						if (marker.TryGetDamageable(out IDamageable dmg) && !damageables.Contains(dmg))
 						{
@@ -153,7 +149,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			{
 				if (!alreadyHit)
 				{
-					foreach (var marker in collisionMarkers)
+					foreach (var marker in hitMarkers)
 					{
 						if (marker.TryGetDamageable(out IDamageable dmg) && !damageables.Contains(dmg))
 						{
@@ -296,14 +292,4 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			
 	}
 
-}
-
-[System.Serializable]
-public class Attack
-{
-	[Tooltip("The name of the trigger for the attack to be called.")]
-	public string triggerName = "Attack";
-	[Tooltip("Multiplier damage a certain attack will deal.")]
-	[Range(1f, 10f)]
-	public float damageMultiplier = 1f;
 }

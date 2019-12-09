@@ -34,6 +34,10 @@ public class NPC : MonoBehaviour, IDamageable
 	[Tooltip("Speed when in battle.")]
 	[SerializeField]
 	protected float battleSpeed = 10f;
+	[SerializeField]
+	protected HitMarker[] collisionMarkers;
+	[SerializeField]
+	protected Attack[] attacks;
 	#endregion
 	[Space]
 	#region Agent Settings
