@@ -1,19 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MyBox;
 #pragma warning disable CS0649
 [RequireComponent(typeof(Animator))]
 public class PlayerCombat : MonoBehaviour, IDamageable
 {
 	#region Combat Settings
-
-	[Header("Combat Settings")]
 	
-	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
-	public float maxSecondsToEndCombat = 5f;
 	[Tooltip("The layer to search for enemies to combat.")]
 	public LayerMask combatLayer;
+	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
+	public float maxSecondsToEndCombat = 5f;
 	[Tooltip("The time, in seconds, to validate the combo. PS: It validates after the attack is dealt.")]
 	public float comboValidationSeconds = 1f;
 	public bool continuousDamage = false;
@@ -26,35 +23,29 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	public Weapon weapon;
 
 	public bool HasTarget { get; private set; }
-	public float CurrentHealth { get; private set; }
-	private int CurrentAttackCombo { get; set; } = 0;
 	public bool IsAttacking { get; private set; } = false;
-	private bool ActiveCollisions { get; set; } = false;
+	private float CurrentHealth { get; set; }
+	private int CurrentAttackCombo { get; set; } = 0;
 	private bool waitingForEndCombat = false;
-	private bool canHitAgain = false;
-	private bool alreadyHit = false;
 	private bool onCombat = false;
 	private bool LastHit => attacks.Length == CurrentAttackCombo + 1;
 	private Attack CurrentAttack => attacks[CurrentAttackCombo];
 	private Transform targetEnemy;
-	private float currentDelayToEndCombat;
-	private float currentIntervalToHitAgain;
 	private Stats Stats { get { return PlayerCenterControl.Instance.playerStats; } }
 	private ArmorStatsIncreaser Armor { get { return PlayerCenterControl.Instance.playerArmor; } }
-	private Coroutine computeComboCoroutine;
+	private List<Transform> focusedEnemies = new List<Transform>();
+	private Coroutine computeComboCoroutine = null;
+	private Coroutine activateCollisionsCoroutine = null;
+	private Coroutine waitForCombatTimeCoroutine = null;
 
 	#endregion
 
 	#region Input Settings
 
-	[Header("Input Settings")]
-
-	[SerializeField]
-	private MouseButtonCode buttonToAttack = MouseButtonCode.LeftButton;
-	[SerializeField]
-	private KeyCode keyToFocus = KeyCode.F;
+	public MouseButtonCode buttonToAttack = MouseButtonCode.LeftButton;
+	public KeyCode keyToTarget = KeyCode.F;
 	
-	private bool attackInput, focusInput;
+	private bool attackInput, targetInput;
 
 	#endregion
 
@@ -62,15 +53,12 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private PlayerController Controller { get { return PlayerCenterControl.Instance.playerController; } }
 
 	private Animator anim;
-	
 
 	// Start is called before the first frame update
 	private void Start()
     {
 		anim = GetComponent<Animator>();
 		CurrentHealth = Stats.baseHealth;
-		currentDelayToEndCombat = maxSecondsToEndCombat;
-		currentIntervalToHitAgain = continuousDamageInterval;
     }
 
 	// Update is called once per frame
@@ -79,15 +67,13 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
 		GetInput();
 		ProccessInput();
-		UpdateTarget();
-		TryCombat();
 		UpdateAnimationVariables();
 	}
 
 	private void GetInput()
 	{
 		attackInput = Input.GetMouseButtonDown((int)buttonToAttack);
-		focusInput = Input.GetKeyDown(keyToFocus);
+		targetInput = Input.GetKeyDown(keyToTarget);
 	}
 
 	private void ProccessInput()
@@ -95,73 +81,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		if (attackInput)
 			if (!IsAttacking && !Controller.IsJumping)
 				ProccessAttackAnimation();
-		if (focusInput)
+		if (targetInput)
 			SetTarget();
-	}
-
-	private void UpdateTarget()
-	{
-		if (targetEnemy != null)
-		{
-			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius)
-			{
-				targetEnemy = null;
-				HasTarget = false;
-				Camera.Focus = null;
-				return;
-			}
-			var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
-			transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
-		}
-		else
-			HasTarget = false;
-	}
-
-	private void TryCombat()
-	{
-		if (ActiveCollisions)
-		{
-			List<IDamageable> damageables = new List<IDamageable>();
-			if (continuousDamage)
-			{
-				if (canHitAgain)
-				{
-					foreach (var marker in hitMarkers)
-					{
-						if (marker.TryGetDamageable(out IDamageable dmg) && !damageables.Contains(dmg))
-						{
-							
-							dmg.TakeDamage(Stats.baseStrength);
-							damageables.Add(dmg);
-						}
-					}
-					canHitAgain = false;
-					currentIntervalToHitAgain = continuousDamageInterval;
-				}
-				else
-				{
-					currentIntervalToHitAgain -= Time.deltaTime;
-					if (currentIntervalToHitAgain <= 0)
-						canHitAgain = true;
-				}
-			}
-			else
-			{
-				if (!alreadyHit)
-				{
-					foreach (var marker in hitMarkers)
-					{
-						if (marker.TryGetDamageable(out IDamageable dmg) && !damageables.Contains(dmg))
-						{
-							dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
-							damageables.Add(dmg);
-							alreadyHit = true;
-						}
-					}
-				}
-			}
-			damageables.Clear();
-		}
 	}
 
 	private void UpdateAnimationVariables()
@@ -176,19 +97,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		}
 		else
 		{
-			if (waitingForEndCombat)
-			{
-				if (currentDelayToEndCombat <= 0)
-				{
-					waitingForEndCombat = false;
-					currentDelayToEndCombat = maxSecondsToEndCombat;
-				}
-				else
-				{
-					currentDelayToEndCombat -= Time.deltaTime;
-				}
-			}
-			else
+			if (!waitingForEndCombat)
 			{
 				if (onCombat)
 				{
@@ -202,16 +111,16 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private void SetTarget()
 	{
-		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.Ignore);
+		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius);
 		float closestDistance = float.MaxValue;
 		Transform closestEnemy = null;
 		foreach (var enemy in enemies)
 		{
 			Transform currentEnemy = enemy.transform;
 
-			if (currentEnemy.Equals(this.transform)) continue;
+			if (currentEnemy.Equals(transform)) continue;
 			if (targetEnemy != null && targetEnemy.Equals(currentEnemy)) continue;
-
+			if (focusedEnemies.Contains(currentEnemy)) continue;
 			float distanceEnemy = Vector3.Distance(transform.position, currentEnemy.position);
 			if (distanceEnemy < closestDistance)
 			{
@@ -229,16 +138,47 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 		Camera.Focus = targetEnemy;
 
+		if (targetEnemy != null)
+			focusedEnemies.Add(targetEnemy);
+
 		if (HasTarget)
 			onCombat = true;
+
+		StartCoroutine(UpdateTarget());
+	}
+
+	private IEnumerator UpdateTarget()
+	{
+		while (targetEnemy != null)
+		{
+			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius)
+			{
+				focusedEnemies.Clear();
+				targetEnemy = null;
+				HasTarget = false;
+				Camera.Focus = null;
+				break;
+			}
+			var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
+			transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
+			yield return new WaitForEndOfFrame();
+		}
 	}
 
 	private void ProccessAttackAnimation()
 	{
 		anim.SetTrigger(CurrentAttack.triggerName);
 		waitingForEndCombat = true;
-		currentDelayToEndCombat = maxSecondsToEndCombat;
 		IsAttacking = true;
+		if (waitForCombatTimeCoroutine != null)
+			StopCoroutine(waitForCombatTimeCoroutine);
+		waitForCombatTimeCoroutine = StartCoroutine(WaitForCombatTime());
+	}
+
+	private IEnumerator WaitForCombatTime()
+	{
+		yield return new WaitForSeconds(maxSecondsToEndCombat);
+		waitingForEndCombat = false;
 	}
 
 	public void TakeDamage(float ammount)
@@ -265,24 +205,69 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	public void ActivateCollisions()
 	{
-		ActiveCollisions = true;
+		if (continuousDamage)
+			activateCollisionsCoroutine = StartCoroutine(CheckCollisionsContinuous());
+		else
+			activateCollisionsCoroutine = StartCoroutine(CheckCollisions());
 	}
 
-	//Finish = 0: deactivate collisions, but not finish the animation.
-	//Finish = 1: deactivate collisions and finish the animation.
-	public void DeactivateCollisions(int finish)
+	private IEnumerator CheckCollisions()
 	{
-		ActiveCollisions = false;
-		alreadyHit = false;
-		canHitAgain = true;
-		currentIntervalToHitAgain = continuousDamageInterval;
+		List<IDamageable> nonHitables = new List<IDamageable>();
+		while (true)
+		{
+			foreach (var marker in hitMarkers)
+			{
+				if (marker.TryGetDamageable(out IDamageable dmg) && !nonHitables.Contains(dmg))
+				{
+					dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
+					nonHitables.Add(dmg);
+				}
+			}
+			yield return new WaitForEndOfFrame();
+		}
+	}
 
-		if (finish == 1)
+	private IEnumerator CheckCollisionsContinuous()
+	{
+		List<IDamageable> damageables = new List<IDamageable>();
+		bool canHit = true;
+		while (true)
+		{
+			if (canHit)
+			{
+				foreach (var marker in hitMarkers)
+				{
+					if (marker.TryGetDamageable(out IDamageable dmg) && !damageables.Contains(dmg))
+					{
+						dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
+						damageables.Add(dmg);
+						canHit = false;
+					}
+				}
+			}
+			else
+			{
+				yield return new WaitForSeconds(continuousDamageInterval);
+				canHit = true;
+			}
+			damageables.Clear();
+			yield return new WaitForEndOfFrame();
+		}
+	}
+
+	public void DeactivateCollisions(DeactivationType finish)
+	{
+		StopCoroutine(activateCollisionsCoroutine);
+		activateCollisionsCoroutine = null;
+
+		if (finish == DeactivationType.FinishAnimation)
 		{
 			if (LastHit)
-				CurrentAttackCombo = -1;
+				CurrentAttackCombo = 0;
+			else
+				CurrentAttackCombo++;
 
-			CurrentAttackCombo++;
 			IsAttacking = false;
 
 			if (computeComboCoroutine != null)
@@ -292,4 +277,9 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			
 	}
 
+}
+
+public enum DeactivationType
+{
+	DoNotFinishAnimation, FinishAnimation
 }

@@ -135,6 +135,11 @@ public class CameraBehaviour : MonoBehaviour
 	{
 		Gizmos.color = Color.green;
 		Gizmos.DrawLine(transform.position, target.position + playerOffset);
+		if (Focus != null)
+		{
+			Gizmos.color = Color.red;
+			Gizmos.DrawLine(transform.position, Focus.transform.position);
+		}
 	}
 
 

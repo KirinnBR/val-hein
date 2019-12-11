@@ -6,14 +6,15 @@ using UnityEditor;
 [CustomEditor(typeof(PlayerCombat))]
 public class PlayerCombatEditor : Editor
 {
-	SerializedProperty weapon, hitMarkers, attacks;
+	SerializedProperty weapon, hitMarkers, attacks, buttonToAttack, keyToTarget;
 
 	private void OnEnable()
 	{
 		weapon = serializedObject.FindProperty("weapon");
 		hitMarkers = serializedObject.FindProperty("hitMarkers");
 		attacks = serializedObject.FindProperty("attacks");
-		
+		buttonToAttack = serializedObject.FindProperty("buttonToAttack");
+		keyToTarget = serializedObject.FindProperty("keyToTarget");
 	}
 
 
@@ -27,7 +28,6 @@ public class PlayerCombatEditor : Editor
 		EditorGUILayout.LabelField(new GUIContent("<b>Combat Settings</b>"), new GUIStyle() { richText = true });
 		GUILayout.Space(5f);
 		p.maxSecondsToEndCombat = EditorGUILayout.FloatField("Max Seconds To End Combat", p.maxSecondsToEndCombat);
-		List<string> layers = new List<string>();
 		p.combatLayer = EditorGUILayout.LayerField("Combat Layer", p.combatLayer);
 		p.comboValidationSeconds = EditorGUILayout.FloatField("Combo Validation Seconds", p.comboValidationSeconds);
 		p.continuousDamage = EditorGUILayout.Toggle("Continuous Damage?", p.continuousDamage);
@@ -47,6 +47,11 @@ public class PlayerCombatEditor : Editor
 			if (EditorGUI.EndChangeCheck())
 				serializedObject.ApplyModifiedProperties();
 		}
+		GUILayout.Space(5f);
+		EditorGUILayout.LabelField(new GUIContent("<b>Input Settings</b>"), new GUIStyle() { richText = true });
+		GUILayout.Space(5f);
+		EditorGUILayout.PropertyField(buttonToAttack);
+		EditorGUILayout.PropertyField(keyToTarget);
 	}
 
 

@@ -131,25 +131,25 @@ Material:
     - _FadeLimit: 0.1
     - _GlossAmount: 0.03
     - _GlossMapScale: 1
-    - _Glossiness: 0.95
+    - _Glossiness: 0.91
     - _GlossyReflections: 1
     - _Intensity: 2
     - _IntensityMicrowave: 0.68
-    - _IntensityMt: 4.2
+    - _IntensityMt: 4.3
     - _IntensityNm: 1
     - _IntensityNmDetail: 0.2
     - _IntensityRef: 2.3
     - _InvFade: 0
     - _MainDetailFlow: 1
     - _MainDetailScale: 1
-    - _Metallic: 0.95
+    - _Metallic: 0.88
     - _MicrowaveScale: 1
     - _MinuteDetailIntensity: 1.455
     - _MinuteDetailScrollSpeed: 0.089
     - _Mitigation: 22.4
     - _Mode: 0
     - _NormalDetailFlow: 1
-    - _NormalmapDetailScale: 1.2
+    - _NormalmapDetailScale: 0.001
     - _NormalmapDetailScaleA: 1
     - _NormalmapDetailScaleB: 5
     - _NormalmapDetailSpeed: -0.1
