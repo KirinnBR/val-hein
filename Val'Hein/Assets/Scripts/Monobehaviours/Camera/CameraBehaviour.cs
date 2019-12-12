@@ -142,6 +142,11 @@ public class CameraBehaviour : MonoBehaviour
 		}
 	}
 
+	public void Defocus()
+	{
+		Focus = null;
+	}
+
 
 }
 

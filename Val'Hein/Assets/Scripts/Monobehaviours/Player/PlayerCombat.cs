@@ -19,7 +19,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	public float enemyDetectionRadius = 10f;
 	public bool hasWeapon = true;
 	public List<HitMarker> hitMarkers;
-	public Attack[] attacks;
+	public List<Attack> attacks;
 	public Weapon weapon;
 
 	public bool HasTarget { get; private set; }
@@ -28,7 +28,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private int CurrentAttackCombo { get; set; } = 0;
 	private bool waitingForEndCombat = false;
 	private bool onCombat = false;
-	private bool LastHit => attacks.Length == CurrentAttackCombo + 1;
+	private bool LastHit => attacks.Count == CurrentAttackCombo + 1;
 	private Attack CurrentAttack => attacks[CurrentAttackCombo];
 	private Transform targetEnemy;
 	private Stats Stats { get { return PlayerCenterControl.Instance.playerStats; } }
@@ -59,6 +59,17 @@ public class PlayerCombat : MonoBehaviour, IDamageable
     {
 		anim = GetComponent<Animator>();
 		CurrentHealth = Stats.baseHealth;
+		if (hasWeapon)
+		{
+			hitMarkers.Clear();
+			attacks.Clear();
+			hitMarkers = null;
+			attacks = null;
+		}
+		else
+		{
+			weapon = null;
+		}
     }
 
 	// Update is called once per frame
@@ -156,13 +167,17 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 				focusedEnemies.Clear();
 				targetEnemy = null;
 				HasTarget = false;
-				Camera.Focus = null;
+				Camera.Defocus();
 				break;
 			}
 			var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
 			transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
 			yield return new WaitForEndOfFrame();
 		}
+		focusedEnemies.Clear();
+		HasTarget = false;
+		Camera.Defocus();
+
 	}
 
 	private void ProccessAttackAnimation()
