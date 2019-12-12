@@ -148,24 +148,12 @@ public class PlayerController : MonoBehaviour
 	{
 		if (CanMove)
 		{
-			if (!Combat.IsAttacking)
-			{
-				inputHorizontal = Input.GetAxisRaw("Horizontal");
-				inputVertical = Input.GetAxisRaw("Vertical");
-			}
-			else
-			{
-				inputHorizontal = 0.0f;
-				inputVertical = 0.0f;
-			}
-
+			inputHorizontal = Input.GetAxisRaw("Horizontal");
+			inputVertical = Input.GetAxisRaw("Vertical");
 			inputJump = Input.GetKeyDown(jumpKey);
 			inputDodge = Input.GetKeyDown(dodgeKey);
-
 			if (!IsJumping)
-			{
 				inputRun = invertRun ? !Input.GetKey(runKey) : Input.GetKey(runKey);
-			}
 		}
 		else
 		{
@@ -179,6 +167,7 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
+
 		Vector3 dir = (Camera.Forward * inputVertical + Camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (!IsMoving)
@@ -197,11 +186,16 @@ public class PlayerController : MonoBehaviour
 		}
 
 		motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
+		if (Combat.IsAttacking)
+			motionHorizontal = Vector3.zero;
 
-		if (motionHorizontal != Vector3.zero && CanMove && !Combat.HasTarget)
+		if (dir != Vector3.zero && CanMove && !Combat.HasTarget)
 		{
-			Quaternion rot = Quaternion.LookRotation(motionHorizontal);
-			transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
+			Quaternion rot = Quaternion.LookRotation(dir);
+			if (Combat.IsAttacking)
+				transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed / 2 * Time.deltaTime);
+			else
+				transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 		}
 
 		controller.Move(motionHorizontal * Time.deltaTime);

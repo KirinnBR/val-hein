@@ -5,17 +5,21 @@ using UnityEngine;
 public class HitMarker : MonoBehaviour
 {
 	public float radius = 0.05f;
-	public LayerMask enemiesLayer;
+	public LayerMask hitLayer;
 	public string ownerTag = "Entity";
-	public QueryTriggerInteraction triggerCollision = QueryTriggerInteraction.Ignore;
+	public QueryTriggerInteraction triggerInteraction = QueryTriggerInteraction.Ignore;
 	
 	public bool TryGetDamageable(out IDamageable dmg)
 	{
-		var targets = Physics.OverlapSphere(transform.position, radius, enemiesLayer, triggerCollision);
+		List<Collider> targets = new List<Collider>(Physics.OverlapSphere(transform.position, radius, hitLayer, triggerInteraction));
+		targets.RemoveAll(x => x.CompareTag(ownerTag));
 		foreach (var target in targets)
 		{
-			if (target.TryGetComponent(out dmg) && target.tag != ownerTag)
+			if (target.TryGetComponent(out dmg))
+			{
+				Debug.Log($"{name} hit {target.name}");
 				return true;
+			}
 		}
 		dmg = null;
 		return false;

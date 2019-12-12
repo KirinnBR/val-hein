@@ -6,7 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(PlayerCombat))]
 public class PlayerCombatEditor : Editor
 {
-	SerializedProperty weapon, hitMarkers, attacks, buttonToAttack, keyToTarget;
+	SerializedProperty weapon, hitMarkers, attacks, buttonToAttack, keyToTarget, hitMarkersManager;
 
 	private void OnEnable()
 	{
@@ -15,6 +15,7 @@ public class PlayerCombatEditor : Editor
 		attacks = serializedObject.FindProperty("attacks");
 		buttonToAttack = serializedObject.FindProperty("buttonToAttack");
 		keyToTarget = serializedObject.FindProperty("keyToTarget");
+		hitMarkersManager = serializedObject.FindProperty("hitMarkersManager");
 	}
 
 
@@ -30,20 +31,24 @@ public class PlayerCombatEditor : Editor
 		p.maxSecondsToEndCombat = EditorGUILayout.FloatField("Max Seconds To End Combat", p.maxSecondsToEndCombat);
 		p.combatLayer = EditorGUILayout.LayerField("Combat Layer", p.combatLayer);
 		p.comboValidationSeconds = EditorGUILayout.FloatField("Combo Validation Seconds", p.comboValidationSeconds);
-		p.continuousDamage = EditorGUILayout.Toggle("Continuous Damage?", p.continuousDamage);
-		if (p.continuousDamage)
-			p.continuousDamageInterval = EditorGUILayout.FloatField("Continuous Damage Interval", p.continuousDamageInterval);
 		p.enemyDetectionRadius = EditorGUILayout.FloatField("Enemy Detection Radius", p.enemyDetectionRadius);
+		EditorGUILayout.PropertyField(attacks, true);
 		p.hasWeapon = EditorGUILayout.Toggle("Has Weapon?", p.hasWeapon);
 		if (p.hasWeapon)
 		{
+			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.ObjectField(weapon);
+			if (EditorGUI.EndChangeCheck())
+				serializedObject.ApplyModifiedProperties();
 		}
 		else
 		{
+			p.continuousDamage = EditorGUILayout.Toggle("Continuous Damage?", p.continuousDamage);
+			if (p.continuousDamage)
+				p.continuousDamageInterval = EditorGUILayout.FloatField("Continuous Damage Interval", p.continuousDamageInterval);
 			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.PropertyField(hitMarkers, true);
-			EditorGUILayout.PropertyField(attacks, true);
+			EditorGUILayout.PropertyField(hitMarkersManager, true);
 			if (EditorGUI.EndChangeCheck())
 				serializedObject.ApplyModifiedProperties();
 		}
