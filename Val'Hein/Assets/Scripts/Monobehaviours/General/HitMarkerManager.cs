@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class HitMarkerManager
+public struct HitMarkerManager
 {
     public string ownerTag;
     public LayerMask hitLayer;
-    public QueryTriggerInteraction triggerInteraction = QueryTriggerInteraction.Ignore;
+    public QueryTriggerInteraction triggerInteraction;
 
     public void ConfigureMarkers(HitMarker[] hitMarkers)
     {

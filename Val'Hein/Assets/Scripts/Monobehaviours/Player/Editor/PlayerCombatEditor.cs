@@ -32,7 +32,10 @@ public class PlayerCombatEditor : Editor
 		p.combatLayer = EditorGUILayout.LayerField("Combat Layer", p.combatLayer);
 		p.comboValidationSeconds = EditorGUILayout.FloatField("Combo Validation Seconds", p.comboValidationSeconds);
 		p.enemyDetectionRadius = EditorGUILayout.FloatField("Enemy Detection Radius", p.enemyDetectionRadius);
+		EditorGUI.BeginChangeCheck();
 		EditorGUILayout.PropertyField(attacks, true);
+		if (EditorGUI.EndChangeCheck())
+			serializedObject.ApplyModifiedProperties();
 		p.hasWeapon = EditorGUILayout.Toggle("Has Weapon?", p.hasWeapon);
 		if (p.hasWeapon)
 		{

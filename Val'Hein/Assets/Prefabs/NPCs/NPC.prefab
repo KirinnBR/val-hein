@@ -621,11 +621,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  enemiesLayer:
+  hitLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   ownerTag: Player
-  triggerCollision: 1
+  triggerInteraction: 1
 --- !u!1 &1758665697038473399
 GameObject:
   m_ObjectHideFlags: 0
@@ -920,11 +920,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  enemiesLayer:
+  hitLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   ownerTag: Player
-  triggerCollision: 1
+  triggerInteraction: 1
 --- !u!1 &3048287266878455831
 GameObject:
   m_ObjectHideFlags: 0
@@ -1001,11 +1001,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  enemiesLayer:
+  hitLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   ownerTag: Player
-  triggerCollision: 1
+  triggerInteraction: 1
 --- !u!1 &3323118379538359419
 GameObject:
   m_ObjectHideFlags: 0
@@ -2214,11 +2214,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  enemiesLayer:
+  hitLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   ownerTag: Player
-  triggerCollision: 1
+  triggerInteraction: 1
 --- !u!1 &7722209590809103929
 GameObject:
   m_ObjectHideFlags: 0
@@ -2458,11 +2458,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  enemiesLayer:
+  hitLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   ownerTag: Player
-  triggerCollision: 1
+  triggerInteraction: 1
 --- !u!1 &7932543260443358012
 GameObject:
   m_ObjectHideFlags: 0
@@ -2540,11 +2540,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  enemiesLayer:
+  hitLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   ownerTag: Player
-  triggerCollision: 1
+  triggerInteraction: 1
 --- !u!1 &8421431823961225613
 GameObject:
   m_ObjectHideFlags: 0

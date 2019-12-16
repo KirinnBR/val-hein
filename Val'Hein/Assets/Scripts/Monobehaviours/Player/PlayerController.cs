@@ -43,7 +43,8 @@ public class PlayerController : MonoBehaviour
 	private CameraBehaviour Camera { get { return PlayerCenterControl.Instance.playerCamera; } }
 	private bool IsValidKeepJump { get; set; } = true;
 	private CharacterController controller;
-	public Vector3 motionHorizontal = Vector3.zero;
+
+	public Vector3 motionHorizontal { get; private set; } = Vector3.zero;
 	Vector3 motionVertical = Vector3.zero;
 	private float velocityY;
 
