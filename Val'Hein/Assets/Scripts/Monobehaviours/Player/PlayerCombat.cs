@@ -26,26 +26,28 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	public List<HitMarker> hitMarkers;
 	[Tooltip("Utility class that helps the configuration of the referenced markers.")]
 	public HitMarkerManager hitMarkersManager;
-	[Tooltip("All of the attacks that the player can do.")]
-	public List<Attack> attacks;
+	[Tooltip("The logic representation of an attack.")]
+	public Attack[] attacks;
 	[Tooltip("The weapon the player is holding")]
 	public Weapon weapon;
 
 	public bool HasTarget { get; private set; }
 	public bool IsAttacking { get; private set; } = false;
 	private float CurrentHealth { get; set; }
-	private int CurrentAttackCombo { get; set; } = 0;
+	private int CurrentAttackIndex { get; set; } = 0;
+	private Attack CurrentAttack => attacks[CurrentAttackIndex];
+	private bool LastHit => CurrentAttackIndex == attacks.Length - 1;
 	private bool waitingForEndCombat = false;
 	private bool onCombat = false;
-	private bool LastHit => attacks.Count == CurrentAttackCombo + 1;
-	private Attack CurrentAttack => attacks[CurrentAttackCombo];
+	private bool CanProgressCombo { get; set; } = true;
 	private Transform targetEnemy;
-	private Stats Stats { get { return PlayerCenterControl.Instance.playerStats; } }
-	private ArmorStatsIncreaser Armor { get { return PlayerCenterControl.Instance.playerArmor; } }
+	private Stats Stats { get { return Player.Instance.playerStats; } }
+	private ArmorStatsIncreaser Armor { get { return Player.Instance.playerArmor; } }
 	private List<Transform> focusedEnemies = new List<Transform>();
 	private Coroutine computeComboCoroutine = null;
 	private Coroutine activeMarkersCoroutine = null;
 	private Coroutine waitForCombatTimeCoroutine = null;
+	private Coroutine updateTargetCoroutine = null;
 
 	#endregion
 
@@ -60,8 +62,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	#region External Properties
 
-	private CameraBehaviour Camera { get { return PlayerCenterControl.Instance.playerCamera; } }
-	private PlayerController Controller { get { return PlayerCenterControl.Instance.playerController; } }
+	private CameraBehaviour Camera { get { return Player.Instance.playerCamera; } }
+	private PlayerController Controller { get { return Player.Instance.playerController; } }
 
 	private Animator anim;
 
@@ -89,6 +91,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		UpdateAnimationVariables();
 	}
 
+	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
+
 	private void GetInput()
 	{
 		attackInput = Input.GetMouseButtonDown((int)buttonToAttack);
@@ -98,7 +102,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void ProccessInput()
 	{
 		if (attackInput)
-			if (!IsAttacking && !Controller.IsJumping)
+			if (CanProgressCombo && !Controller.IsJumping && !Controller.IsDodging)
 				ProccessAttackAnimation();
 		if (targetInput)
 			SetTarget();
@@ -130,7 +134,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private void SetTarget()
 	{
-		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.Ignore);
+		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.UseGlobal);
 		float closestDistance = float.MaxValue;
 		Transform closestEnemy = null;
 		foreach (var enemy in enemies)
@@ -164,14 +168,32 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		if (HasTarget)
 			onCombat = true;
 
-		StartCoroutine(UpdateTarget());
+		if (updateTargetCoroutine != null)
+			StopCoroutine(updateTargetCoroutine);
+		updateTargetCoroutine = StartCoroutine(UpdateTarget());
 	}
 
 	private void ProccessAttackAnimation()
 	{
-		anim.SetTrigger(CurrentAttack.triggerName);
-		waitingForEndCombat = true;
+		 if (LastHit)
+		{
+			StopCoroutine(computeComboCoroutine);
+			computeComboCoroutine = null;
+		}
+		else
+		{
+			if (computeComboCoroutine != null)
+				StopCoroutine(computeComboCoroutine);
+			computeComboCoroutine = StartCoroutine(ComputeCombo());
+		}
+
+		anim.SetInteger("Attack Index", CurrentAttackIndex);
+		anim.SetTrigger("Attack");
+
 		IsAttacking = true;
+		CanProgressCombo = false;
+		waitingForEndCombat = true;
+
 		if (waitForCombatTimeCoroutine != null)
 			StopCoroutine(waitForCombatTimeCoroutine);
 		waitForCombatTimeCoroutine = StartCoroutine(WaitForCombatTime());
@@ -202,9 +224,10 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private IEnumerator ComputeCombo()
 	{
-		yield return new WaitForSeconds(comboValidationSeconds);
-		CurrentAttackCombo = 0;
-		computeComboCoroutine = null;
+		int aux = CurrentAttackIndex;
+		yield return new WaitForSeconds(CurrentAttack.timeToBlendCombo);
+		Debug.Log("Stopped at index " + aux);
+		CurrentAttackIndex = 0;
 	}
 
 	private IEnumerator CheckCollisions()
@@ -216,39 +239,30 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			{
 				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
-					dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
+					DoDamage(dmg);
 					cannotHit.Add(dmg);
 				}
 			}
-			yield return new WaitForEndOfFrame();
+			yield return null;
 		}
 	}
 
 	private IEnumerator CheckCollisionsContinuous()
 	{
 		List<IDamageable> cannotHit = new List<IDamageable>();
-		bool canHit = true;
 		while (true)
 		{
-			if (canHit)
+			foreach (var marker in hitMarkers)
 			{
-				foreach (var marker in hitMarkers)
+				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
-					if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
-					{
-						dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
-						cannotHit.Add(dmg);
-						canHit = false;
-					}
+					DoDamage(dmg);
+					cannotHit.Add(dmg);
 				}
 			}
-			else
-			{
-				yield return new WaitForSeconds(continuousDamageInterval);
-				canHit = true;
-			}
+			yield return new WaitForSeconds(continuousDamageInterval);
 			cannotHit.Clear();
-			yield return new WaitForEndOfFrame();
+			yield return null;
 		}
 	}
 
@@ -256,6 +270,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	{
 		yield return new WaitForSeconds(maxSecondsToEndCombat);
 		waitingForEndCombat = false;
+		IsAttacking = false;
 	}
 
 	private IEnumerator UpdateTarget()
@@ -272,7 +287,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			}
 			var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
 			transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
-			yield return new WaitForEndOfFrame();
+			yield return null;
 		}
 		focusedEnemies.Clear();
 		HasTarget = false;
@@ -286,7 +301,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
     public void ActivateMarkers()
 	{
 		if (hasWeapon)
-			weapon.ActivateMarkers();
+			weapon.ActivateMarkers(CurrentAttack.damageMultiplier);
 		else
 		{
 			if (continuousDamage)
@@ -295,6 +310,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 				activeMarkersCoroutine = StartCoroutine(CheckCollisions());
 		}
 	}
+
 	public void DeactivateMarkers(DeactivationType finish)
 	{
 		if (hasWeapon)
@@ -304,17 +320,20 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 		if (finish == DeactivationType.FinishAnimation)
 		{
-			if (LastHit)
-				CurrentAttackCombo = 0;
-			else
-				CurrentAttackCombo++;
-
-			IsAttacking = false;
-
-			if (computeComboCoroutine != null)
-				StopCoroutine(computeComboCoroutine);
-			computeComboCoroutine = StartCoroutine(ComputeCombo());
+			FinishAnimation();
 		}
+	}
+
+	public void FinishAnimation()
+	{
+		IsAttacking = false;
+
+		CanProgressCombo = true;
+		if (LastHit)
+			CurrentAttackIndex = 0;
+		else
+			CurrentAttackIndex++;
+		
 	}
 
 	#endregion

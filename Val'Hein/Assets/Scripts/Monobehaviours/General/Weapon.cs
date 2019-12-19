@@ -22,6 +22,8 @@ public class Weapon : MonoBehaviour
 
 	private float finalDamage;
 
+	private float damageMultiplier;
+
 	private void Start()
 	{
 		markersManager.ConfigureMarkers(hitMarkers);
@@ -33,8 +35,9 @@ public class Weapon : MonoBehaviour
 		finalDamage = statsIncreasers.baseStrength + userStats.baseStrength;
 	}
 
-	public void ActivateMarkers()
+	public void ActivateMarkers(float multiplier)
 	{
+		damageMultiplier = multiplier;
 		if (continuousDamage)
 			activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
 		else
@@ -48,7 +51,6 @@ public class Weapon : MonoBehaviour
 
 	private IEnumerator CheckCollisions()
 	{
-
 		List<IDamageable> cannotHit = new List<IDamageable>();
 		while (true)
 		{
@@ -56,11 +58,11 @@ public class Weapon : MonoBehaviour
 			{
 				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
-					dmg.TakeDamage(finalDamage);
+					DoDamage(dmg);
 					cannotHit.Add(dmg);
 				}
 			}
-			yield return new WaitForEndOfFrame();
+			yield return null;
 		}
 	}
 
@@ -76,7 +78,7 @@ public class Weapon : MonoBehaviour
 				{
 					if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 					{
-						dmg.TakeDamage(finalDamage);
+						DoDamage(dmg);
 						cannotHit.Add(dmg);
 						canHit = false;
 					}
@@ -88,8 +90,9 @@ public class Weapon : MonoBehaviour
 				canHit = true;
 			}
 			cannotHit.Clear();
-			yield return new WaitForEndOfFrame();
+			yield return null;
 		}
 	}
 
+	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(finalDamage * damageMultiplier);
 }

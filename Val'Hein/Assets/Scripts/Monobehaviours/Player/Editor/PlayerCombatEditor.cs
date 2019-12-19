@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 
 [CustomEditor(typeof(PlayerCombat))]
 public class PlayerCombatEditor : Editor
@@ -29,13 +30,10 @@ public class PlayerCombatEditor : Editor
 		EditorGUILayout.LabelField(new GUIContent("<b>Combat Settings</b>"), new GUIStyle() { richText = true });
 		GUILayout.Space(5f);
 		p.maxSecondsToEndCombat = EditorGUILayout.FloatField("Max Seconds To End Combat", p.maxSecondsToEndCombat);
-		p.combatLayer = EditorGUILayout.LayerField("Combat Layer", p.combatLayer);
+		LayerMask temp = EditorGUILayout.MaskField(new GUIContent() { text = "Combat Layer" }, InternalEditorUtility.LayerMaskToConcatenatedLayersMask(p.combatLayer), InternalEditorUtility.layers);
+		p.combatLayer = InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(temp);
 		p.comboValidationSeconds = EditorGUILayout.FloatField("Combo Validation Seconds", p.comboValidationSeconds);
 		p.enemyDetectionRadius = EditorGUILayout.FloatField("Enemy Detection Radius", p.enemyDetectionRadius);
-		EditorGUI.BeginChangeCheck();
-		EditorGUILayout.PropertyField(attacks, true);
-		if (EditorGUI.EndChangeCheck())
-			serializedObject.ApplyModifiedProperties();
 		p.hasWeapon = EditorGUILayout.Toggle("Has Weapon?", p.hasWeapon);
 		if (p.hasWeapon)
 		{
@@ -55,6 +53,13 @@ public class PlayerCombatEditor : Editor
 			if (EditorGUI.EndChangeCheck())
 				serializedObject.ApplyModifiedProperties();
 		}
+		GUILayout.Space(5f);
+		EditorGUILayout.LabelField(new GUIContent("<b>Combo Settings</b>"), new GUIStyle() { richText = true });
+		GUILayout.Space(5f);
+		EditorGUI.BeginChangeCheck();
+		EditorGUILayout.PropertyField(attacks, true);
+		if (EditorGUI.EndChangeCheck())
+			serializedObject.ApplyModifiedProperties();
 		GUILayout.Space(5f);
 		EditorGUILayout.LabelField(new GUIContent("<b>Input Settings</b>"), new GUIStyle() { richText = true });
 		GUILayout.Space(5f);

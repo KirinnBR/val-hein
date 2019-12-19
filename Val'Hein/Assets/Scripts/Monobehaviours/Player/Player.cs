@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 [RequireComponent(typeof(PlayerCombat))]
 [RequireComponent(typeof(PlayerClass))]
-public class PlayerCenterControl : Singleton<PlayerCenterControl>
+public class Player : Singleton<Player>
 {
 	[Header("General")]
 	public CameraBehaviour playerCamera;

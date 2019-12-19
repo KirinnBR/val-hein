@@ -37,7 +37,7 @@ public class HitMarker : MonoBehaviour
 #if UNITY_EDITOR
 	private IEnumerator ClearPoint()
 	{
-		yield return new WaitForSeconds(0.3f);
+		yield return new WaitForSeconds(0.4f);
 		previoustPoints.RemoveAt(0);
 	}
 #endif

@@ -40,8 +40,9 @@ public class PlayerController : MonoBehaviour
 
 	public bool CanMove { get; set; }
 	public bool IsJumping { get; private set; }
-	private CameraBehaviour Camera { get { return PlayerCenterControl.Instance.playerCamera; } }
+	public bool IsDodging { get; private set; } = false;
 	private bool IsValidKeepJump { get; set; } = true;
+	private CameraBehaviour Camera { get { return Player.Instance.playerCamera; } }
 	private CharacterController controller;
 
 	public Vector3 motionHorizontal { get; private set; } = Vector3.zero;
@@ -100,7 +101,7 @@ public class PlayerController : MonoBehaviour
 	#endregion
 
 	private Animator anim;
-	private PlayerCombat Combat { get { return PlayerCenterControl.Instance.playerCombat; } }
+	private PlayerCombat Combat { get { return Player.Instance.playerCombat; } }
 
 	private void Start()
     {
@@ -136,7 +137,7 @@ public class PlayerController : MonoBehaviour
 
 		controller.Move(motionVertical * Time.deltaTime);
 
-		//Check if is valid to keep the jump.
+		//Check if is valid to keep the jump variable true.
 		if (velocityY <= 0)
 			IsValidKeepJump = false;
 
@@ -175,6 +176,7 @@ public class PlayerController : MonoBehaviour
 			if (motionHorizontal.magnitude <= minimumMagnitudeToStop)
 				motionHorizontal = Vector3.zero;
 
+
 		if (OnSlope && !IsJumping)
 			controller.Move(Vector3.down * gravityForce * slopeForce * Time.deltaTime);
 
@@ -182,7 +184,7 @@ public class PlayerController : MonoBehaviour
 		{
 			if (inputJump)
 				Jump();
-			if (CanMove && inputDodge)
+			if (inputDodge && CanMove && !IsDodging)
 				StartCoroutine(OnDodge());
 		}
 
@@ -248,9 +250,10 @@ public class PlayerController : MonoBehaviour
 	private IEnumerator OnDodge()
 	{
 		CanMove = false;
+		IsDodging = true;
 		float timeDodging = dodgeTime;
 		Vector3 dir = motionHorizontal.normalized;
-		if (dir == Vector3.zero)
+		if (inputHorizontal == 0 && inputVertical == 0)
 			dir = -transform.forward;
 		Vector3 destination = dir * dodgeSpeed;
 		while (timeDodging >= 0)
@@ -263,6 +266,7 @@ public class PlayerController : MonoBehaviour
 			yield return null;
 		}
 		CanMove = true;
+		IsDodging = false;
 	}
 
 	private void OnDrawGizmosSelected()

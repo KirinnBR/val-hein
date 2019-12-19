@@ -23,7 +23,7 @@ namespace MyBox
 		public ConditionalFieldAttribute(string fieldToCheck, bool value = false, params object[] compareValues)
 		{
 			FieldToCheck = fieldToCheck;
-			Inverse = !value;
+			Inverse = value;
 			CompareValues = compareValues.Select(c => c.ToString().ToUpper()).ToArray();
 		}
 	}

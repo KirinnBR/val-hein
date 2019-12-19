@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerClass : MonoBehaviour
 {
 
-	public int Level { get { return PlayerCenterControl.Instance.playerLevel.level; } }
+	public int Level { get { return Player.Instance.playerLevel.level; } }
 
     // Start is called before the first frame update
     void Start()
