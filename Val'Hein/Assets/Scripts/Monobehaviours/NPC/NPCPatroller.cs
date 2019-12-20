@@ -7,7 +7,9 @@ using UnityEngine.AI;
 public class NPCPatroller : NPC, IDamageable
 {
 	#region Patrolling Settings
+
 	[Header("Patrolling Settings")]
+
 	[Tooltip("Speed when patrolling.")]
 	public float patrollingSpeed = 5f;
 	[Tooltip("The points to patrol.")]
@@ -16,88 +18,162 @@ public class NPCPatroller : NPC, IDamageable
 	public int patrollingWaitTime = 5;
 	private int currentPatrolPoint = 0;
 	private bool patrolling = false;
+	private bool pursuing = false;
+	private bool canAttack = true;
+
+	private Coroutine patrolCoroutine = null;
+	private Coroutine pursuitCoroutine = null;
+	private Coroutine setAttackCooldownCoroutine = null;
+
+	private Transform target;
+
 	#endregion
+
+	#region Patroller Combat Settings
+
+	[Header("Patroller Combat Settings")]
+
+	[SerializeField]
+	private float attackCooldown = 2f;
+
+	#endregion
+
+	#region Common Methods
 
 	// Start is called before the first frame update
 	protected override void Start()
-    {
+	{
 		base.Start();
 		agent.speed = patrollingSpeed;
-    }
+	}
 
 	// Update is called once per frame
-	protected override void Update()
-    {
-		base.Update();
+	private void Update()
+	{
+		CheckActualState();
+		UpdateAnimator();
+	}
+
+	private void CheckActualState()
+	{
 		if (visibleObjects.Count > 0)
 		{
 			foreach (var visibleObject in visibleObjects)
 			{
-				//Condicao para ver se o inimigo se interessa em atacar aquele objeto.
-				//Atualmente, ele procura o primeiro objeto que seja um player e ataca.
-				if (visibleObject.tag == "Player")
+				if (visibleObject.CompareTag("Player"))
 				{
-					StartPursuit(visibleObject.transform);
+					target = visibleObject.transform;
+					break;
 				}
+				else
+				{
+					target = null;
+				}
+			}
+
+			if (target != null)
+			{
+				if (!pursuing)
+				{
+					StartPursuit();
+				}
+			}
+			else if (!patrolling)
+			{
+				StartPatrol();
 			}
 		}
 		else
 		{
 			if (!patrolling)
 			{
-				StartCoroutine("Patrol");
+				StartPatrol();
 			}
 		}
-    }
+	}
 
-	private void StartPursuit(Transform target)
+	private void StartPatrol()
 	{
-		StopPatrolCoroutine();
-		transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
-		agent.speed = battleSpeed;
-		agent.SetDestination(target.position);
-		if (IsCloseEnoughToTarget(target.position))
+		if (pursuing)
 		{
-			if (!attackOnCooldown)
-			{
-				Attack(target);
-			}
+			StopCoroutine(pursuitCoroutine);
+			pursuing = false;
 		}
+		patrolCoroutine = StartCoroutine(Patrol());
+		patrolling = true;
 	}
 
-	private void StopPatrolCoroutine()
+	private void StartPursuit()
 	{
-		agent.speed = patrollingSpeed;
-		StopCoroutine("Patrol");
-		patrolling = false;
-	}
-
-	private void UpdateCooldown()
-	{
-		if (attackOnCooldown)
+		if (patrolling)
 		{
-			currentCooldown -= Time.deltaTime;
-			if (currentCooldown <= 0)
-			{
-				attackOnCooldown = false;
-			}
+			if (patrolCoroutine != null)
+				StopCoroutine(patrolCoroutine);
+			patrolling = false;
 		}
+		pursuitCoroutine = StartCoroutine(Pursuit());
+		pursuing = true;
 	}
+
+	private void UpdateAnimator()
+	{
+		anim.SetFloat("Speed", agent.velocity.magnitude);
+	}
+
+	#endregion
+
+	#region Coroutines
 
 	private IEnumerator Patrol()
 	{
 		agent.speed = patrollingSpeed;
-		patrolling = true;
-		if (patrolPoints.Length == 0) yield break;
-		yield return new WaitUntil(() => IsCloseEnoughToDestination);
+
+		if (patrolPoints.Length == 0)
+		{
+			yield break;
+		}
+
+		yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
 		yield return new WaitForSeconds(patrollingWaitTime);
 		while (true)
 		{
 			agent.SetDestination(patrolPoints[currentPatrolPoint].position);
-			yield return new WaitUntil(() => IsCloseEnoughToDestination);
+			yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
 			yield return new WaitForSeconds(patrollingWaitTime);
 			currentPatrolPoint = currentPatrolPoint == patrolPoints.Length - 1 ? 0 : currentPatrolPoint + 1;
 		}
 	}
+
+	private IEnumerator Pursuit()
+	{
+		while (true)
+		{
+			Vector3 p = target.position;
+			agent.destination = p;
+			transform.LookAt(new Vector3(p.x, transform.position.y, p.z));
+
+			if (IsCloseEnoughToTarget(p))
+			{
+				if (canAttack)
+				{
+					ProccessAttackAnimation();
+					setAttackCooldownCoroutine = StartCoroutine(SetAttackCooldown());
+				}
+			}
+
+
+			yield return null;
+		}
+		
+	}
+
+	private IEnumerator SetAttackCooldown()
+	{
+		canAttack = false;
+		yield return new WaitForSeconds(attackCooldown);
+		canAttack = true;
+	}
+
+	#endregion
 
 }

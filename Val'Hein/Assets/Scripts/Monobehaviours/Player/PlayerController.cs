@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable CS0649 //Disable warnings in console
-[RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
 	#region Movement Settings
@@ -36,7 +34,8 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("The time, in seconds, it takes for the player to dodge.")]
 	private float dodgeTime = 0.5f;
 	[SerializeField]
-	private float dodgeSpeed = 2f;
+	[Tooltip("The force of the dodge.")]
+	private float dodgeForce = 2f;
 
 	public bool CanMove { get; set; }
 	public bool IsJumping { get; private set; }
@@ -73,16 +72,21 @@ public class PlayerController : MonoBehaviour
 
 	[Header("Physics Settings")]
 
+	[Tooltip("The force of the gravity.")]
 	[SerializeField]
 	private float gravityForce = 25f;
+	[Tooltip("The height configuration of the ground-check sphere.")]
 	[SerializeField]
 	private float distanceGroundCheck = -1.05f;
 	[SerializeField]
-	private float sphereRadius = 0.3f;
+	[Tooltip("The radius of the ground-check sphere.")]
+	private float groundCheckSphereRadius = 0.3f;
 	[SerializeField]
-	private LayerMask groundLayer;
+	[Tooltip("The layer to search for ground detection.")]
+	private LayerMask groundCheckLayer;
+	[Tooltip("The extra force activated when on slope, preventing bounciness.")]
 	[SerializeField]
-	private float slopeForce = 50f;
+	private float slopeForce = 200f;
 
 	private bool OnSlope { get; set; }
 	private bool IsMoving => inputHorizontal != 0 || inputVertical != 0;
@@ -96,7 +100,7 @@ public class PlayerController : MonoBehaviour
 	[Header("Advanced Settings")]
 
 	[SerializeField]
-	private float minimumMagnitudeToStop = 0.2f;
+	private float minimumMagnitudeToStop = 0.1f;
 
 	#endregion
 
@@ -221,7 +225,7 @@ public class PlayerController : MonoBehaviour
 	private void CheckGrounded()
 	{
 		IsGrounded = controller.isGrounded;
-		if (Physics.SphereCast(transform.position + Vector3.down * distanceGroundCheck, sphereRadius, Vector3.down, out RaycastHit groundHit, 1.0f, groundLayer, QueryTriggerInteraction.UseGlobal))
+		if (Physics.SphereCast(transform.position + Vector3.down * distanceGroundCheck, groundCheckSphereRadius, Vector3.down, out RaycastHit groundHit, 1.0f, groundCheckLayer, QueryTriggerInteraction.UseGlobal))
 		{
 			if (!IsGrounded)
 				IsGrounded = true;
@@ -238,7 +242,7 @@ public class PlayerController : MonoBehaviour
 
 		while (IsGrounded)
 		{
-			yield return new WaitForEndOfFrame();
+			yield return null;
 			if (!IsValidKeepJump)
 				break;
 		}
@@ -255,7 +259,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 dir = motionHorizontal.normalized;
 		if (inputHorizontal == 0 && inputVertical == 0)
 			dir = -transform.forward;
-		Vector3 destination = dir * dodgeSpeed;
+		Vector3 destination = dir * dodgeForce;
 		while (timeDodging >= 0)
 		{
 			Quaternion rot = Quaternion.LookRotation(motionHorizontal == Vector3.zero ? transform.forward : motionHorizontal);
@@ -272,6 +276,6 @@ public class PlayerController : MonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireSphere(transform.position + Vector3.down + Vector3.down * distanceGroundCheck, sphereRadius);
+		Gizmos.DrawWireSphere(transform.position + Vector3.down + Vector3.down * distanceGroundCheck, groundCheckSphereRadius);
 	}
 }

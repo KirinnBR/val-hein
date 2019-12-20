@@ -44,6 +44,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &272322011881919909
 GameObject:
   m_ObjectHideFlags: 0
@@ -88,6 +92,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &286167772207257981
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,6 +140,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &642094012511148772
 GameObject:
   m_ObjectHideFlags: 0
@@ -176,6 +188,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &2026395446547068003
 GameObject:
   m_ObjectHideFlags: 0
@@ -220,6 +236,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &2903639095868408503
 GameObject:
   m_ObjectHideFlags: 0
@@ -264,6 +284,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &2982915546873820173
 GameObject:
   m_ObjectHideFlags: 0
@@ -347,6 +371,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &3544269450651948967
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,6 +419,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &4223530758639571759
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,6 +467,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &4935984862366037562
 GameObject:
   m_ObjectHideFlags: 0
@@ -479,6 +515,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &5005431567591861340
 GameObject:
   m_ObjectHideFlags: 0
@@ -523,6 +563,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &5519343369397874086
 GameObject:
   m_ObjectHideFlags: 0
@@ -567,6 +611,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &5527991513876110457
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,6 +659,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.07
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  ownerTag: Entity
 --- !u!1 &6790563798627304960
 GameObject:
   m_ObjectHideFlags: 0
@@ -4201,9 +4253,6 @@ MonoBehaviour:
   playerArmor: {fileID: 11400000, guid: 920777b14556e9a48a1f4a32b9f06391, type: 2}
   playerStats: {fileID: 11400000, guid: 8d4e9ee682a362041abe24f7358a1c05, type: 2}
   playerLevel: {fileID: 11400000, guid: 65db46cf7444dcb499a25559b032c512, type: 2}
-  playerController: {fileID: 0}
-  playerCombat: {fileID: 0}
-  playerClass: {fileID: 0}
 --- !u!114 &6790563799526998622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4230,33 +4279,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 256
   maxSecondsToEndCombat: 5
-  comboValidationSeconds: 1
-  continuousDamage: 0
-  continuousDamageInterval: 1
   enemyDetectionRadius: 10
-  hasWeapon: 1
-  hitMarkers:
-  - {fileID: 8608493923045700315}
-  - {fileID: 1573720989478935060}
-  - {fileID: 3637548596263846872}
-  - {fileID: 8747785080029359183}
-  hitMarkersManager:
-    ownerTag: Player
-    hitLayer:
-      serializedVersion: 2
-      m_Bits: 256
-    triggerInteraction: 1
   attacks:
-  - damageMultiplier: 1
-    timeToBlendCombo: 0.4
-  - damageMultiplier: 1
-    timeToBlendCombo: 0.7
   - damageMultiplier: 1
     timeToBlendCombo: 1
   - damageMultiplier: 1
-    timeToBlendCombo: 0.001
+    timeToBlendCombo: 1
+  - damageMultiplier: 1
+    timeToBlendCombo: 1
+  - damageMultiplier: 1
+    timeToBlendCombo: 1
+  hasWeapon: 1
+  combatSettings:
+    hitMarkers: []
+    hitMarkerManager:
+      ownerTag: 
+      hitLayer:
+        serializedVersion: 2
+        m_Bits: 0
+      triggerInteraction: 0
+    continuousDamage: 0
+    continuousDamageInterval: 0
   weapon: {fileID: 1547741263924561456}
   buttonToAttack: 0
   keyToTarget: 102
@@ -4279,20 +4324,20 @@ MonoBehaviour:
   slopeLimit: 50
   stepOffset: 0.5
   jumpHeight: 5
-  dodgeTime: 1
-  dodgeSpeed: 10
+  dodgeTime: 0.25
+  dodgeForce: 20
   runKey: 304
   invertRun: 1
   jumpKey: 32
   dodgeKey: 306
   gravityForce: 25
   distanceGroundCheck: -1.05
-  sphereRadius: 0.3
-  groundLayer:
+  groundCheckSphereRadius: 0.3
+  groundCheckLayer:
     serializedVersion: 2
     m_Bits: 512
-  slopeForce: 50
-  minimumMagnitudeToStop: 0.2
+  slopeForce: 200
+  minimumMagnitudeToStop: 0.1
 --- !u!114 &1547741263924561456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4306,24 +4351,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statsIncreasers: {fileID: 11400000, guid: 9aac21b73fa32d3438dd04ff5461eaba, type: 2}
-  hitMarkers:
-  - {fileID: 130480304975306033}
-  - {fileID: 2598030220826676669}
-  - {fileID: 7812036615868106165}
-  - {fileID: 4526824899992632521}
-  - {fileID: 4260206872563508870}
-  - {fileID: 1214808939022721288}
-  - {fileID: 8070697298006962674}
-  - {fileID: 5746496285760295063}
-  - {fileID: 9030932868767099261}
-  markersManager:
-    ownerTag: Player
-    hitLayer:
-      serializedVersion: 2
-      m_Bits: 256
-    triggerInteraction: 1
-  continuousDamage: 0
-  continuousDamageInterval: 1
+  combatSettings:
+    hitMarkers:
+    - {fileID: 130480304975306033}
+    - {fileID: 2598030220826676669}
+    - {fileID: 7812036615868106165}
+    - {fileID: 4526824899992632521}
+    - {fileID: 4260206872563508870}
+    - {fileID: 1214808939022721288}
+    - {fileID: 8070697298006962674}
+    - {fileID: 5746496285760295063}
+    - {fileID: 9030932868767099261}
+    hitMarkerManager:
+      ownerTag: Player
+      hitLayer:
+        serializedVersion: 2
+        m_Bits: 256
+      triggerInteraction: 0
+    continuousDamage: 0
+    continuousDamageInterval: 0
 --- !u!1001 &6790563800471599009
 PrefabInstance:
   m_ObjectHideFlags: 0

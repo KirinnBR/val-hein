@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 [CreateAssetMenu(fileName = "New Level Definitions", menuName = "Entities/Stats/LevelDefinitions")]
 public class LevelDefinitions : ScriptableObject
 {

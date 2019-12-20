@@ -9,7 +9,9 @@ using UnityEngine.AI;
 public class NPC : MonoBehaviour, IDamageable
 {
 	#region Object Detection Settings
+
 	[Header("Object Detection Settings")]
+
 	[Tooltip("The angle, in degrees, of the vision.")]
 	[Range(0, 360)]
 	public float visionAngle = 45f;
@@ -23,60 +25,78 @@ public class NPC : MonoBehaviour, IDamageable
 	[Tooltip("The layer in which the obstacles are.")]
 	[SerializeField]
 	private LayerMask obstacleObjectsLayer;
-	protected List<Transform> visibleObjects;
+	protected List<Transform> visibleObjects = new List<Transform>();
+
 	#endregion
 	[Space]
+
 	#region Combat Settings
 	[Header("Combat Settings")]
+
 	[Tooltip("Stats of the NPC.")]
 	[SerializeField]
 	protected Stats stats;
+	[SerializeField]
+	protected List<Attack> attacks;
+	[SerializeField]
+	[Rename("Has Weapon?")]
+	protected bool hasWeapon = false;
+	[SerializeField]
+	[ConditionalHide("hasWeapon", true)]
+	protected Weapon weapon;
+	[SerializeField]
+	[ConditionalHide("hasWeapon", false)]
+	protected CombatSettings combatSettings;
 	[Tooltip("Speed when in battle.")]
 	[SerializeField]
 	protected float battleSpeed = 10f;
-	[SerializeField]
-	protected HitMarker[] collisionMarkers;
-	[SerializeField]
-	protected Attack[] attacks;
+
+	protected int CurrentAttackIndex { get; set; } = 0;
+	protected List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
+	protected Attack CurrentAttack => attacks[CurrentAttackIndex];
+	protected bool IsAttacking { get; set; } = false;
+	protected bool animationFinished = false;
+	protected Coroutine activeMarkersCoroutine = null;
+
 	#endregion
 	[Space]
 	#region Agent Settings
+
+	[Header("Agent Settings")]
+
+	[SerializeField]
+	protected float agentAcceleration = 80f;
+	[SerializeField]
+	protected float agentAngularSpeed = 1200f;
+	[SerializeField]
+	protected float agentStoppingDistance = 2f;
+
 	protected NavMeshAgent agent;
-	public bool IsCloseEnoughToDestination => Vector3.Distance(agent.destination, transform.position) < agent.stoppingDistance;
+	protected bool IsCloseEnoughToDestination => IsCloseEnoughToTarget(agent.destination);
 	protected bool IsCloseEnoughToTarget (Vector3 target) { return Vector3.Distance(transform.position, target) < agent.stoppingDistance; }
+
 	#endregion
 
+	public float CurrentHealth { get; protected set; }
 	protected Animator anim;
-	protected float CurrentHealth { get; set; }
-	protected bool attackOnCooldown = false;
-	protected float currentCooldown = 0;
 
 	protected virtual void Start()
 	{
-		visibleObjects = new List<Transform>();
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 		CurrentHealth = stats.baseHealth;
-		agent.acceleration = 80;
-		agent.angularSpeed = 1200;
-		agent.stoppingDistance = 2f;
+		if (hasWeapon)
+			weapon.MergeStatsWithUser(stats);
+		else
+			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
+		agent.acceleration = agentAcceleration;
+		agent.angularSpeed = agentAngularSpeed;
+		agent.stoppingDistance = agentStoppingDistance;
 	}
 
-	protected virtual void Update()
+	protected virtual void FixedUpdate()
 	{
-		UpdateCooldown();
-	}
-
-	private void UpdateCooldown()
-	{
-		if (attackOnCooldown)
-		{
-			currentCooldown -= Time.deltaTime;
-			if (currentCooldown <= 0)
-			{
-				attackOnCooldown = false;
-			}
-		}
+		SearchObjects();
 	}
 
 	protected void SearchObjects()
@@ -92,7 +112,6 @@ public class NPC : MonoBehaviour, IDamageable
 				{
 					if (!Physics.Linecast(transform.position, objectsInVisionRadius[i].transform.position, obstacleObjectsLayer))
 					{
-
 						visibleObjects.Add(objectsInVisionRadius[i].transform);
 					}
 				}
@@ -101,11 +120,11 @@ public class NPC : MonoBehaviour, IDamageable
 		var objectsInShortVisionRadius = Physics.OverlapSphere(transform.position, shortDistanceVisionRadius, detectionLayer);
 		if (objectsInShortVisionRadius.Length > 0)
 		{
-			foreach (var _object in objectsInShortVisionRadius)
+			foreach (var obj in objectsInShortVisionRadius)
 			{
-				if (!visibleObjects.Contains(_object.transform))
+				if (!visibleObjects.Contains(obj.transform))
 				{
-					visibleObjects.Add(_object.transform);
+					visibleObjects.Add(obj.transform);
 				}
 			}
 		}
@@ -118,30 +137,98 @@ public class NPC : MonoBehaviour, IDamageable
 		return new Vector3(Mathf.Sin(angle * Mathf.Deg2Rad), 0, Mathf.Cos(angle * Mathf.Deg2Rad));
 	}
 
-	protected void Attack(Transform target)
+	protected void ProccessAttackAnimation()
 	{
-		//Animation of attack.
-		//Sound of attack.
-		if (target.TryGetComponent(out IDamageable dmg))
+		animationFinished = false;
+
+		CurrentAttackIndex = Random.Range(0, attacks.Count - 1);
+
+		anim.SetInteger("Attack Index", CurrentAttackIndex);
+		anim.SetTrigger("Attack");
+
+		IsAttacking = true;
+	}
+
+	#region Coroutines
+
+	protected IEnumerator CheckCollisions()
+	{
+		List<IDamageable> cannotHit = new List<IDamageable>();
+		while (true)
 		{
-			if (Random.Range(0, 100) <= stats.basePrecision)
+			foreach (var marker in hitMarkers)
 			{
-				Debug.Log($"{gameObject.name} dealt damage to {target.name}.");
-				dmg.TakeDamage(stats.baseStrength);
+				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
+				{
+					DoDamage(dmg);
+					cannotHit.Add(dmg);
+				}
 			}
-			else
-			{
-				Debug.Log($"{gameObject.name} missed the attack.");
-			}
+			yield return null;
 		}
+	}
+
+	protected IEnumerator CheckCollisionsContinuous()
+	{
+		List<IDamageable> cannotHit = new List<IDamageable>();
+		while (true)
+		{
+			foreach (var marker in hitMarkers)
+			{
+				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
+				{
+					DoDamage(dmg);
+					cannotHit.Add(dmg);
+				}
+			}
+			yield return new WaitForSeconds(combatSettings.continuousDamageInterval);
+			cannotHit.Clear();
+			yield return null;
+		}
+	}
+
+	protected void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
+
+	#endregion
+
+	#region Animation Event Methods
+
+	public void EnableMarkers()
+	{
+		if (hasWeapon)
+			weapon.ActivateMarkers(CurrentAttack.damageMultiplier);
 		else
 		{
-			Debug.Log($"{target.name} is not damageable.");
+			if (combatSettings.continuousDamage)
+				activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
+			else
+				activeMarkersCoroutine = StartCoroutine(CheckCollisions());
 		}
-		attackOnCooldown = true;
-		//TODO: Agility cooldown.
-		currentCooldown = 2;
 	}
+
+	public void DisableMarkers(DeactivationType finish)
+	{
+		if (hasWeapon)
+			weapon.DeactivateMarkers();
+		else
+			StopCoroutine(activeMarkersCoroutine);
+
+		if (finish == DeactivationType.FinishAnimation)
+			FinishAnimation();
+	}
+
+	public void FinishAnimation()
+	{
+		if (animationFinished) return;
+
+		IsAttacking = false;
+
+		animationFinished = true;
+	}
+
+	#endregion
+
+	#region IDamageable Methods
 
 	public virtual void TakeDamage(float ammount)
 	{
@@ -159,9 +246,6 @@ public class NPC : MonoBehaviour, IDamageable
 		Destroy(gameObject);
 	}
 
-	protected virtual void FixedUpdate()
-	{
-		SearchObjects();
-	}
+	#endregion
 
 }

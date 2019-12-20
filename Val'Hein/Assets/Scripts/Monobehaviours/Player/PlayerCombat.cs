@@ -1,48 +1,51 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Animations;
+
 #pragma warning disable CS0649
-[RequireComponent(typeof(Animator))]
+
 public class PlayerCombat : MonoBehaviour, IDamageable
 {
 	#region Combat Settings
 	
-	[Tooltip("The layer to search for enemies to combat.")]
-	public LayerMask combatLayer;
-	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
-	public float maxSecondsToEndCombat = 5f;
-	[Tooltip("The time, in seconds, to validate the combo. PS: It validates after the attack is dealt.")]
-	public float comboValidationSeconds = 1f;
-	[Tooltip("Is the hit continous?")]
-	public bool continuousDamage = false;
-	[Tooltip("The interval, in seconds, it takes to detect another hit when the damage is continuous.")]
-	public float continuousDamageInterval = 1f;
-	[Tooltip("The radius of detection of an enemy.")]
-	public float enemyDetectionRadius = 10f;
-	[Tooltip("Does the player holds some kind of weapon?")]
-	public bool hasWeapon = true;
-	[Tooltip("The hit boxex of the attacks.")]
-	public List<HitMarker> hitMarkers;
-	[Tooltip("Utility class that helps the configuration of the referenced markers.")]
-	public HitMarkerManager hitMarkersManager;
-	[Tooltip("The logic representation of an attack.")]
-	public Attack[] attacks;
-	[Tooltip("The weapon the player is holding")]
-	public Weapon weapon;
+	[Header("Combat Settings")]
 
+	[Tooltip("The layer to search for enemies to combat.")]
+	[SerializeField]
+	private LayerMask combatLayer;
+	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
+	[SerializeField]
+	private float maxSecondsToEndCombat = 5f;
+	[Tooltip("The radius of detection of an enemy.")]
+	[SerializeField]
+	private float enemyDetectionRadius = 10f;
+	[Tooltip("The logic representation of an attack.")]
+	[SerializeField]
+	private List<ComboAttack> attacks;
+	[Tooltip("Does the player holds some kind of weapon?")]
+	[SerializeField]
+	private bool hasWeapon = true;
+	[SerializeField]
+	[ConditionalHide("hasWeapon", false)]
+	private CombatSettings combatSettings;
+	[Tooltip("The weapon the player is holding")]
+	[ConditionalHide("hasWeapon", true)]
+	[SerializeField]
+	private Weapon weapon;
+	public float EnemyDetectionRadius { get { return enemyDetectionRadius; } }
 	public bool HasTarget { get; private set; }
 	public bool IsAttacking { get; private set; } = false;
 	private float CurrentHealth { get; set; }
 	private int CurrentAttackIndex { get; set; } = 0;
-	private Attack CurrentAttack => attacks[CurrentAttackIndex];
-	private bool LastHit => CurrentAttackIndex == attacks.Length - 1;
+	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
+	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
+	private ComboAttack CurrentAttack => attacks[CurrentAttackIndex];
+	private bool LastHit => CurrentAttackIndex == attacks.Count - 1;
 	private bool waitingForEndCombat = false;
 	private bool onCombat = false;
-	private bool CanProgressCombo { get; set; } = true;
+	private bool animationFinished = false;
 	private Transform targetEnemy;
-	private Stats Stats { get { return Player.Instance.playerStats; } }
-	private ArmorStatsIncreaser Armor { get { return Player.Instance.playerArmor; } }
+	private Stats stats { get { return Player.Instance.playerStats; } }
 	private List<Transform> focusedEnemies = new List<Transform>();
 	private Coroutine computeComboCoroutine = null;
 	private Coroutine activeMarkersCoroutine = null;
@@ -52,6 +55,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	#endregion
 
 	#region Input Settings
+
+	[Header("Input Settings")]
 
 	public MouseButtonCode buttonToAttack = MouseButtonCode.LeftButton;
 	public KeyCode keyToTarget = KeyCode.F;
@@ -75,13 +80,12 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void Start()
 	{
 		anim = GetComponent<Animator>();
-		CurrentHealth = Stats.baseHealth;
+		CurrentHealth = stats.baseHealth;
 		if (hasWeapon)
-			weapon.MergeStatsWithUser(Stats);
+			weapon.MergeStatsWithUser(stats);
 		else
-			hitMarkersManager.ConfigureMarkers(hitMarkers.ToArray());
+			hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
 	}
-
 	// Update is called once per frame
 	private void Update()
 	{
@@ -91,7 +95,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		UpdateAnimationVariables();
 	}
 
-	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(Stats.baseStrength * CurrentAttack.damageMultiplier);
+	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
 
 	private void GetInput()
 	{
@@ -102,7 +106,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void ProccessInput()
 	{
 		if (attackInput)
-			if (CanProgressCombo && !Controller.IsJumping && !Controller.IsDodging)
+			if (!IsAttacking && !Controller.IsJumping && !Controller.IsDodging)
 				ProccessAttackAnimation();
 		if (targetInput)
 			SetTarget();
@@ -187,11 +191,12 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			computeComboCoroutine = StartCoroutine(ComputeCombo());
 		}
 
+		animationFinished = false;
+
 		anim.SetInteger("Attack Index", CurrentAttackIndex);
 		anim.SetTrigger("Attack");
 
 		IsAttacking = true;
-		CanProgressCombo = false;
 		waitingForEndCombat = true;
 
 		if (waitForCombatTimeCoroutine != null)
@@ -260,7 +265,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 					cannotHit.Add(dmg);
 				}
 			}
-			yield return new WaitForSeconds(continuousDamageInterval);
+			yield return new WaitForSeconds(combatSettings.continuousDamageInterval);
 			cannotHit.Clear();
 			yield return null;
 		}
@@ -304,7 +309,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			weapon.ActivateMarkers(CurrentAttack.damageMultiplier);
 		else
 		{
-			if (continuousDamage)
+			if (combatSettings.continuousDamage)
 				activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
 			else
 				activeMarkersCoroutine = StartCoroutine(CheckCollisions());
@@ -319,28 +324,24 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			StopCoroutine(activeMarkersCoroutine);
 
 		if (finish == DeactivationType.FinishAnimation)
-		{
 			FinishAnimation();
-		}
 	}
 
 	public void FinishAnimation()
 	{
+		if (animationFinished) return;
+
+
 		IsAttacking = false;
 
-		CanProgressCombo = true;
+		animationFinished = true;
+
 		if (LastHit)
 			CurrentAttackIndex = 0;
 		else
 			CurrentAttackIndex++;
-		
 	}
 
 	#endregion
 
-}
-
-public enum DeactivationType
-{
-	DoNotFinishAnimation, FinishAnimation
 }

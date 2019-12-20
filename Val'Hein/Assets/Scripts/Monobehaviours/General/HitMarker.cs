@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-#pragma warning disable CS0649
+
 public class HitMarker : MonoBehaviour
 {
 	[Header("Hit Marker Settings")]
 	public float radius = 0.05f;
-	public LayerMask hitLayer { get; set; }
-	public string ownerTag { get; set; } = "Entity";
+	public LayerMask hitLayer;
+	public string ownerTag = "Entity";
 	public QueryTriggerInteraction triggerInteraction { get; set; } = QueryTriggerInteraction.Ignore;
 #if UNITY_EDITOR
 	private List<Vector3> previoustPoints = new List<Vector3>();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable CS0649
+#pragma warning disable CS0414
 [RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
 public class CameraBehaviour : MonoBehaviour
@@ -13,8 +14,14 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	[Tooltip("The target to follow.")]
 	private Transform target;
+	[SerializeField]
+	[Tooltip("The minimum and maximum distance that the camera can go.")]
+	private Vector2 distanceLimits = new Vector2(1f, 10f);
 	[Tooltip("The distance between the camera and the target.")]
-	public float distance = 10f;
+	public float distance = 5f;
+	private bool auxCurrentDistanceDisabled = false;
+	[ConditionalHide("auxCurrentDistanceDisabled", false, true)]
+	public float currentDistance;
 	[Tooltip("The sensitivity of the mouse scroll wheel.")]
 	[SerializeField]
 	private float mouseScrollWheelSensitivity = 1f;
@@ -47,9 +54,11 @@ public class CameraBehaviour : MonoBehaviour
 	[Header("Camera Focus Settings")]
 
 	[SerializeField]
+	private float focusHeight = 10f;
+	[SerializeField]
 	private float distanceFocused = 1f;
 	[SerializeField]
-	private float distanceTransitionSpeed = 5f;
+	private float distanceInterpolationSpeed = 5f;
 	[SerializeField]
 	private SideSelector cameraSide = SideSelector.Left;
 
@@ -59,7 +68,6 @@ public class CameraBehaviour : MonoBehaviour
 
 	private float heading = 0f, tilt = 20f;
 	private float mouseScroll = 0f;
-	private float currentDistance;
 	
 
 	private Vector3 forward, right;
@@ -76,13 +84,13 @@ public class CameraBehaviour : MonoBehaviour
     {
 		if (Focus == null)
 		{
-			currentDistance = Mathf.Lerp(currentDistance, distance, distanceTransitionSpeed * Time.deltaTime);
+			currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
 			Move(target.position - transform.forward * currentDistance + playerOffset);
 		}
 		else
 		{
-			currentDistance = Mathf.Lerp(currentDistance, distanceFocused, distanceTransitionSpeed * Time.deltaTime);
-			transform.LookAt(Focus.position);
+			currentDistance = Mathf.Lerp(currentDistance, distanceFocused, distanceInterpolationSpeed * Time.deltaTime);
+			transform.LookAt(new Vector3(Focus.position.x, focusHeight, Focus.position.z));
 			if (cameraSide == SideSelector.Left)
 				Move(target.position - transform.forward * currentDistance + (playerOffset + (-transform.right / 2)));
 			else
@@ -105,6 +113,7 @@ public class CameraBehaviour : MonoBehaviour
 			transform.rotation = Quaternion.Euler(tilt, heading, 0);
 			mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
 			distance += mouseScroll * mouseScrollWheelSensitivity;
+			distance = Mathf.Clamp(distance, distanceLimits.x, distanceLimits.y);
 		}
 		else
 		{
@@ -134,11 +143,15 @@ public class CameraBehaviour : MonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.green;
-		Gizmos.DrawLine(transform.position, target.position + playerOffset);
+		Vector3 targetPos = target.position + playerOffset;
+		Gizmos.DrawLine(transform.position, targetPos);
+		Gizmos.color = Color.red;
+		Gizmos.DrawLine(targetPos, targetPos + (transform.forward * (distanceLimits.y - currentDistance)));
+		Gizmos.DrawLine(transform.position, transform.position + (transform.forward * (distanceLimits.x - currentDistance)));
 		if (Focus != null)
 		{
-			Gizmos.color = Color.red;
-			Gizmos.DrawLine(transform.position, Focus.transform.position);
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawLine(transform.position, new Vector3(Focus.position.x, focusHeight, Focus.position.z));
 		}
 	}
 

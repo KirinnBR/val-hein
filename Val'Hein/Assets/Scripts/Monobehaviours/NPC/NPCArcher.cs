@@ -25,9 +25,8 @@ public class NPCArcher : NPC
 	}
 
 	// Update is called once per frame
-	protected override void Update()
+	private void Update()
     {
-		base.Update();
 		if (visibleObjects.Count > 0)
 		{
 			foreach (var visibleObject in visibleObjects)
@@ -41,7 +40,7 @@ public class NPCArcher : NPC
 		else
 		{
 			agent.destination = inicialPosition;
-			if (IsCloseEnoughToDestination)
+			if (IsCloseEnoughToTarget(agent.destination))
 			{
 				transform.rotation = inicialRotation;
 			}
@@ -64,22 +63,7 @@ public class NPCArcher : NPC
 		}
 		if (IsCloseEnoughToTarget(target.position))
 		{
-			if (!attackOnCooldown)
-			{
-				Attack(target);
-			}
-		}
-	}
-
-	private void UpdateCooldown()
-	{
-		if (attackOnCooldown)
-		{
-			currentCooldown -= Time.deltaTime;
-			if (currentCooldown <= 0)
-			{
-				attackOnCooldown = false;
-			}
+			//Can attack.
 		}
 	}
 

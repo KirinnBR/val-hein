@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 
 [CustomEditor(typeof(NPC), true)]
 public class NPCEditor : Editor
 {
-	protected virtual void OnSceneGUI()
+	void OnSceneGUI()
 	{
 		NPC npc = target as NPC;
 		Vector3 dirAngleA = npc.DirFromAngle(-npc.visionAngle / 2, false);

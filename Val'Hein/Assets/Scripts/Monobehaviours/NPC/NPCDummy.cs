@@ -19,9 +19,8 @@ public class NPCDummy : NPC
 	}
 
 	// Update is called once per frame
-	protected override void Update()
+	private void Update()
     {
-		base.Update();
 		ApplyWalkAnimation();
 		if (visibleObjects.Count > 0)
 		{
@@ -38,7 +37,7 @@ public class NPCDummy : NPC
 		else
 		{
 			agent.destination = inicialPosition;
-			if (IsCloseEnoughToDestination)
+			if (IsCloseEnoughToTarget(agent.destination))
 			{
 				transform.rotation = inicialRotation;
 			}
@@ -57,10 +56,7 @@ public class NPCDummy : NPC
 		agent.SetDestination(target.position);
 		if (IsCloseEnoughToTarget(target.position))
 		{
-			if (!attackOnCooldown)
-			{
-				Attack(target);
-			}
+			//Can attack.
 		}
 	}
 

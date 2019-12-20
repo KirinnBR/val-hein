@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MyBox;
 
 public class Weapon : MonoBehaviour
 {
@@ -9,14 +8,7 @@ public class Weapon : MonoBehaviour
 
 	private Stats userStats;
 
-	public HitMarker[] hitMarkers;
-
-	public HitMarkerManager markersManager;
-
-	public bool continuousDamage = false;
-
-	[ConditionalField("continuousDamage", true)]
-	public float continuousDamageInterval = 1f;
+	public CombatSettings combatSettings;
 
 	private Coroutine activeMarkersCoroutine;
 
@@ -24,9 +16,12 @@ public class Weapon : MonoBehaviour
 
 	private float damageMultiplier;
 
+	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
+	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
+
 	private void Start()
 	{
-		markersManager.ConfigureMarkers(hitMarkers);
+		hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
 	}
 
 	public void MergeStatsWithUser(Stats stats)
@@ -38,7 +33,7 @@ public class Weapon : MonoBehaviour
 	public void ActivateMarkers(float multiplier)
 	{
 		damageMultiplier = multiplier;
-		if (continuousDamage)
+		if (combatSettings.continuousDamage)
 			activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
 		else
 			activeMarkersCoroutine = StartCoroutine(CheckCollisions());
@@ -86,7 +81,7 @@ public class Weapon : MonoBehaviour
 			}
 			else
 			{
-				yield return new WaitForSeconds(continuousDamageInterval);
+				yield return new WaitForSeconds(combatSettings.continuousDamageInterval);
 				canHit = true;
 			}
 			cannotHit.Clear();
