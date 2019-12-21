@@ -145,7 +145,6 @@ public class NPC : MonoBehaviour, IDamageable
 
 		anim.SetInteger("Attack Index", CurrentAttackIndex);
 		anim.SetTrigger("Attack");
-
 		IsAttacking = true;
 	}
 

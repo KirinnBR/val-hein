@@ -23,7 +23,6 @@ public class NPCPatroller : NPC, IDamageable
 
 	private Coroutine patrolCoroutine = null;
 	private Coroutine pursuitCoroutine = null;
-	private Coroutine setAttackCooldownCoroutine = null;
 
 	private Transform target;
 
@@ -146,25 +145,45 @@ public class NPCPatroller : NPC, IDamageable
 
 	private IEnumerator Pursuit()
 	{
+		agent.speed = battleSpeed;
 		while (true)
 		{
-			Vector3 p = target.position;
-			agent.destination = p;
-			transform.LookAt(new Vector3(p.x, transform.position.y, p.z));
-
-			if (IsCloseEnoughToTarget(p))
+			Vector3 targetPos = target.position;
+			if (canAttack)
 			{
-				if (canAttack)
+				MoveAgent(targetPos);
+				if (IsCloseEnoughToTarget(targetPos))
 				{
 					ProccessAttackAnimation();
-					setAttackCooldownCoroutine = StartCoroutine(SetAttackCooldown());
+					StartCoroutine(SetAttackCooldown());
 				}
 			}
-
-
+			else
+			{
+				Vector3 retreatPoint = transform.position - (transform.forward * 5f);
+				if (Vector3.Distance(transform.position, targetPos) < 4f)
+				{
+					MoveAgent(retreatPoint);
+				}
+				else if (Vector3.Distance(transform.position, targetPos) > 5f)
+				{
+					MoveAgent(targetPos);
+				}
+				else
+				{
+					MoveAgent(transform.position);
+				}
+			}
+			transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
 			yield return null;
 		}
 		
+	}
+
+	private void MoveAgent(Vector3 point)
+	{
+		if (!IsAttacking)
+			agent.SetDestination(point);
 	}
 
 	private IEnumerator SetAttackCooldown()

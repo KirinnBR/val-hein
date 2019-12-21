@@ -273,9 +273,15 @@ public class PlayerController : MonoBehaviour
 		IsDodging = false;
 	}
 
+	public void SetMovementEnabled(bool enabled)
+	{
+		CanMove = enabled;
+	}
+
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.green;
 		Gizmos.DrawWireSphere(transform.position + Vector3.down + Vector3.down * distanceGroundCheck, groundCheckSphereRadius);
 	}
+
 }

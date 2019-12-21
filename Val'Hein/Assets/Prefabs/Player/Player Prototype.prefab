@@ -4325,7 +4325,7 @@ MonoBehaviour:
   stepOffset: 0.5
   jumpHeight: 5
   dodgeTime: 0.25
-  dodgeForce: 20
+  dodgeForce: 10
   runKey: 304
   invertRun: 1
   jumpKey: 32
