@@ -12,13 +12,15 @@ public class NPC : MonoBehaviour, IDamageable
 
 	[Header("Object Detection Settings")]
 
+	[Tooltip("The distance, in meters, of the periferic vision.")]
+	public float perifericVisionRadius = 3f;
+	[Tooltip("The distance, in meters, of the normal vision.")]
+	public float normalVisionRadius = 10f;
 	[Tooltip("The angle, in degrees, of the vision.")]
 	[Range(0, 360)]
-	public float visionAngle = 45f;
-	[Tooltip("The distance, in meters, of the vision.")]
-	public float visionRadius = 10f;
-	[Tooltip("The distance, in meters, of the short-distance vision.")]
-	public float shortDistanceVisionRadius = 3f;
+	public float normalVisionAngle = 45f;
+	[Tooltip("The distance, in meters, of the vision when the target is defined.")]
+	public float wideDistanceVisionRadius = 20f;
 	[Tooltip("The layer in which the objects to detect are.")]
 	[SerializeField]
 	private LayerMask detectionLayer;
@@ -37,7 +39,7 @@ public class NPC : MonoBehaviour, IDamageable
 	[SerializeField]
 	protected Stats stats;
 	[SerializeField]
-	protected List<Attack> attacks;
+	protected List<CooldownAttack> attacks;
 	[SerializeField]
 	[Rename("Has Weapon?")]
 	protected bool hasWeapon = false;
@@ -53,10 +55,12 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected int CurrentAttackIndex { get; set; } = 0;
 	protected List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
-	protected Attack CurrentAttack => attacks[CurrentAttackIndex];
+	protected CooldownAttack CurrentAttack => attacks[CurrentAttackIndex];
 	protected bool IsAttacking { get; set; } = false;
+	protected bool canAttack = true;
 	protected bool animationFinished = false;
 	protected Coroutine activeMarkersCoroutine = null;
+	protected Coroutine setAttackCooldownCoroutine = null;
 
 	#endregion
 	[Space]
@@ -102,13 +106,13 @@ public class NPC : MonoBehaviour, IDamageable
 	protected void SearchObjects()
 	{
 		visibleObjects.Clear();
-		var objectsInVisionRadius = Physics.OverlapSphere(transform.position, visionRadius, detectionLayer);
+		var objectsInVisionRadius = Physics.OverlapSphere(transform.position, normalVisionRadius, detectionLayer);
 		if (objectsInVisionRadius.Length > 0)
 		{
 			for (int i = 0; i < objectsInVisionRadius.Length; i++)
 			{
 				Vector3 dirToTarget = (objectsInVisionRadius[i].transform.position - transform.position).normalized;
-				if (Vector3.Angle(transform.forward, dirToTarget) < visionAngle / 2f)
+				if (Vector3.Angle(transform.forward, dirToTarget) < normalVisionAngle / 2f)
 				{
 					if (!Physics.Linecast(transform.position, objectsInVisionRadius[i].transform.position, obstacleObjectsLayer))
 					{
@@ -117,7 +121,7 @@ public class NPC : MonoBehaviour, IDamageable
 				}
 			}
 		}
-		var objectsInShortVisionRadius = Physics.OverlapSphere(transform.position, shortDistanceVisionRadius, detectionLayer);
+		var objectsInShortVisionRadius = Physics.OverlapSphere(transform.position, perifericVisionRadius, detectionLayer);
 		if (objectsInShortVisionRadius.Length > 0)
 		{
 			foreach (var obj in objectsInShortVisionRadius)
@@ -188,6 +192,12 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
 
+	protected IEnumerator SetAttackCooldown()
+	{
+		yield return new WaitForSeconds(CurrentAttack.cooldown);
+		canAttack = true;
+	}
+
 	#endregion
 
 	#region Animation Event Methods
@@ -223,6 +233,12 @@ public class NPC : MonoBehaviour, IDamageable
 		IsAttacking = false;
 
 		animationFinished = true;
+
+		canAttack = false;
+
+		if (setAttackCooldownCoroutine != null)
+			StopCoroutine(setAttackCooldownCoroutine);
+		setAttackCooldownCoroutine = StartCoroutine(SetAttackCooldown());
 	}
 
 	#endregion

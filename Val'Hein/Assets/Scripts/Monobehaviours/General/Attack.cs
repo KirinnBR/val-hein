@@ -15,3 +15,10 @@ public class ComboAttack : Attack
 	[Range(0.001f, 5f)]
 	public float timeToBlendCombo;
 }
+
+[System.Serializable]
+public class CooldownAttack : Attack
+{
+	[Tooltip("The cooldown of this attack.")]
+	public float cooldown;
+}

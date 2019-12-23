@@ -49,6 +49,7 @@ public class NPCArcher : NPC
 
 	private void StartPursuit(Transform target)
 	{
+		
 		agent.speed = battleSpeed;
 		transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
 		if (Vector3.Distance(transform.position, target.position) <= distanceToRetreat)
