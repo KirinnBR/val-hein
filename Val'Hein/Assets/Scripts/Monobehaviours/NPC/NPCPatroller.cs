@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 #pragma warning disable CS0649
 public class NPCPatroller : NPC, IDamageable
@@ -10,18 +9,16 @@ public class NPCPatroller : NPC, IDamageable
 
 	[Header("Patrolling Settings")]
 
-	[Tooltip("Speed when patrolling.")]
-	public float patrollingSpeed = 5f;
+	public PatrollingType patrollingType;
 	[Tooltip("The points to patrol.")]
 	public List<Transform> patrolPoints;
 	[Tooltip("The time to wait between patrol points.")]
 	public int patrollingWaitTime = 5;
-	private int currentPatrolPoint = 0;
-	private bool patrolling = false;
-	private bool pursuing = false;
+	protected int currentPatrolPoint = 0;
+	protected bool patrolling = false;
 
-	private Coroutine patrolCoroutine = null;
-	private Coroutine pursuitCoroutine = null;
+	protected Coroutine patrolCoroutine = null;
+	private Coroutine combatCoroutine = null;
 
 	private Transform target;
 
@@ -33,43 +30,47 @@ public class NPCPatroller : NPC, IDamageable
 	protected override void Start()
 	{
 		base.Start();
-		agent.speed = patrollingSpeed;
+		agent.speed = speed.y;
 	}
 
 	// Update is called once per frame
 	private void Update()
 	{
-		CheckActualState();
+		UpdateActualState();
 		UpdateAnimator();
 	}
 
-	private void CheckActualState()
+	private void UpdateActualState()
 	{
 		if (visibleObjects.Count > 0)
 		{
-			foreach (var visibleObject in visibleObjects)
+			if (target == null)
 			{
-				if (visibleObject.CompareTag("Player"))
+				foreach (var visibleObject in visibleObjects)
 				{
-					target = visibleObject.transform;
-					break;
+					if (visibleObject.CompareTag("Player"))
+					{
+						target = visibleObject.transform;
+						break;
+					}
+					else
+					{
+						target = null;
+					}
 				}
-				else
-				{
-					target = null;
-				}
-			}
 
-			if (target != null)
-			{
-				if (!pursuing)
+				if (target == null)
 				{
-					StartPursuit();
+					if (!patrolling)
+					{
+						StartPatrol();
+					}
 				}
+
 			}
-			else if (!patrolling)
+			else if (!onCombat)
 			{
-				StartPatrol();
+				StartCombat();
 			}
 		}
 		else
@@ -83,16 +84,16 @@ public class NPCPatroller : NPC, IDamageable
 
 	private void StartPatrol()
 	{
-		if (pursuing)
+		if (onCombat)
 		{
-			StopCoroutine(pursuitCoroutine);
-			pursuing = false;
+			if (combatCoroutine != null)
+				StopCoroutine(combatCoroutine);
+			onCombat = false;
 		}
 		patrolCoroutine = StartCoroutine(Patrol());
-		patrolling = true;
 	}
 
-	private void StartPursuit()
+	private void StartCombat()
 	{
 		if (patrolling)
 		{
@@ -100,8 +101,19 @@ public class NPCPatroller : NPC, IDamageable
 				StopCoroutine(patrolCoroutine);
 			patrolling = false;
 		}
-		pursuitCoroutine = StartCoroutine(Pursuit());
-		pursuing = true;
+		
+		switch (npcType)
+		{
+			case NPCType.Human:
+				combatCoroutine = StartCoroutine(HumanCombat());
+				break;
+			case NPCType.Beast:
+				combatCoroutine = StartCoroutine(BeastCombat());
+				break;
+			case NPCType.Dummy:
+				combatCoroutine = StartCoroutine(DummyCombat());
+				break;
+		}
 	}
 
 	private void UpdateAnimator()
@@ -110,7 +122,7 @@ public class NPCPatroller : NPC, IDamageable
 		{
 			anim.SetFloat("Speed", agent.velocity.magnitude);
 		}
-		else
+		else if (onCombat)
 		{
 			anim.SetFloat("Speed", agent.velocity.magnitude);
 			//Set bidimensional parameters.
@@ -121,41 +133,93 @@ public class NPCPatroller : NPC, IDamageable
 
 	#region Coroutines
 
-	private IEnumerator Patrol()
+	protected IEnumerator Patrol()
 	{
-		agent.speed = patrollingSpeed;
+		agent.speed = speed.y;
 
-		if (patrolPoints.Count == 0)
-		{
-			yield break;
-		}
+		patrolling = true;
+
+		if (patrolPoints.Count == 0) yield break;
 
 		yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
 		yield return new WaitForSeconds(patrollingWaitTime);
-		while (true)
+
+		if (patrollingType == PatrollingType.Loop)
 		{
-			agent.SetDestination(patrolPoints[currentPatrolPoint].position);
-			yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
-			yield return new WaitForSeconds(patrollingWaitTime);
-			currentPatrolPoint = currentPatrolPoint == patrolPoints.Count - 1 ? 0 : currentPatrolPoint + 1;
+			while (true)
+			{
+				agent.SetDestination(patrolPoints[currentPatrolPoint].position);
+				yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
+				yield return new WaitForSeconds(patrollingWaitTime);
+				currentPatrolPoint = currentPatrolPoint == patrolPoints.Count - 1 ? 0 : currentPatrolPoint + 1;
+			}
+		}
+		else if (patrollingType == PatrollingType.Rewind)
+		{
+			bool rewinding = false;
+			while (true)
+			{
+				agent.SetDestination(patrolPoints[currentPatrolPoint].position);
+
+				yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
+				yield return new WaitForSeconds(patrollingWaitTime);
+
+				if (!rewinding)
+				{
+					if (currentPatrolPoint == patrolPoints.Count - 1)
+					{
+						rewinding = true;
+						currentPatrolPoint--;
+					}
+					else
+					{
+						currentPatrolPoint++;
+					}
+				}
+				else
+				{
+					if (currentPatrolPoint == 0)
+					{
+						rewinding = false;
+						currentPatrolPoint++;
+					}
+					else
+					{
+						currentPatrolPoint--;
+					}
+				}
+			}
 		}
 	}
 
-	private IEnumerator Pursuit()
+	private IEnumerator DummyCombat()
 	{
-		void MoveAgent(Vector3 point)
-		{
-			if (!IsAttacking)
-				agent.SetDestination(point);
-		}
+		onCombat = true;
+
+		Vector3 targetPos = target.position;
+
+		if (Vector3.Distance(targetPos, transform.position) > wideDistanceVisionRadius) yield break;
 
 		while (true)
 		{
-			Vector3 targetPos = target.position;
+			targetPos = target.position;
+
+			void MoveAgent(Vector3 point)
+			{
+				if (!IsAttacking)
+					agent.SetDestination(point);
+			}
+
+			void SetDefend(bool value)
+			{
+				IsDefending = value;
+				agent.speed = IsDefending ? speed.x : speed.z;
+			}
+
 			if (canAttack)
 			{
 				//While can attack, go near player and deal attack.
-				agent.speed = battleSpeed;
+				agent.speed = speed.z;
 				MoveAgent(targetPos);
 				if (IsCloseEnoughToTarget(targetPos))
 				{
@@ -168,11 +232,64 @@ public class NPCPatroller : NPC, IDamageable
 				Vector3 retreatPoint = transform.position - transform.forward.normalized * 2f;
 				if (Vector3.Distance(transform.position, targetPos) < 4f)
 				{
-					agent.speed = battleSpeed / 2;
+					SetDefend(true);
+					MoveAgent(retreatPoint);
+				}
+				else if (Vector3.Distance(transform.position, targetPos) > normalVisionRadius)
+				{
+					SetDefend(false);
+					MoveAgent(targetPos);
+				}
+				else
+				{
+					SetDefend(true);
+					MoveAgent(transform.position);
+				}
+			}
+			transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
+			yield return null;
+		}
+	}
+
+	private IEnumerator BeastCombat()
+	{
+		Debug.LogWarning("Beast Combat on development.");
+		yield break;
+
+		void MoveAgent(Vector3 point)
+		{
+			if (!IsAttacking)
+				agent.SetDestination(point);
+		}
+
+		onCombat = true;
+
+		while (true)
+		{
+			Vector3 targetPos = target.position;
+
+			if (Vector3.Distance(targetPos, transform.position) > wideDistanceVisionRadius) yield break;
+
+			if (canAttack)
+			{
+				//While can attack, go near player and deal attack.
+				agent.speed = speed.z;
+				MoveAgent(targetPos);
+				if (IsCloseEnoughToTarget(targetPos))
+					ProccessAttackAnimation();
+			}
+			else
+			{
+				//While can't attack, flank the target and raise guard, keeping certain distance from target (but not letting him go).
+				Vector3 retreatPoint = transform.position - transform.forward.normalized * 2f;
+				if (Vector3.Distance(transform.position, targetPos) < 4f)
+				{
+					agent.speed = speed.x;
 					MoveAgent(retreatPoint);
 				}
 				else if (Vector3.Distance(transform.position, targetPos) > 5f)
 				{
+					agent.speed = speed.z;
 					MoveAgent(targetPos);
 				}
 				else
@@ -183,9 +300,64 @@ public class NPCPatroller : NPC, IDamageable
 			transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
 			yield return null;
 		}
-		
+	}
+
+	private IEnumerator HumanCombat()
+	{
+		Debug.LogWarning("Human Combat on development.");
+		yield break;
+
+		void MoveAgent(Vector3 point)
+		{
+			if (!IsAttacking)
+				agent.SetDestination(point);
+		}
+
+		onCombat = true;
+
+		while (true)
+		{
+			Vector3 targetPos = target.position;
+
+			if (Vector3.Distance(targetPos, transform.position) > wideDistanceVisionRadius) yield break;
+
+			if (canAttack)
+			{
+				//While can attack, go near player and deal attack.
+				agent.speed = speed.z;
+				MoveAgent(targetPos);
+				if (IsCloseEnoughToTarget(targetPos))
+					ProccessAttackAnimation();
+			}
+			else
+			{
+				//While can't attack, flank the target and raise guard, keeping certain distance from target (but not letting him go).
+				Vector3 retreatPoint = transform.position - transform.forward.normalized * 2f;
+				if (Vector3.Distance(transform.position, targetPos) < 4f)
+				{
+					agent.speed = speed.x;
+					MoveAgent(retreatPoint);
+				}
+				else if (Vector3.Distance(transform.position, targetPos) > 5f)
+				{
+					agent.speed = speed.z;
+					MoveAgent(targetPos);
+				}
+				else
+				{
+					MoveAgent(transform.position);
+				}
+			}
+			transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
+			yield return null;
+		}
 	}
 
 	#endregion
+
+	public enum PatrollingType
+	{
+		Loop, Rewind
+	}
 
 }

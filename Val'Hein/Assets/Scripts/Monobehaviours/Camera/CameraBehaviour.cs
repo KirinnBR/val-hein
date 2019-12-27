@@ -19,8 +19,7 @@ public class CameraBehaviour : MonoBehaviour
 	private Vector2 distanceLimits = new Vector2(1f, 10f);
 	[Tooltip("The distance between the camera and the target.")]
 	public float distance = 5f;
-	private bool auxCurrentDistanceDisabled = false;
-	[ConditionalHide("auxCurrentDistanceDisabled", false, true)]
+	[DisableOnInspector]
 	public float currentDistance;
 	[Tooltip("The sensitivity of the mouse scroll wheel.")]
 	[SerializeField]
@@ -54,9 +53,9 @@ public class CameraBehaviour : MonoBehaviour
 	[Header("Camera Focus Settings")]
 
 	[SerializeField]
-	private float focusHeight = 10f;
+	private float focusHeight = 0f;
 	[SerializeField]
-	private float distanceFocused = 1f;
+	private float distanceFocused = 2f;
 	[SerializeField]
 	private float distanceInterpolationSpeed = 5f;
 	[SerializeField]
@@ -82,6 +81,8 @@ public class CameraBehaviour : MonoBehaviour
 	// Update is called once per frame
 	private void LateUpdate()
     {
+		if (target == null) return;
+
 		if (Focus == null)
 		{
 			currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
@@ -142,6 +143,8 @@ public class CameraBehaviour : MonoBehaviour
 	
 	private void OnDrawGizmosSelected()
 	{
+		if (target == null) return;
+
 		Gizmos.color = Color.green;
 		Vector3 targetPos = target.position + playerOffset;
 		Gizmos.DrawLine(transform.position, targetPos);

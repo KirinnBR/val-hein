@@ -11,8 +11,7 @@ public class ConditionalHidePropertyDrawer : PropertyDrawer
     {
         
         ConditionalHideAttribute condHAtt = (ConditionalHideAttribute)attribute;
-        bool enabled = GetConditionalHideAttributeResult(condHAtt, property);        
-
+        bool enabled = GetConditionalHideAttributeResult(condHAtt, property);
         bool wasEnabled = GUI.enabled;
         GUI.enabled = enabled;
         if (!condHAtt.HideInInspector || enabled)

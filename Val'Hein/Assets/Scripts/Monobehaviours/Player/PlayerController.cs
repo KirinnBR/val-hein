@@ -29,13 +29,13 @@ public class PlayerController : MonoBehaviour
 	private float stepOffset = 0.5f;
 	[SerializeField]
 	[Tooltip("The maximum height when jumping.")]
-	private float jumpHeight = 3f;
+	private float jumpHeight = 5f;
 	[SerializeField]
 	[Tooltip("The time, in seconds, it takes for the player to dodge.")]
-	private float dodgeTime = 0.5f;
+	private float dodgeTime = 0.25f;
 	[SerializeField]
 	[Tooltip("The force of the dodge.")]
-	private float dodgeForce = 2f;
+	private float dodgeForce = 10f;
 
 	public bool CanMove { get; set; }
 	public bool IsJumping { get; private set; }
@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
 	private float velocityY;
 
 	#endregion
-	[Space]
+	
 	#region Input Settings
 
 	[Header("Input Settings")]
@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour
 	private bool inputJump, inputDodge, inputRun;
 
 	#endregion
-	[Space]
+	
 	#region Physics Settings
 
 	[Header("Physics Settings")]
@@ -94,7 +94,7 @@ public class PlayerController : MonoBehaviour
 	private float JumpVelocity => Mathf.Sqrt(2 * gravityForce * jumpHeight);
 
 	#endregion
-	[Space]
+	
 	#region Advanced Settings
 
 	[Header("Advanced Settings")]
@@ -124,6 +124,8 @@ public class PlayerController : MonoBehaviour
 		Move();
 		ProccessAnimations();
     }
+
+	
 
 	private void FixedUpdate()
 	{

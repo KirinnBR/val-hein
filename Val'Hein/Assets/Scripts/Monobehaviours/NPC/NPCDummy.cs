@@ -52,7 +52,7 @@ public class NPCDummy : NPC
 	private void StartPursuit(Transform target)
 	{
 		transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
-		agent.speed = battleSpeed;
+		agent.speed = speed.z;
 		agent.SetDestination(target.position);
 		if (IsCloseEnoughToTarget(target.position))
 		{

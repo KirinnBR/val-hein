@@ -98,17 +98,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   distanceLimits: {x: 1, y: 20}
-  distance: 5
-  currentDistance: 5
+  distance: 3
+  currentDistance: 3
   mouseScrollWheelSensitivity: 5
-  playerOffset: {x: 0, y: 1.5, z: 0}
+  playerOffset: {x: 0, y: 1.3, z: 0}
   angleLimits: {x: 0, y: 60}
   mouseSensitivityX: 180
   mouseSensitivityY: 180
   collisionLayer:
     serializedVersion: 2
     m_Bits: 512
-  focusHeight: 10.2
+  focusHeight: 0.5
   distanceFocused: 2
   distanceInterpolationSpeed: 5
   cameraSide: 1

@@ -414,7 +414,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c5b1b1e360238144a2e7e72667f182d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  perifericVisionRadius: 5
+  perifericVisionRadius: 3
   normalVisionRadius: 10
   normalVisionAngle: 45
   wideDistanceVisionRadius: 20
@@ -427,13 +427,11 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: afa638057322c6b4fa7b4714b81c3c56, type: 2}
   attacks:
   - damageMultiplier: 1
-    cooldown: 2
   - damageMultiplier: 1
-    cooldown: 3
   - damageMultiplier: 1
-    cooldown: 4
   - damageMultiplier: 1
-    cooldown: 5
+  attacksPerCombo: 3
+  npcType: 2
   hasWeapon: 0
   weapon: {fileID: 0}
   combatSettings:
@@ -452,13 +450,13 @@ MonoBehaviour:
       triggerInteraction: 0
     continuousDamage: 0
     continuousDamageInterval: 0
-  battleSpeed: 10
+  speed: {x: 2, y: 5, z: 10}
   agentAcceleration: 80
   agentAngularSpeed: 1200
   agentStoppingDistance: 1
-  patrollingSpeed: 5
+  patrollingType: 0
   patrolPoints: []
-  patrollingWaitTime: 5
+  patrollingWaitTime: 2
 --- !u!136 &3259557998626709594
 CapsuleCollider:
   m_ObjectHideFlags: 0

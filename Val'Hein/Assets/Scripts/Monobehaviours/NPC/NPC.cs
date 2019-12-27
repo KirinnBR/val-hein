@@ -18,7 +18,7 @@ public class NPC : MonoBehaviour, IDamageable
 	public float normalVisionRadius = 10f;
 	[Tooltip("The angle, in degrees, of the vision.")]
 	[Range(0, 360)]
-	public float normalVisionAngle = 45f;
+	public float normalVisionAngle = 90f;
 	[Tooltip("The distance, in meters, of the vision when the target is defined.")]
 	public float wideDistanceVisionRadius = 20f;
 	[Tooltip("The layer in which the objects to detect are.")]
@@ -30,16 +30,21 @@ public class NPC : MonoBehaviour, IDamageable
 	protected List<Transform> visibleObjects = new List<Transform>();
 
 	#endregion
-	[Space]
 
 	#region Combat Settings
+
 	[Header("Combat Settings")]
 
 	[Tooltip("Stats of the NPC.")]
 	[SerializeField]
 	protected Stats stats;
 	[SerializeField]
-	protected List<CooldownAttack> attacks;
+	protected List<Attack> attacks;
+	[SerializeField]
+	protected int attacksPerCombo = 2;
+	[SerializeField]
+	[Rename("NPC Type")]
+	protected NPCType npcType = NPCType.Human;
 	[SerializeField]
 	[Rename("Has Weapon?")]
 	protected bool hasWeapon = false;
@@ -49,21 +54,25 @@ public class NPC : MonoBehaviour, IDamageable
 	[SerializeField]
 	[ConditionalHide("hasWeapon", false)]
 	protected CombatSettings combatSettings;
-	[Tooltip("Speed when in battle.")]
+	[Tooltip("Defending, normal and attacking move speed, respectively.")]
 	[SerializeField]
-	protected float battleSpeed = 10f;
+	protected Vector3 speed = new Vector3(2f, 5f, 10f);
 
 	protected int CurrentAttackIndex { get; set; } = 0;
-	protected List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
-	protected CooldownAttack CurrentAttack => attacks[CurrentAttackIndex];
+	protected int CurrentAttackCombo { get; set; } = 0;
+	protected List<HitMarker> HitMarkers { get { return combatSettings.hitMarkers; } }
+	protected Attack CurrentAttack => attacks[CurrentAttackIndex];
 	protected bool IsAttacking { get; set; } = false;
+	protected bool IsDefending { get; set; } = false;
 	protected bool canAttack = true;
-	protected bool animationFinished = false;
+	protected bool animationFinished = true;
 	protected Coroutine activeMarkersCoroutine = null;
 	protected Coroutine setAttackCooldownCoroutine = null;
+	public bool ShowCombatGUI { get; set; } = false;
+	protected bool onCombat = false;
 
 	#endregion
-	[Space]
+
 	#region Agent Settings
 
 	[Header("Agent Settings")]
@@ -84,15 +93,19 @@ public class NPC : MonoBehaviour, IDamageable
 	public float CurrentHealth { get; protected set; }
 	protected Animator anim;
 
+	//Editor utility.
+	public Vector3 StartPos { get; set; }
+
 	protected virtual void Start()
 	{
+		StartPos = transform.position;
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 		CurrentHealth = stats.baseHealth;
 		if (hasWeapon)
 			weapon.MergeStatsWithUser(stats);
 		else
-			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
+			combatSettings.hitMarkerManager.ConfigureMarkers(HitMarkers.ToArray());
 		agent.acceleration = agentAcceleration;
 		agent.angularSpeed = agentAngularSpeed;
 		agent.stoppingDistance = agentStoppingDistance;
@@ -143,9 +156,13 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected void ProccessAttackAnimation()
 	{
+		if (!animationFinished) return;
+
 		animationFinished = false;
 
 		CurrentAttackIndex = Random.Range(0, attacks.Count - 1);
+
+		CurrentAttackCombo++;
 
 		anim.SetInteger("Attack Index", CurrentAttackIndex);
 		anim.SetTrigger("Attack");
@@ -159,7 +176,7 @@ public class NPC : MonoBehaviour, IDamageable
 		List<IDamageable> cannotHit = new List<IDamageable>();
 		while (true)
 		{
-			foreach (var marker in hitMarkers)
+			foreach (var marker in HitMarkers)
 			{
 				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
@@ -176,7 +193,7 @@ public class NPC : MonoBehaviour, IDamageable
 		List<IDamageable> cannotHit = new List<IDamageable>();
 		while (true)
 		{
-			foreach (var marker in hitMarkers)
+			foreach (var marker in HitMarkers)
 			{
 				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
@@ -194,7 +211,7 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected IEnumerator SetAttackCooldown()
 	{
-		yield return new WaitForSeconds(CurrentAttack.cooldown);
+		yield return new WaitForSeconds(5f);
 		canAttack = true;
 	}
 
@@ -234,7 +251,11 @@ public class NPC : MonoBehaviour, IDamageable
 
 		animationFinished = true;
 
-		canAttack = false;
+		if (CurrentAttackCombo == attacksPerCombo)
+		{
+			canAttack = false;
+			CurrentAttackCombo = 0;
+		}
 
 		if (setAttackCooldownCoroutine != null)
 			StopCoroutine(setAttackCooldownCoroutine);
@@ -247,20 +268,67 @@ public class NPC : MonoBehaviour, IDamageable
 
 	public virtual void TakeDamage(float ammount)
 	{
-		CurrentHealth = CurrentHealth - (ammount - stats.baseResistance);
+		if (IsDefending)
+			CurrentHealth -= ammount - stats.baseResistance * 2;
+		else
+			CurrentHealth -= ammount - stats.baseResistance;
+		
 		if (CurrentHealth <= 0)
 		{
 			Die();
+		}
+		else
+		{
+			anim.SetTrigger("Hurt");
+			FinishAnimation();
 		}
 	}
 
 	protected virtual void Die()
 	{
 		CurrentHealth = 0;
+		anim.SetTrigger("Die");
+		FinishAnimation();
 		Debug.Log($"{gameObject.name} has died.");
 		Destroy(gameObject);
 	}
 
 	#endregion
 
+	//Auxiliary variables.
+	float lastPeriferic { get; set; }
+	float lastNormal { get; set; }float lastWide { get; set; }
+	private void OnValidate()
+	{
+		if (perifericVisionRadius != lastPeriferic)
+		{
+			if (perifericVisionRadius <= 0f)
+				perifericVisionRadius = 0f;
+			else if (perifericVisionRadius >= normalVisionRadius)
+				perifericVisionRadius = normalVisionRadius;
+			lastPeriferic = perifericVisionRadius;
+		}
+		if (normalVisionRadius != lastNormal)
+		{
+			if (normalVisionRadius <= perifericVisionRadius)
+				normalVisionRadius = perifericVisionRadius;
+			else if (normalVisionRadius >= wideDistanceVisionRadius)
+				normalVisionRadius = wideDistanceVisionRadius;
+			lastNormal = normalVisionRadius;
+		}
+		if (wideDistanceVisionRadius != lastWide)
+		{
+			if (wideDistanceVisionRadius <= normalVisionRadius)
+				wideDistanceVisionRadius = normalVisionRadius;
+			lastWide = wideDistanceVisionRadius;
+		}
+		if (attacksPerCombo > attacks.Count)
+			attacksPerCombo = attacks.Count;
+	}
+
+}
+
+public enum NPCType
+{
+	Human, Beast, Dummy
 }

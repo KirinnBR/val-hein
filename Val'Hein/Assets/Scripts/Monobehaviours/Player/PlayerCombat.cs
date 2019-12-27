@@ -180,9 +180,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private void ProccessAttackAnimation()
 	{
 		 if (LastHit)
-		{
 			StopCoroutine(computeComboCoroutine);
-		}
 		else
 		{
 			if (computeComboCoroutine != null)
@@ -209,8 +207,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	public void TakeDamage(float ammount)
 	{
-		IsAttacking = false;
-		anim.ResetTrigger("Attack");
+		FinishAnimation();
 		anim.SetTrigger("Hurt");
 		CurrentHealth -= ammount;
 		if (CurrentHealth <= 0)
@@ -344,5 +341,4 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	}
 
 	#endregion
-
 }
