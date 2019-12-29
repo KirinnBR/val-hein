@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.AI;
 
 #pragma warning disable CS0649
@@ -8,6 +9,30 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Animator))]
 public class NPC : MonoBehaviour, IDamageable
 {
+	#region NPC Settings
+
+	[Header("NPC Settings")]
+
+	[SerializeField]
+	[Rename("NPC Name")]
+	protected string npcName = "NPC";
+
+	#endregion
+
+	#region UI Settings
+
+	[Header("UI Settings")]
+
+	[SerializeField]
+	[Rename("NPC Canvas")]
+	private GameObject canvas;
+
+	protected Canvas npcCanvas;
+	protected Slider npcHealthBar;
+	protected Text npcTextName;
+
+	#endregion
+
 	#region Object Detection Settings
 
 	[Header("Object Detection Settings")]
@@ -27,6 +52,7 @@ public class NPC : MonoBehaviour, IDamageable
 	[Tooltip("The layer in which the obstacles are.")]
 	[SerializeField]
 	private LayerMask obstacleObjectsLayer;
+
 	protected List<Transform> visibleObjects = new List<Transform>();
 
 	#endregion
@@ -41,6 +67,10 @@ public class NPC : MonoBehaviour, IDamageable
 	[SerializeField]
 	protected List<Attack> attacks;
 	[SerializeField]
+	[Rename("Randomize Attacks Per Combo?")]
+	protected bool randomizeAttacksPerCombo = false;
+	[SerializeField]
+	[ConditionalHide("randomizeAttacksPerCombo", false)]
 	protected int attacksPerCombo = 2;
 	[SerializeField]
 	[Rename("NPC Type")]
@@ -58,6 +88,8 @@ public class NPC : MonoBehaviour, IDamageable
 	[SerializeField]
 	protected Vector3 speed = new Vector3(2f, 5f, 10f);
 
+	public float CurrentHealth { get; private set; }
+	protected float CurrentStamina { get; set; }
 	protected int CurrentAttackIndex { get; set; } = 0;
 	protected int CurrentAttackCombo { get; set; } = 0;
 	protected List<HitMarker> HitMarkers { get { return combatSettings.hitMarkers; } }
@@ -90,22 +122,35 @@ public class NPC : MonoBehaviour, IDamageable
 
 	#endregion
 
-	public float CurrentHealth { get; protected set; }
 	protected Animator anim;
-
-	//Editor utility.
+#if UNITY_EDITOR
+	/*Editor utility.*/
 	public Vector3 StartPos { get; set; }
-
+#endif
 	protected virtual void Start()
 	{
+#if UNITY_EDITOR
 		StartPos = transform.position;
+#endif
+		CurrentHealth = stats.baseHealth;
+		CurrentStamina = stats.baseStamina;
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
-		CurrentHealth = stats.baseHealth;
+		npcCanvas = canvas.GetComponent<Canvas>();
+		npcHealthBar = npcCanvas.GetComponentInChildren<Slider>();
+		npcTextName = npcCanvas.GetComponentInChildren<Text>();
+		npcTextName.text = npcName;
+		npcHealthBar.maxValue = CurrentHealth;
+		npcHealthBar.value = CurrentHealth;
+
+		if (randomizeAttacksPerCombo)
+			attacksPerCombo = Random.Range(1, attacks.Count);
+
 		if (hasWeapon)
 			weapon.MergeStatsWithUser(stats);
 		else
 			combatSettings.hitMarkerManager.ConfigureMarkers(HitMarkers.ToArray());
+
 		agent.acceleration = agentAcceleration;
 		agent.angularSpeed = agentAngularSpeed;
 		agent.stoppingDistance = agentStoppingDistance;
@@ -114,6 +159,12 @@ public class NPC : MonoBehaviour, IDamageable
 	protected virtual void FixedUpdate()
 	{
 		SearchObjects();
+		UpdateUIElements();
+	}
+
+	protected void UpdateUIElements()
+	{
+		npcHealthBar.value = Mathf.Lerp(npcHealthBar.value, CurrentHealth, 0.2f);
 	}
 
 	protected void SearchObjects()
@@ -156,7 +207,7 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected void ProccessAttackAnimation()
 	{
-		if (!animationFinished) return;
+		if (!animationFinished) { return; }
 
 		animationFinished = false;
 
@@ -245,7 +296,7 @@ public class NPC : MonoBehaviour, IDamageable
 
 	public void FinishAnimation()
 	{
-		if (animationFinished) return;
+		if (animationFinished) { return; }
 
 		IsAttacking = false;
 
@@ -255,6 +306,8 @@ public class NPC : MonoBehaviour, IDamageable
 		{
 			canAttack = false;
 			CurrentAttackCombo = 0;
+			if (randomizeAttacksPerCombo)
+				attacksPerCombo = Random.Range(1, attacks.Count);
 		}
 
 		if (setAttackCooldownCoroutine != null)
@@ -272,7 +325,6 @@ public class NPC : MonoBehaviour, IDamageable
 			CurrentHealth -= ammount - stats.baseResistance * 2;
 		else
 			CurrentHealth -= ammount - stats.baseResistance;
-		
 		if (CurrentHealth <= 0)
 		{
 			Die();

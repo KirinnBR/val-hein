@@ -55,18 +55,16 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	private float focusHeight = 0f;
 	[SerializeField]
-	private float distanceFocused = 2f;
-	[SerializeField]
 	private float distanceInterpolationSpeed = 5f;
 	[SerializeField]
 	private SideSelector cameraSide = SideSelector.Left;
 
-	public Transform Focus { get; set; }
+	private Transform focus;
+	private bool HasFocus => focus != null;
 
 	#endregion
 
 	private float heading = 0f, tilt = 20f;
-	private float mouseScroll = 0f;
 	
 
 	private Vector3 forward, right;
@@ -83,15 +81,15 @@ public class CameraBehaviour : MonoBehaviour
     {
 		if (target == null) return;
 
-		if (Focus == null)
+		currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
+
+		if (!HasFocus)
 		{
-			currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
 			Move(target.position - transform.forward * currentDistance + playerOffset);
 		}
 		else
 		{
-			currentDistance = Mathf.Lerp(currentDistance, distanceFocused, distanceInterpolationSpeed * Time.deltaTime);
-			transform.LookAt(new Vector3(Focus.position.x, focusHeight, Focus.position.z));
+			transform.LookAt(new Vector3(focus.position.x, focusHeight, focus.position.z));
 			if (cameraSide == SideSelector.Left)
 				Move(target.position - transform.forward * currentDistance + (playerOffset + (-transform.right / 2)));
 			else
@@ -102,17 +100,16 @@ public class CameraBehaviour : MonoBehaviour
 	
 	private void Update()
 	{
-		if (Focus == null)
+		
+		if (!HasFocus)
 		{
-			heading += Input.GetAxis("Mouse X") * Time.deltaTime * mouseSensitivityX;
-			if (heading >= 360f)
+			heading += Input.GetAxisRaw("Mouse X") * Time.deltaTime * mouseSensitivityX;
+			if (heading >= 360f || heading <= -360f)
 				heading = 0f;
-			if (heading <= -360f)
-				heading = 0f;
-			tilt -= Input.GetAxis("Mouse Y") * Time.deltaTime * mouseSensitivityY;
+			tilt -= Input.GetAxisRaw("Mouse Y") * Time.deltaTime * mouseSensitivityY;
 			tilt = Mathf.Clamp(tilt, angleLimits.x, angleLimits.y);
 			transform.rotation = Quaternion.Euler(tilt, heading, 0);
-			mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
+			float mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
 			distance += mouseScroll * mouseScrollWheelSensitivity;
 			distance = Mathf.Clamp(distance, distanceLimits.x, distanceLimits.y);
 		}
@@ -148,21 +145,27 @@ public class CameraBehaviour : MonoBehaviour
 		Gizmos.color = Color.green;
 		Vector3 targetPos = target.position + playerOffset;
 		Gizmos.DrawLine(transform.position, targetPos);
+
 		Gizmos.color = Color.red;
 		Gizmos.DrawLine(targetPos, targetPos + (transform.forward * (distanceLimits.y - currentDistance)));
 		Gizmos.DrawLine(transform.position, transform.position + (transform.forward * (distanceLimits.x - currentDistance)));
-		if (Focus != null)
+
+		if (focus != null)
 		{
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(transform.position, new Vector3(Focus.position.x, focusHeight, Focus.position.z));
+			Gizmos.DrawLine(transform.position, new Vector3(focus.position.x, focusHeight, focus.position.z));
 		}
+	}
+
+	public void SetFocus(Transform newFocus)
+	{
+		focus = newFocus;
 	}
 
 	public void Defocus()
 	{
-		Focus = null;
+		focus = null;
 	}
-
 
 }
 

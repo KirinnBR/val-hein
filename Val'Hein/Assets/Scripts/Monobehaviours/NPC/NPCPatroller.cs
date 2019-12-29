@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #pragma warning disable CS0649
-public class NPCPatroller : NPC, IDamageable
+public class NPCPatroller : NPC
 {
 	#region Patrolling Settings
 
@@ -207,7 +207,10 @@ public class NPCPatroller : NPC, IDamageable
 			void MoveAgent(Vector3 point)
 			{
 				if (!IsAttacking)
+				{
 					agent.SetDestination(point);
+				}
+
 			}
 
 			void SetDefend(bool value)

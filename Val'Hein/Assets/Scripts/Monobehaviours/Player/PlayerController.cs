@@ -41,8 +41,6 @@ public class PlayerController : MonoBehaviour
 	public bool IsJumping { get; private set; }
 	public bool IsDodging { get; private set; } = false;
 	private bool IsValidKeepJump { get; set; } = true;
-	private CameraBehaviour Camera { get { return Player.Instance.playerCamera; } }
-	private CharacterController controller;
 
 	public Vector3 motionHorizontal { get; private set; } = Vector3.zero;
 	Vector3 motionVertical = Vector3.zero;
@@ -94,18 +92,16 @@ public class PlayerController : MonoBehaviour
 	private float JumpVelocity => Mathf.Sqrt(2 * gravityForce * jumpHeight);
 
 	#endregion
-	
-	#region Advanced Settings
 
-	[Header("Advanced Settings")]
-
-	[SerializeField]
-	private float minimumMagnitudeToStop = 0.1f;
-
-	#endregion
+	#region External Properties
 
 	private Animator anim;
 	private PlayerCombat Combat { get { return Player.Instance.playerCombat; } }
+	private CameraBehaviour Camera { get { return Player.Instance.playerCamera; } }
+
+	private CharacterController controller;
+
+	#endregion
 
 	private void Start()
     {
@@ -179,7 +175,7 @@ public class PlayerController : MonoBehaviour
 		Vector3 dir = (Camera.Forward * inputVertical + Camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (!IsMoving)
-			if (motionHorizontal.magnitude <= minimumMagnitudeToStop)
+			if (motionHorizontal.magnitude <= .01f)
 				motionHorizontal = Vector3.zero;
 
 

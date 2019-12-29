@@ -57,7 +57,12 @@ public class NPCEditor : Editor
 		if (!EditorApplication.isPlaying)
 			npcP.StartPos = npcP.transform.position;
 		Handles.color = Color.green;
-		List<Transform> patrolPoints = npcP.patrolPoints.FindAll(x => x != null);
+		List<Transform> patrolPoints;
+		if (npcP.patrolPoints.Count > 0)
+			patrolPoints = npcP.patrolPoints.FindAll(x => x != null);
+		else
+			patrolPoints = npcP.patrolPoints;
+		
 		var npcPos = npcP.StartPos;
 		if (npcP.patrollingType == NPCPatroller.PatrollingType.Loop)
 		{

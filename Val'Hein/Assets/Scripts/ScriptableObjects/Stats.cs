@@ -9,6 +9,7 @@ public class Stats : ScriptableObject
 	[Header("Standart Stats")]
 	public float baseHealth = 100f;
 	public float baseResistance = 10f;
+	public float baseStamina = 100f;
 
 	[Header("Physical damage")]
 	public float baseStrength = 10f;

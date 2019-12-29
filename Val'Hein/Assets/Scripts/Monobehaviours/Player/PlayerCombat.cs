@@ -35,7 +35,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	public float EnemyDetectionRadius { get { return enemyDetectionRadius; } }
 	public bool HasTarget { get; private set; }
 	public bool IsAttacking { get; private set; } = false;
-	private float CurrentHealth { get; set; }
+	public float CurrentHealth { get; private set; }
 	private int CurrentAttackIndex { get; set; } = 0;
 	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
 	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
@@ -62,6 +62,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	public KeyCode keyToTarget = KeyCode.F;
 	
 	private bool attackInput, targetInput;
+	private float mouseScrollInput;
 
 	#endregion
 
@@ -101,6 +102,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	{
 		attackInput = Input.GetMouseButtonDown((int)buttonToAttack);
 		targetInput = Input.GetKeyDown(keyToTarget);
+		mouseScrollInput = -Input.GetAxisRaw("Mouse ScrollWheel");
 	}
 
 	private void ProccessInput()
@@ -109,7 +111,12 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			if (!IsAttacking && !Controller.IsJumping && !Controller.IsDodging)
 				ProccessAttackAnimation();
 		if (targetInput)
-			SetTarget();
+		{
+			if (!HasTarget)
+				SetTarget();
+			else
+				UnsetTarget();
+		}
 	}
 
 	private void UpdateAnimationVariables()
@@ -138,6 +145,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private void SetTarget()
 	{
+		//Quando setar, pega todos os inimigos e calcula o mais perto. Depois, inicia a co-rotina UpdateTarget().
 		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.UseGlobal);
 		float closestDistance = float.MaxValue;
 		Transform closestEnemy = null;
@@ -164,17 +172,26 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 		HasTarget = targetEnemy != null;
 
-		Camera.Focus = targetEnemy;
-
-		if (targetEnemy != null)
-			focusedEnemies.Add(targetEnemy);
+		Camera.SetFocus(targetEnemy);
 
 		if (HasTarget)
+		{
+			focusedEnemies.Add(targetEnemy);
 			onCombat = true;
+		}
 
 		if (updateTargetCoroutine != null)
 			StopCoroutine(updateTargetCoroutine);
 		updateTargetCoroutine = StartCoroutine(UpdateTarget());
+	}
+
+	private void UnsetTarget()
+	{
+		focusedEnemies.Clear();
+		targetEnemy = null;
+		HasTarget = false;
+		Camera.Defocus();
+		updateTargetCoroutine = null;
 	}
 
 	private void ProccessAttackAnimation()
@@ -278,23 +295,16 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private IEnumerator UpdateTarget()
 	{
+		//Essa co-rotina atualiza a cada Fixed Update os NPCs que estao dentro do raio de deteccao. Se nenhum inimigo estiver dentro desse raio, a co-rotina desativa automaticamente.
 		while (targetEnemy != null)
 		{
-			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius)
-			{
-				focusedEnemies.Clear();
-				targetEnemy = null;
-				HasTarget = false;
-				Camera.Defocus();
-				break;
-			}
+			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius) break;
+
 			var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
 			transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
-			yield return null;
+			yield return new WaitForFixedUpdate();
 		}
-		focusedEnemies.Clear();
-		HasTarget = false;
-		Camera.Defocus();
+		UnsetTarget();
 	}
 
     #endregion
