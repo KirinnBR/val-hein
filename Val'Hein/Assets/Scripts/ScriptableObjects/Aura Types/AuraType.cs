@@ -6,5 +6,5 @@ using UnityEngine;
 public class AuraType : ScriptableObject
 {
 	//public Color auraColor;
-	public Material auraColor;
+	public Material auraMaterial;
 }

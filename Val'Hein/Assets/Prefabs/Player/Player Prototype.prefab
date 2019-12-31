@@ -4331,13 +4331,11 @@ MonoBehaviour:
   jumpKey: 32
   dodgeKey: 306
   gravityForce: 25
-  distanceGroundCheck: -1.05
-  groundCheckSphereRadius: 0.3
+  distanceGroundCheck: 0
+  groundCheckSphereRadius: 0.35
   groundCheckLayer:
     serializedVersion: 2
     m_Bits: 512
-  slopeForce: 200
-  minimumMagnitudeToStop: 0.1
 --- !u!114 &1547741263924561456
 MonoBehaviour:
   m_ObjectHideFlags: 0

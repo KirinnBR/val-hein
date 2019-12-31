@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
 	private float slopeLimit = 50f;
 	[SerializeField]
 	[Tooltip("The maximum height, in meters, that the player can move up.")]
-	private float stepOffset = 0.5f;
+	private float stepHeight = 0.5f;
 	[SerializeField]
 	[Tooltip("The maximum height when jumping.")]
 	private float jumpHeight = 5f;
@@ -42,9 +42,9 @@ public class PlayerController : MonoBehaviour
 	public bool IsDodging { get; private set; } = false;
 	private bool IsValidKeepJump { get; set; } = true;
 
-	public Vector3 motionHorizontal { get; private set; } = Vector3.zero;
-	Vector3 motionVertical = Vector3.zero;
-	private float velocityY;
+	public Vector3 motion { get { return motionHorizontal; } }
+	private Vector3 motionHorizontal;
+	private float motionVertical;
 
 	#endregion
 	
@@ -82,23 +82,21 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	[Tooltip("The layer to search for ground detection.")]
 	private LayerMask groundCheckLayer;
-	[Tooltip("The extra force activated when on slope, preventing bounciness.")]
-	[SerializeField]
-	private float slopeForce = 200f;
 
 	private bool OnSlope { get; set; }
+	private bool IsGrounded { get; set; }
+	private bool WasGrounded { get; set; }
 	private bool IsMoving => inputHorizontal != 0 || inputVertical != 0;
-	public bool IsGrounded { get; private set; }
 	private float JumpVelocity => Mathf.Sqrt(2 * gravityForce * jumpHeight);
+	private bool KnockingOnRoof { get; set; }
 
 	#endregion
 
 	#region External Properties
 
-	private Animator anim;
-	private PlayerCombat Combat { get { return Player.Instance.playerCombat; } }
-	private CameraBehaviour Camera { get { return Player.Instance.playerCamera; } }
-
+	private Animator anim { get { return Player.Instance.anim; } }
+	private PlayerCombat combat { get { return Player.Instance.playerCombat; } }
+	private CameraBehaviour cam { get { return Player.Instance.playerCamera; } }
 	private CharacterController controller;
 
 	#endregion
@@ -106,46 +104,49 @@ public class PlayerController : MonoBehaviour
 	private void Start()
     {
 		controller = GetComponent<CharacterController>();
-		anim = GetComponent<Animator>();
 		controller.slopeLimit = slopeLimit;
-		controller.stepOffset = stepOffset;
+		controller.stepOffset = stepHeight;
 		CanMove = true;
 	}
 
 	private void Update()
     {
 		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
+		CheckGrounded();
 		ApplyGravity();
 		GetInput();
 		Move();
 		ProccessAnimations();
-    }
-
-	
-
-	private void FixedUpdate()
-	{
-		CheckGrounded();
+		WasGrounded = IsGrounded;
 	}
 
+
+	
+	private void FixedUpdate()
+	{
+		KnockingOnRoof = controller.collisionFlags == CollisionFlags.Above;
+	}
+	
 	private void ApplyGravity()
 	{
-		velocityY += -gravityForce * Time.deltaTime;
-		motionVertical = new Vector3(0, velocityY, 0);
+		if (motionVertical <= 200f)
+			motionVertical += -gravityForce * Time.deltaTime;
 
-		//Knock on the ceiling.
-		if (IsJumping && controller.collisionFlags == CollisionFlags.Above)
-			velocityY -= 1f;
+		if (IsJumping)
+		{
+			if (KnockingOnRoof)
+				motionVertical = 0f;
+		}
+		else if (WasGrounded && !IsGrounded)
+			motionVertical = 0f;
 
-		controller.Move(motionVertical * Time.deltaTime);
+		if (OnSlope && !IsJumping && WasGrounded && IsGrounded)
+			controller.Move(Vector3.down * gravityForce * 500f * Time.deltaTime);
+		else
+			controller.Move(Vector3.up * motionVertical * Time.deltaTime);
 
-		//Check if is valid to keep the jump variable true.
-		if (velocityY <= 0)
+		if (motionVertical <= 0)
 			IsValidKeepJump = false;
-
-		//Check if player is grounded and not jumping.
-		if (IsGrounded && !IsJumping)
-			velocityY = 0;
 	}
 
 	private void GetInput()
@@ -171,16 +172,11 @@ public class PlayerController : MonoBehaviour
 
 	private void Move()
 	{
-
-		Vector3 dir = (Camera.Forward * inputVertical + Camera.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
+		Vector3 dir = (cam.Forward * inputVertical + cam.Right * inputHorizontal).normalized * (inputRun ? runSpeed : walkSpeed);
 
 		if (!IsMoving)
-			if (motionHorizontal.magnitude <= .01f)
+			if (motionHorizontal.magnitude <= .001f)
 				motionHorizontal = Vector3.zero;
-
-
-		if (OnSlope && !IsJumping)
-			controller.Move(Vector3.down * gravityForce * slopeForce * Time.deltaTime);
 
 		if (IsGrounded)
 		{
@@ -191,13 +187,13 @@ public class PlayerController : MonoBehaviour
 		}
 
 		motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
-		if (Combat.IsAttacking)
+		if (combat.IsAttacking)
 			motionHorizontal = Vector3.zero;
 
-		if (dir != Vector3.zero && CanMove && !Combat.HasTarget)
+		if (dir != Vector3.zero && CanMove && !combat.HasTarget)
 		{
 			Quaternion rot = Quaternion.LookRotation(dir);
-			if (Combat.IsAttacking)
+			if (combat.IsAttacking)
 				transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed / 2 * Time.deltaTime);
 			else
 				transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
@@ -209,7 +205,7 @@ public class PlayerController : MonoBehaviour
 	private void Jump()
 	{
 		anim.SetTrigger("Jump");
-		velocityY = JumpVelocity;
+		motionVertical = JumpVelocity;
 		StartCoroutine(OnJump());
 	}
 
@@ -222,15 +218,15 @@ public class PlayerController : MonoBehaviour
 
 	private void CheckGrounded()
 	{
-		IsGrounded = controller.isGrounded;
-		if (Physics.SphereCast(transform.position + Vector3.down * distanceGroundCheck, groundCheckSphereRadius, Vector3.down, out RaycastHit groundHit, 1.0f, groundCheckLayer, QueryTriggerInteraction.UseGlobal))
+		var pos = transform.position + Vector3.down * distanceGroundCheck;
+		IsGrounded = Physics.CheckSphere(pos, groundCheckSphereRadius, groundCheckLayer, QueryTriggerInteraction.UseGlobal);
+		if (IsGrounded)
 		{
-			if (!IsGrounded)
-				IsGrounded = true;
-			OnSlope = groundHit.normal != Vector3.up;
+			if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, groundCheckSphereRadius, groundCheckLayer, QueryTriggerInteraction.UseGlobal))
+				OnSlope = hit.normal != Vector3.up;
+			else
+				OnSlope = false;
 		}
-		else
-			OnSlope = false;
 	}
 
 	private IEnumerator OnJump()
@@ -261,7 +257,7 @@ public class PlayerController : MonoBehaviour
 		while (timeDodging >= 0)
 		{
 			Quaternion rot = Quaternion.LookRotation(motionHorizontal == Vector3.zero ? transform.forward : motionHorizontal);
-			if(!Combat.HasTarget)
+			if(!combat.HasTarget)
 				transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
 			timeDodging -= Time.deltaTime;
 			controller.SimpleMove(destination);
@@ -279,7 +275,7 @@ public class PlayerController : MonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireSphere(transform.position + Vector3.down + Vector3.down * distanceGroundCheck, groundCheckSphereRadius);
+		Gizmos.DrawWireSphere(transform.position + Vector3.down * distanceGroundCheck, groundCheckSphereRadius);
 	}
 
 }

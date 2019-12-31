@@ -36,6 +36,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	public bool HasTarget { get; private set; }
 	public bool IsAttacking { get; private set; } = false;
 	public float CurrentHealth { get; private set; }
+	private float CurrentStamina { get; set; }
 	private int CurrentAttackIndex { get; set; } = 0;
 	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
 	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
@@ -45,7 +46,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private bool onCombat = false;
 	private bool animationFinished = false;
 	private Transform targetEnemy;
-	private Stats stats { get { return Player.Instance.playerStats; } }
+	private int targetEnemyIndex;
+	
 	private List<Transform> focusedEnemies = new List<Transform>();
 	private Coroutine computeComboCoroutine = null;
 	private Coroutine activeMarkersCoroutine = null;
@@ -60,6 +62,10 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	public MouseButtonCode buttonToAttack = MouseButtonCode.LeftButton;
 	public KeyCode keyToTarget = KeyCode.F;
+	//[SerializeField]
+	//private MouseButtonCode buttonToRaiseGuard = MouseButtonCode.RightButton;
+	//[SerializeField]
+	//private bool holdButton = false;
 	
 	private bool attackInput, targetInput;
 	private float mouseScrollInput;
@@ -68,20 +74,20 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	#region External Properties
 
-	private CameraBehaviour Camera { get { return Player.Instance.playerCamera; } }
-	private PlayerController Controller { get { return Player.Instance.playerController; } }
-
-	private Animator anim;
+	private Stats stats { get { return Player.Instance.playerStats; } }
+	private CameraBehaviour cam { get { return Player.Instance.playerCamera; } }
+	private PlayerController controller { get { return Player.Instance.playerController; } }
+	private Animator anim { get { return Player.Instance.anim; } }
 
 	#endregion
 
 	#region Common Methods
 
 	// Start is called before the first frame update
-	private void Start()
+	void Start()
 	{
-		anim = GetComponent<Animator>();
 		CurrentHealth = stats.baseHealth;
+		CurrentStamina = stats.baseStamina;
 		if (hasWeapon)
 			weapon.MergeStatsWithUser(stats);
 		else
@@ -102,13 +108,14 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	{
 		attackInput = Input.GetMouseButtonDown((int)buttonToAttack);
 		targetInput = Input.GetKeyDown(keyToTarget);
+		//raiseGuardInput = holdButton ? Input.GetMouseButton((int)buttonToRaiseGuard) : Input.GetMouseButtonDown((int)buttonToRaiseGuard);
 		mouseScrollInput = -Input.GetAxisRaw("Mouse ScrollWheel");
 	}
 
 	private void ProccessInput()
 	{
 		if (attackInput)
-			if (!IsAttacking && !Controller.IsJumping && !Controller.IsDodging)
+			if (!IsAttacking && !controller.IsJumping && !controller.IsDodging)
 				ProccessAttackAnimation();
 		if (targetInput)
 		{
@@ -117,6 +124,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			else
 				UnsetTarget();
 		}
+
 	}
 
 	private void UpdateAnimationVariables()
@@ -141,6 +149,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 				}
 			}
 		}
+		//anim.SetBool("On Guard", IsGuard);
 	}
 
 	private void SetTarget()
@@ -154,8 +163,6 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			Transform currentEnemy = enemy.transform;
 
 			if (currentEnemy.Equals(transform)) continue;
-			if (targetEnemy != null && targetEnemy.Equals(currentEnemy)) continue;
-			if (focusedEnemies.Contains(currentEnemy)) continue;
 
 			float distanceEnemy = Vector3.Distance(transform.position, currentEnemy.position);
 			if (distanceEnemy < closestDistance)
@@ -163,22 +170,18 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 				closestDistance = distanceEnemy;
 				closestEnemy = currentEnemy;
 			}
+			focusedEnemies.Add(currentEnemy);
 		}
 
-		if (closestEnemy != null && closestEnemy.Equals(targetEnemy))
-			targetEnemy = null;
-		else
-			targetEnemy = closestEnemy;
+		targetEnemy = closestEnemy;
+		targetEnemyIndex = focusedEnemies.IndexOf(targetEnemy);
 
 		HasTarget = targetEnemy != null;
 
-		Camera.SetFocus(targetEnemy);
+		cam.SetFocus(targetEnemy);
 
 		if (HasTarget)
-		{
-			focusedEnemies.Add(targetEnemy);
 			onCombat = true;
-		}
 
 		if (updateTargetCoroutine != null)
 			StopCoroutine(updateTargetCoroutine);
@@ -190,7 +193,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		focusedEnemies.Clear();
 		targetEnemy = null;
 		HasTarget = false;
-		Camera.Defocus();
+		cam.SetFocus(null);
 		updateTargetCoroutine = null;
 	}
 
@@ -295,16 +298,70 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private IEnumerator UpdateTarget()
 	{
-		//Essa co-rotina atualiza a cada Fixed Update os NPCs que estao dentro do raio de deteccao. Se nenhum inimigo estiver dentro desse raio, a co-rotina desativa automaticamente.
+		
+		IEnumerator CheckForTargets()
+		{
+			while (true)
+			{
+				Collider[] enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.UseGlobal);
+				focusedEnemies.Clear();
+				foreach (var enemy in enemies)
+				{
+					var enemyT = enemy.transform;
+					if (transform.Equals(enemyT)) continue;
+					focusedEnemies.Add(enemyT);
+				}
+				yield return new WaitForSeconds(0.1f);
+			}
+		}
+
+		Coroutine checkForTargetsCoroutine = StartCoroutine(CheckForTargets());
+
 		while (targetEnemy != null)
 		{
-			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius) break;
+			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius + 0.2f) { break; }
 
-			var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
-			transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
-			yield return new WaitForFixedUpdate();
+			if (mouseScrollInput > 0)
+			{
+				targetEnemyIndex++;
+				if (targetEnemyIndex == focusedEnemies.Count) targetEnemyIndex = 0;
+				
+				targetEnemy = focusedEnemies[targetEnemyIndex];
+				cam.SetFocus(targetEnemy);
+			}
+
+			if (mouseScrollInput < 0)
+			{
+				targetEnemyIndex--;
+				if (targetEnemyIndex < 0) targetEnemyIndex = focusedEnemies.Count - 1;
+
+				targetEnemy = focusedEnemies[targetEnemyIndex];
+				cam.SetFocus(targetEnemy);
+			}
+
+			//var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
+			//transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
+
+			transform.LookAt(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z));
+			
+			yield return null;
 		}
+
+		StopCoroutine(checkForTargetsCoroutine);
 		UnsetTarget();
+		yield break;
+	}
+
+	private IEnumerator UpdateStamina()
+	{
+		CurrentStamina -= 10f;
+		yield return new WaitForSeconds(2.5f);
+		while (CurrentStamina < stats.baseStamina)
+		{
+			CurrentStamina += 0.5f;
+			yield return null;
+		}
+		CurrentStamina = stats.baseStamina;
 	}
 
     #endregion
@@ -339,9 +396,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	{
 		if (animationFinished) return;
 
-
 		IsAttacking = false;
-
 		animationFinished = true;
 
 		if (LastHit)

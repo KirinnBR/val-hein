@@ -15,12 +15,14 @@ public class Player : Singleton<Player>
 	public PlayerController playerController { get; private set; }
 	public PlayerCombat playerCombat { get; private set; }
 	public PlayerClass playerClass { get; private set; }
+    public Animator anim { get; private set; }
 
-	private void Start()
+    private void Start()
 	{
 		playerController = GetComponent<PlayerController>();
 		playerCombat = GetComponent<PlayerCombat>();
 		playerClass = GetComponent<PlayerClass>();
+		anim = GetComponent<Animator>();
 	}
 
 }

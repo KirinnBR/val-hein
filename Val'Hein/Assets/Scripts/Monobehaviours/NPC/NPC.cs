@@ -26,7 +26,8 @@ public class NPC : MonoBehaviour, IDamageable
 	[SerializeField]
 	[Rename("NPC Canvas")]
 	private GameObject canvas;
-
+	[SerializeField]
+	private Camera referenceCamera;
 	protected Canvas npcCanvas;
 	protected Slider npcHealthBar;
 	protected Text npcTextName;
@@ -160,6 +161,8 @@ public class NPC : MonoBehaviour, IDamageable
 	{
 		SearchObjects();
 		UpdateUIElements();
+		if (referenceCamera != null)
+			canvas.transform.LookAt(referenceCamera.transform, Vector3.up);
 	}
 
 	protected void UpdateUIElements()

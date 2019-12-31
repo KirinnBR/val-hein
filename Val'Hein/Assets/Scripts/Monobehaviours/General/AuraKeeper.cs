@@ -10,7 +10,7 @@ public class AuraKeeper : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		rend.material = aura.auraColor;
+		rend.material = aura.auraMaterial;
     }
 
     // Update is called once per frame

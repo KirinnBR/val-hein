@@ -10,6 +10,7 @@ public class NPCEditor : Editor
 	private void OnEnable()
 	{
 		npc = target as NPC;
+		
 	}
 
 	private void OnSceneGUI()

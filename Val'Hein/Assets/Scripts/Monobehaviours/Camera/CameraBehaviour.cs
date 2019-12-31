@@ -81,19 +81,17 @@ public class CameraBehaviour : MonoBehaviour
     {
 		if (target == null) return;
 
-		currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
-
 		if (!HasFocus)
 		{
 			Move(target.position - transform.forward * currentDistance + playerOffset);
 		}
 		else
 		{
-			transform.LookAt(new Vector3(focus.position.x, focusHeight, focus.position.z));
 			if (cameraSide == SideSelector.Left)
 				Move(target.position - transform.forward * currentDistance + (playerOffset + (-transform.right / 2)));
 			else
 				Move(target.position - transform.forward * currentDistance + (playerOffset + (transform.right / 2)));
+			transform.LookAt(new Vector3(focus.position.x, focusHeight, focus.position.z));
 		}
 		CalculateDirections();
 	}
@@ -112,7 +110,8 @@ public class CameraBehaviour : MonoBehaviour
 			float mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
 			distance += mouseScroll * mouseScrollWheelSensitivity;
 			distance = Mathf.Clamp(distance, distanceLimits.x, distanceLimits.y);
-		}
+            currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
+        }
 		else
 		{
 			tilt = transform.eulerAngles.x;
@@ -123,7 +122,7 @@ public class CameraBehaviour : MonoBehaviour
 	private void Move(Vector3 point)
 	{
 		if (Physics.Linecast(target.position + playerOffset, point, out RaycastHit hit, collisionLayer, QueryTriggerInteraction.Ignore))
-			transform.position = hit.point + transform.forward;
+			transform.position = hit.point;
 		else
 			transform.position = point;
 	}
@@ -160,11 +159,6 @@ public class CameraBehaviour : MonoBehaviour
 	public void SetFocus(Transform newFocus)
 	{
 		focus = newFocus;
-	}
-
-	public void Defocus()
-	{
-		focus = null;
 	}
 
 }
