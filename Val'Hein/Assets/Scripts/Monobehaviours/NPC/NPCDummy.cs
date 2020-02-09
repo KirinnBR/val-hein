@@ -37,7 +37,7 @@ public class NPCDummy : NPC
 		else
 		{
 			agent.destination = inicialPosition;
-			if (IsCloseEnoughToTarget(agent.destination))
+			if (IsCloseEnoughToPoint(agent.destination))
 			{
 				transform.rotation = inicialRotation;
 			}
@@ -54,7 +54,7 @@ public class NPCDummy : NPC
 		transform.LookAt(new Vector3(target.position.x, transform.position.y, target.position.z));
 		agent.speed = speed.z;
 		agent.SetDestination(target.position);
-		if (IsCloseEnoughToTarget(target.position))
+		if (IsCloseEnoughToPoint(target.position))
 		{
 			//Can attack.
 		}

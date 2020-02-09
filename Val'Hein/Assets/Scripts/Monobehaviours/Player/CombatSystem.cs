@@ -1,18 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 #pragma warning disable CS0649
-
-public class PlayerCombat : MonoBehaviour, IDamageable
+public class CombatSystem : MonoBehaviour
 {
 	#region Combat Settings
-	
-	[Header("Combat Settings")]
 
-	[Tooltip("The layer to search for enemies to combat.")]
-	[SerializeField]
-	private LayerMask combatLayer;
+	[Header("Combat Settings")]
+	
 	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
 	[SerializeField]
 	private float maxSecondsToEndCombat = 5f;
@@ -21,7 +18,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private float enemyDetectionRadius = 10f;
 	[Tooltip("The logic representation of an attack.")]
 	[SerializeField]
-	private List<ComboAttack> attacks;
+	private List<PlayerAttack> attacks;
 	[Tooltip("Does the player holds some kind of weapon?")]
 	[SerializeField]
 	private bool hasWeapon = true;
@@ -40,44 +37,36 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	private int CurrentAttackIndex { get; set; } = 0;
 	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
 	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
-	private ComboAttack CurrentAttack => attacks[CurrentAttackIndex];
+	private PlayerAttack CurrentAttack => attacks[CurrentAttackIndex];
 	private bool LastHit => CurrentAttackIndex == attacks.Count - 1;
 	private bool waitingForEndCombat = false;
 	private bool onCombat = false;
 	private bool animationFinished = false;
 	private Transform targetEnemy;
+	private Collider targetCollider;
 	private int targetEnemyIndex;
-	
+
 	private List<Transform> focusedEnemies = new List<Transform>();
 	private Coroutine computeComboCoroutine = null;
 	private Coroutine activeMarkersCoroutine = null;
 	private Coroutine waitForCombatTimeCoroutine = null;
 	private Coroutine updateTargetCoroutine = null;
 
-	#endregion
+	public class OnTakeDamageEvent : UnityEvent<float> { }
 
-	#region Input Settings
-
-	[Header("Input Settings")]
-
-	public MouseButtonCode buttonToAttack = MouseButtonCode.LeftButton;
-	public KeyCode keyToTarget = KeyCode.F;
-	//[SerializeField]
-	//private MouseButtonCode buttonToRaiseGuard = MouseButtonCode.RightButton;
-	//[SerializeField]
-	//private bool holdButton = false;
-	
-	private bool attackInput, targetInput;
-	private float mouseScrollInput;
+	public OnTakeDamageEvent OnTakeDamage = new OnTakeDamageEvent();
 
 	#endregion
 
 	#region External Properties
 
-	private Stats stats { get { return Player.Instance.playerStats; } }
-	private CameraBehaviour cam { get { return Player.Instance.playerCamera; } }
-	private PlayerController controller { get { return Player.Instance.playerController; } }
-	private Animator anim { get { return Player.Instance.anim; } }
+	private Stats stats { get { return PlayerCenterControl.Instance.playerStats; } }
+	private LayerMask combatLayer { get { return PlayerCenterControl.Instance.combatCheckLayer; } }
+	private CameraBehaviour cam { get { return PlayerCenterControl.Instance.playerCamera; } }
+	private ControllerSystem controller { get { return PlayerCenterControl.Instance.controller; } }
+	private InputSystem input { get { return PlayerCenterControl.Instance.input; } }
+	private UISystem ui { get { return PlayerCenterControl.Instance.ui; } }
+	private Animator anim { get { return PlayerCenterControl.Instance.anim; } }
 
 	#endregion
 
@@ -92,39 +81,30 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			weapon.MergeStatsWithUser(stats);
 		else
 			hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
+		OnTakeDamage.AddListener(ui.UpdateHealthBar);
 	}
 	// Update is called once per frame
 	private void Update()
 	{
 		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
-		GetInput();
 		ProccessInput();
 		UpdateAnimationVariables();
 	}
 
 	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
 
-	private void GetInput()
-	{
-		attackInput = Input.GetMouseButtonDown((int)buttonToAttack);
-		targetInput = Input.GetKeyDown(keyToTarget);
-		//raiseGuardInput = holdButton ? Input.GetMouseButton((int)buttonToRaiseGuard) : Input.GetMouseButtonDown((int)buttonToRaiseGuard);
-		mouseScrollInput = -Input.GetAxisRaw("Mouse ScrollWheel");
-	}
-
 	private void ProccessInput()
 	{
-		if (attackInput)
+		if (input.Attack)
 			if (!IsAttacking && !controller.IsJumping && !controller.IsDodging)
 				ProccessAttackAnimation();
-		if (targetInput)
+		if (input.Target)
 		{
 			if (!HasTarget)
 				SetTarget();
 			else
 				UnsetTarget();
 		}
-
 	}
 
 	private void UpdateAnimationVariables()
@@ -149,7 +129,6 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 				}
 			}
 		}
-		//anim.SetBool("On Guard", IsGuard);
 	}
 
 	private void SetTarget()
@@ -178,10 +157,13 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 		HasTarget = targetEnemy != null;
 
-		cam.SetFocus(targetEnemy);
+		cam.Focus = targetEnemy;
 
 		if (HasTarget)
+		{
+			targetCollider = targetEnemy.GetComponent<Collider>();
 			onCombat = true;
+		}
 
 		if (updateTargetCoroutine != null)
 			StopCoroutine(updateTargetCoroutine);
@@ -193,13 +175,13 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		focusedEnemies.Clear();
 		targetEnemy = null;
 		HasTarget = false;
-		cam.SetFocus(null);
+		cam.Focus = null;
 		updateTargetCoroutine = null;
 	}
 
 	private void ProccessAttackAnimation()
 	{
-		 if (LastHit)
+		if (LastHit)
 			StopCoroutine(computeComboCoroutine);
 		else
 		{
@@ -214,6 +196,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		anim.SetTrigger("Attack");
 
 		IsAttacking = true;
+		controller.MovementBlocked = true;
+		controller.RotationBlocked = true;
 		waitingForEndCombat = true;
 
 		if (waitForCombatTimeCoroutine != null)
@@ -230,6 +214,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		FinishAnimation();
 		anim.SetTrigger("Hurt");
 		CurrentHealth -= ammount;
+		OnTakeDamage.Invoke(CurrentHealth);
 		if (CurrentHealth <= 0)
 			Die();
 	}
@@ -251,6 +236,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		yield return new WaitForSeconds(CurrentAttack.timeToBlendCombo);
 		Debug.Log("Stopped at index " + aux);
 		CurrentAttackIndex = 0;
+		computeComboCoroutine = null;
+		yield break;
 	}
 
 	private IEnumerator CheckCollisions()
@@ -298,7 +285,7 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 
 	private IEnumerator UpdateTarget()
 	{
-		
+
 		IEnumerator CheckForTargets()
 		{
 			while (true)
@@ -315,41 +302,59 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 			}
 		}
 
-		Coroutine checkForTargetsCoroutine = StartCoroutine(CheckForTargets());
+		bool completeTwirl = false;
 
+		void SetNewFocus()
+		{
+			targetEnemy = focusedEnemies[targetEnemyIndex];
+			cam.Focus = targetEnemy;
+			targetCollider = targetEnemy.GetComponent<Collider>();
+			completeTwirl = false;
+		}
+
+		Coroutine checkForTargetsCoroutine = StartCoroutine(CheckForTargets());
 		while (targetEnemy != null)
 		{
-			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius + 0.2f) { break; }
+			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius + 0.2f) break;
 
-			if (mouseScrollInput > 0)
+			if (targetCollider.enabled == false)
+			{
+				if (focusedEnemies.Count == 0)
+					break;
+				targetEnemyIndex = focusedEnemies.FindIndex(enemy => enemy.transform != null);
+				SetNewFocus();
+			}
+
+			if (input.MouseScrollWheel > 0)
 			{
 				targetEnemyIndex++;
 				if (targetEnemyIndex == focusedEnemies.Count) targetEnemyIndex = 0;
-				
-				targetEnemy = focusedEnemies[targetEnemyIndex];
-				cam.SetFocus(targetEnemy);
+				SetNewFocus();
 			}
 
-			if (mouseScrollInput < 0)
+			if (input.MouseScrollWheel < 0)
 			{
 				targetEnemyIndex--;
 				if (targetEnemyIndex < 0) targetEnemyIndex = focusedEnemies.Count - 1;
-
-				targetEnemy = focusedEnemies[targetEnemyIndex];
-				cam.SetFocus(targetEnemy);
+				SetNewFocus();
 			}
 
-			//var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
-			//transform.rotation = Quaternion.Lerp(transform.rotation, look, Controller.turnSpeed * Time.deltaTime);
-
-			transform.LookAt(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z));
-			
+			if (completeTwirl)
+			{
+				transform.LookAt(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z));
+			}
+			else
+			{
+				var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
+				transform.rotation = Quaternion.Lerp(transform.rotation, look, controller.turnSpeed * Time.deltaTime);
+				if (Quaternion.Angle(transform.rotation, look) < 5f)
+					completeTwirl = true;
+			}
 			yield return null;
 		}
 
 		StopCoroutine(checkForTargetsCoroutine);
 		UnsetTarget();
-		yield break;
 	}
 
 	private IEnumerator UpdateStamina()
@@ -364,11 +369,11 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 		CurrentStamina = stats.baseStamina;
 	}
 
-    #endregion
+	#endregion
 
-    #region Animation Event Methods
+	#region Animation Event Methods
 
-    public void ActivateMarkers()
+	public void ActivateMarkers()
 	{
 		if (hasWeapon)
 			weapon.ActivateMarkers(CurrentAttack.damageMultiplier);
@@ -396,6 +401,8 @@ public class PlayerCombat : MonoBehaviour, IDamageable
 	{
 		if (animationFinished) return;
 
+		controller.MovementBlocked = false;
+		controller.RotationBlocked = false;
 		IsAttacking = false;
 		animationFinished = true;
 

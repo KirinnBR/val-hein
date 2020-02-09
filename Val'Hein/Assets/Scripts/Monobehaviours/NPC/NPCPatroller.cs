@@ -15,9 +15,9 @@ public class NPCPatroller : NPC
 	[Tooltip("The time to wait between patrol points.")]
 	public int patrollingWaitTime = 5;
 	protected int currentPatrolPoint = 0;
-	protected bool patrolling = false;
+	protected bool onPatrol = false;
 
-	protected Coroutine patrolCoroutine = null;
+	private Coroutine patrolCoroutine = null;
 	private Coroutine combatCoroutine = null;
 
 	private Transform target;
@@ -61,7 +61,7 @@ public class NPCPatroller : NPC
 
 				if (target == null)
 				{
-					if (!patrolling)
+					if (!onPatrol)
 					{
 						StartPatrol();
 					}
@@ -75,7 +75,7 @@ public class NPCPatroller : NPC
 		}
 		else
 		{
-			if (!patrolling)
+			if (!onPatrol)
 			{
 				StartPatrol();
 			}
@@ -95,11 +95,11 @@ public class NPCPatroller : NPC
 
 	private void StartCombat()
 	{
-		if (patrolling)
+		if (onPatrol)
 		{
 			if (patrolCoroutine != null)
 				StopCoroutine(patrolCoroutine);
-			patrolling = false;
+			onPatrol = false;
 		}
 		
 		switch (npcType)
@@ -118,14 +118,16 @@ public class NPCPatroller : NPC
 
 	private void UpdateAnimator()
 	{
-		if (patrolling)
+		if (onPatrol)
 		{
 			anim.SetFloat("Speed", agent.velocity.magnitude);
 		}
 		else if (onCombat)
 		{
 			anim.SetFloat("Speed", agent.velocity.magnitude);
-			//Set bidimensional parameters.
+			//Set bidimensional parameters, like:
+			//anim.SetFloat("Speed X", agent.velocity.x);
+			//anim.SetFloat("Speed Y", agent.velocity.y);
 		}
 	}
 
@@ -137,11 +139,11 @@ public class NPCPatroller : NPC
 	{
 		agent.speed = speed.y;
 
-		patrolling = true;
+		onPatrol = true;
 
 		if (patrolPoints.Count == 0) yield break;
 
-		yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
+		yield return new WaitUntil(() => IsCloseEnoughToPoint(agent.destination));
 		yield return new WaitForSeconds(patrollingWaitTime);
 
 		if (patrollingType == PatrollingType.Loop)
@@ -149,7 +151,7 @@ public class NPCPatroller : NPC
 			while (true)
 			{
 				agent.SetDestination(patrolPoints[currentPatrolPoint].position);
-				yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
+				yield return new WaitUntil(() => IsCloseEnoughToPoint(agent.destination));
 				yield return new WaitForSeconds(patrollingWaitTime);
 				currentPatrolPoint = currentPatrolPoint == patrolPoints.Count - 1 ? 0 : currentPatrolPoint + 1;
 			}
@@ -161,7 +163,7 @@ public class NPCPatroller : NPC
 			{
 				agent.SetDestination(patrolPoints[currentPatrolPoint].position);
 
-				yield return new WaitUntil(() => IsCloseEnoughToTarget(agent.destination));
+				yield return new WaitUntil(() => IsCloseEnoughToPoint(agent.destination));
 				yield return new WaitForSeconds(patrollingWaitTime);
 
 				if (!rewinding)
@@ -224,8 +226,8 @@ public class NPCPatroller : NPC
 				//While can attack, go near player and deal attack.
 				agent.speed = speed.z;
 				MoveAgent(targetPos);
-				if (IsCloseEnoughToTarget(targetPos))
-				{
+				if (IsCloseEnoughToPoint(targetPos))
+				{	
 					ProccessAttackAnimation();
 				}
 			}
@@ -256,6 +258,7 @@ public class NPCPatroller : NPC
 
 	private IEnumerator BeastCombat()
 	{
+#pragma warning disable CS0162
 		Debug.LogWarning("Beast Combat on development.");
 		yield break;
 
@@ -278,7 +281,7 @@ public class NPCPatroller : NPC
 				//While can attack, go near player and deal attack.
 				agent.speed = speed.z;
 				MoveAgent(targetPos);
-				if (IsCloseEnoughToTarget(targetPos))
+				if (IsCloseEnoughToPoint(targetPos))
 					ProccessAttackAnimation();
 			}
 			else
@@ -329,7 +332,7 @@ public class NPCPatroller : NPC
 				//While can attack, go near player and deal attack.
 				agent.speed = speed.z;
 				MoveAgent(targetPos);
-				if (IsCloseEnoughToTarget(targetPos))
+				if (IsCloseEnoughToPoint(targetPos))
 					ProccessAttackAnimation();
 			}
 			else

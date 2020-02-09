@@ -66,7 +66,7 @@ public class NPC : MonoBehaviour, IDamageable
 	[SerializeField]
 	protected Stats stats;
 	[SerializeField]
-	protected List<Attack> attacks;
+	protected List<NPCAttack> attacks;
 	[SerializeField]
 	[Rename("Randomize Attacks Per Combo?")]
 	protected bool randomizeAttacksPerCombo = false;
@@ -90,18 +90,18 @@ public class NPC : MonoBehaviour, IDamageable
 	protected Vector3 speed = new Vector3(2f, 5f, 10f);
 
 	public float CurrentHealth { get; private set; }
-	protected float CurrentStamina { get; set; }
 	protected int CurrentAttackIndex { get; set; } = 0;
 	protected int CurrentAttackCombo { get; set; } = 0;
 	protected List<HitMarker> HitMarkers { get { return combatSettings.hitMarkers; } }
-	protected Attack CurrentAttack => attacks[CurrentAttackIndex];
+	protected NPCAttack CurrentAttack => attacks[CurrentAttackIndex];
 	protected bool IsAttacking { get; set; } = false;
 	protected bool IsDefending { get; set; } = false;
 	protected bool canAttack = true;
 	protected bool animationFinished = true;
 	protected Coroutine activeMarkersCoroutine = null;
 	protected Coroutine setAttackCooldownCoroutine = null;
-	public bool ShowCombatGUI { get; set; } = false;
+	[HideInInspector]
+	public bool showCombatGUI = false;
 	protected bool onCombat = false;
 
 	#endregion
@@ -118,8 +118,7 @@ public class NPC : MonoBehaviour, IDamageable
 	protected float agentStoppingDistance = 2f;
 
 	protected NavMeshAgent agent;
-	protected bool IsCloseEnoughToDestination => IsCloseEnoughToTarget(agent.destination);
-	protected bool IsCloseEnoughToTarget (Vector3 target) { return Vector3.Distance(transform.position, target) < agent.stoppingDistance; }
+	protected bool IsCloseEnoughToPoint (Vector3 point) => Vector3.Distance(transform.position, point) < agent.stoppingDistance;
 
 	#endregion
 
@@ -134,7 +133,6 @@ public class NPC : MonoBehaviour, IDamageable
 		StartPos = transform.position;
 #endif
 		CurrentHealth = stats.baseHealth;
-		CurrentStamina = stats.baseStamina;
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 		npcCanvas = canvas.GetComponent<Canvas>();
@@ -265,7 +263,7 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected IEnumerator SetAttackCooldown()
 	{
-		yield return new WaitForSeconds(5f);
+		yield return new WaitForSeconds(CurrentAttack.timeToRest);
 		canAttack = true;
 	}
 
@@ -318,6 +316,11 @@ public class NPC : MonoBehaviour, IDamageable
 		setAttackCooldownCoroutine = StartCoroutine(SetAttackCooldown());
 	}
 
+	public void Destroy()
+	{
+		Destroy(gameObject);
+	}
+
 	#endregion
 
 	#region IDamageable Methods
@@ -329,9 +332,7 @@ public class NPC : MonoBehaviour, IDamageable
 		else
 			CurrentHealth -= ammount - stats.baseResistance;
 		if (CurrentHealth <= 0)
-		{
 			Die();
-		}
 		else
 		{
 			anim.SetTrigger("Hurt");
@@ -341,18 +342,19 @@ public class NPC : MonoBehaviour, IDamageable
 
 	protected virtual void Die()
 	{
+		StopAllCoroutines();
 		CurrentHealth = 0;
-		anim.SetTrigger("Die");
+		GetComponent<Collider>().enabled = false;
 		FinishAnimation();
-		Debug.Log($"{gameObject.name} has died.");
-		Destroy(gameObject);
+		anim.SetTrigger("Die");
 	}
 
 	#endregion
 
-	//Auxiliary variables.
-	float lastPeriferic { get; set; }
-	float lastNormal { get; set; }float lastWide { get; set; }
+#if UNITY_EDITOR
+	float lastPeriferic;
+	float lastNormal;
+	float lastWide;
 	private void OnValidate()
 	{
 		if (perifericVisionRadius != lastPeriferic)
@@ -380,10 +382,11 @@ public class NPC : MonoBehaviour, IDamageable
 		if (attacksPerCombo > attacks.Count)
 			attacksPerCombo = attacks.Count;
 	}
+#endif
 
-}
+	protected enum NPCType
+	{
+		Human, Beast, Dummy
+	}
 
-public enum NPCType
-{
-	Human, Beast, Dummy
 }

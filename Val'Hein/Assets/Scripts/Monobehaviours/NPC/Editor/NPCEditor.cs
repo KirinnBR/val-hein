@@ -10,13 +10,11 @@ public class NPCEditor : Editor
 	private void OnEnable()
 	{
 		npc = target as NPC;
-		
 	}
 
 	private void OnSceneGUI()
 	{
-		
-		if (npc.ShowCombatGUI)
+		if (npc.showCombatGUI)
 			DrawCombatGUI();
 		else
 			DrawNPCGUI();
@@ -45,6 +43,7 @@ public class NPCEditor : Editor
 
 	private void DrawArcherGUI()
 	{
+		
 		NPCArcher npcA = target as NPCArcher;
 		Handles.color = Color.green;
 		Handles.DrawWireArc(npcA.transform.position, Vector3.up, Vector3.forward, 360, npcA.attackRange);
@@ -142,7 +141,7 @@ public class NPCEditor : Editor
 		base.OnInspectorGUI();
 		EditorGUILayout.Space();
 		EditorGUILayout.LabelField("Editor Settings", EditorStyles.boldLabel);
-		npc.ShowCombatGUI = EditorGUILayout.Toggle("Show Combat GUI?", npc.ShowCombatGUI);
+		npc.showCombatGUI = EditorGUILayout.Toggle("Show Combat GUI?", npc.showCombatGUI);
 	}
 
 }

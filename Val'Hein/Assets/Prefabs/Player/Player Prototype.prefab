@@ -4230,10 +4230,10 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.6
+  m_Height: 1.5
   m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_SlopeLimit: 50
+  m_StepOffset: 0.5
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.8, z: 0}
@@ -4289,7 +4289,7 @@ MonoBehaviour:
     timeToBlendCombo: 1
   - damageMultiplier: 1
     timeToBlendCombo: 1
-  - damageMultiplier: 1
+  - damageMultiplier: 2
     timeToBlendCombo: 1
   hasWeapon: 1
   combatSettings:
@@ -4322,7 +4322,7 @@ MonoBehaviour:
   acceleration: 10
   turnSpeed: 10
   slopeLimit: 50
-  stepOffset: 0.5
+  stepHeight: 0.5
   jumpHeight: 5
   dodgeTime: 0.25
   dodgeForce: 10
@@ -4331,11 +4331,11 @@ MonoBehaviour:
   jumpKey: 32
   dodgeKey: 306
   gravityForce: 25
-  distanceGroundCheck: 0
-  groundCheckSphereRadius: 0.35
   groundCheckLayer:
     serializedVersion: 2
     m_Bits: 512
+  center: {x: 0, y: 0, z: 0}
+  height: 0.8
 --- !u!114 &1547741263924561456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4375,10 +4375,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6790563798626947676}
     m_Modifications:
-    - target: {fileID: 100000, guid: ffae9263bd1a66245bd2bad16f271364, type: 3}
-      propertyPath: m_Name
-      value: Staff
-      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ffae9263bd1a66245bd2bad16f271364, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -4422,6 +4418,10 @@ PrefabInstance:
     - target: {fileID: 400000, guid: ffae9263bd1a66245bd2bad16f271364, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: ffae9263bd1a66245bd2bad16f271364, type: 3}
+      propertyPath: m_Name
+      value: Staff
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ffae9263bd1a66245bd2bad16f271364, type: 3}

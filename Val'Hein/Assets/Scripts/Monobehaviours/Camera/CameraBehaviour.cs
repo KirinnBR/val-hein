@@ -17,12 +17,11 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	[Tooltip("The minimum and maximum distance that the camera can go.")]
 	private Vector2 distanceLimits = new Vector2(1f, 10f);
-	[Tooltip("The distance between the camera and the target.")]
-	public float distance = 5f;
-	[DisableOnInspector]
-	public float currentDistance;
-	[Tooltip("The sensitivity of the mouse scroll wheel.")]
 	[SerializeField]
+	[Tooltip("The distance between the camera and the target.")]
+	private float distance = 5f;
+	[SerializeField]
+	[Tooltip("The sensitivity of the mouse scroll wheel.")]
 	private float mouseScrollWheelSensitivity = 1f;
 	[SerializeField]
 	[Tooltip("Variable to control the focus on player.")]
@@ -37,8 +36,10 @@ public class CameraBehaviour : MonoBehaviour
 	[Tooltip("The sensitivity of the mouse in the Y axis.")]
 	private float mouseSensitivityY = 180f;
 
+	private float currentDistance;
+
 	#endregion
-	[Space]
+
 	#region Camera Collision Settings
 
 	[Header("Camera Collision Settings")]
@@ -46,8 +47,12 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	private LayerMask collisionLayer;
 
+	private float curTime = 0f;
+	private float collisionPointDistance = 0f;
+	private Vector3 collisionOffset = Vector3.zero;
+
 	#endregion
-	[Space]
+
 	#region Camera Focus Settings
 
 	[Header("Camera Focus Settings")]
@@ -55,18 +60,17 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	private float focusHeight = 0f;
 	[SerializeField]
-	private float distanceInterpolationSpeed = 5f;
-	[SerializeField]
 	private SideSelector cameraSide = SideSelector.Left;
+	[SerializeField]
+	[Range(0f, 360f)]
+	private float xMinimum = 70f;
 
-	private Transform focus;
-	private bool HasFocus => focus != null;
+	public Transform Focus { get; set; }
+	private bool HasFocus => Focus != null;
 
 	#endregion
 
 	private float heading = 0f, tilt = 20f;
-	
-
 	private Vector3 forward, right;
 	public Vector3 Forward { get { return forward; } }
 	public Vector3 Right { get { return right; } }
@@ -76,11 +80,12 @@ public class CameraBehaviour : MonoBehaviour
 		currentDistance = distance;
 	}
 
+	
 	// Update is called once per frame
 	private void LateUpdate()
     {
 		if (target == null) return;
-
+		
 		if (!HasFocus)
 		{
 			Move(target.position - transform.forward * currentDistance + playerOffset);
@@ -91,14 +96,19 @@ public class CameraBehaviour : MonoBehaviour
 				Move(target.position - transform.forward * currentDistance + (playerOffset + (-transform.right / 2)));
 			else
 				Move(target.position - transform.forward * currentDistance + (playerOffset + (transform.right / 2)));
-			transform.LookAt(new Vector3(focus.position.x, focusHeight, focus.position.z));
+
+			var look = Quaternion.LookRotation(new Vector3(Focus.position.x, focusHeight, Focus.position.z) - transform.position);
+			var lookClamped = look.eulerAngles;
+			if (lookClamped.x >= xMinimum)
+				lookClamped.x = xMinimum;
+			transform.eulerAngles = lookClamped;
 		}
+		
 		CalculateDirections();
 	}
 	
 	private void Update()
 	{
-		
 		if (!HasFocus)
 		{
 			heading += Input.GetAxisRaw("Mouse X") * Time.deltaTime * mouseSensitivityX;
@@ -110,7 +120,9 @@ public class CameraBehaviour : MonoBehaviour
 			float mouseScroll = -Input.GetAxisRaw("Mouse ScrollWheel");
 			distance += mouseScroll * mouseScrollWheelSensitivity;
 			distance = Mathf.Clamp(distance, distanceLimits.x, distanceLimits.y);
-            currentDistance = Mathf.Lerp(currentDistance, distance, distanceInterpolationSpeed * Time.deltaTime);
+			currentDistance = Mathf.Lerp(currentDistance, distance, 5f * Time.deltaTime);
+			if (Mathf.Abs(distance - currentDistance) <= 0.01f)
+				currentDistance = distance;
         }
 		else
 		{
@@ -122,10 +134,19 @@ public class CameraBehaviour : MonoBehaviour
 	private void Move(Vector3 point)
 	{
 		if (Physics.Linecast(target.position + playerOffset, point, out RaycastHit hit, collisionLayer, QueryTriggerInteraction.Ignore))
+		{
 			transform.position = hit.point;
+			collisionPointDistance = Vector3.Distance(point, hit.point);
+			curTime = 0f;
+		}
 		else
-			transform.position = point;
+		{
+			collisionOffset = Util.LerpVector(transform.forward * collisionPointDistance, Vector3.zero, 1f, ref curTime);
+			transform.position = point + collisionOffset;
+		}
 	}
+
+	
 
 	private void CalculateDirections()
 	{
@@ -149,16 +170,11 @@ public class CameraBehaviour : MonoBehaviour
 		Gizmos.DrawLine(targetPos, targetPos + (transform.forward * (distanceLimits.y - currentDistance)));
 		Gizmos.DrawLine(transform.position, transform.position + (transform.forward * (distanceLimits.x - currentDistance)));
 
-		if (focus != null)
+		if (HasFocus)
 		{
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(transform.position, new Vector3(focus.position.x, focusHeight, focus.position.z));
+			Gizmos.DrawLine(transform.position, new Vector3(Focus.position.x, focusHeight, Focus.position.z));
 		}
-	}
-
-	public void SetFocus(Transform newFocus)
-	{
-		focus = newFocus;
 	}
 
 }
