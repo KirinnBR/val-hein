@@ -18,7 +18,7 @@ public class ControllerSystem : MonoBehaviour
 	private float runSpeed = 10f;
 	[SerializeField]
 	[Tooltip("Acceleration, in meters per squared second.")]
-	private float acceleration = 5f;
+	private float acceleration = 10f;
 	[SerializeField]
 	private float stoppingAcceleration = 10f;
 	[Tooltip("Speed to turn to direction.")]
@@ -174,9 +174,9 @@ public class ControllerSystem : MonoBehaviour
 	private void ProccessAnimations()
 	{
 		var velocity = new Vector2(controller.velocity.x, controller.velocity.z);
-		anim.SetFloat("Input", velocity.magnitude);
-		anim.SetFloat("InputX", input.Horizontal);
-		anim.SetFloat("InputZ", input.Vertical);
+		anim.SetFloat("Velocity", velocity.magnitude);
+		anim.SetFloat("VelocityX", input.Horizontal);
+		anim.SetFloat("VelocityZ", input.Vertical);
 		anim.SetBool("IsGrounded", isGrounded);
 	}
 
