@@ -36,8 +36,8 @@ public class ControllerSystem : MonoBehaviour
 	public bool IsDodging { get; private set; } = false;
 	public bool RotationBlocked { get; set; } = false;
 	public bool MovementBlocked { get; set; } = false;
+	public bool RunBlocked { get; set; } = false;
 	private bool hasRotationFinished = true;
-	private bool isValidKeepJump = true;
 	private Vector3 motionHorizontal = Vector3.zero;
 	private float motionVertical = 0f;
 
@@ -82,12 +82,14 @@ public class ControllerSystem : MonoBehaviour
 		ApplyGravity();
 		Move();
 		ProccessAnimations();
+
 		wasGrounded = isGrounded;
 	}
 
 	private void FixedUpdate()
 	{
 		CheckGrounded();
+
 		knockingOnRoof = controller.collisionFlags == CollisionFlags.Above;
 	}
 
@@ -102,20 +104,29 @@ public class ControllerSystem : MonoBehaviour
 				motionVertical = 0f;
 		}
 		else if (wasGrounded && !isGrounded)
+		{
 			motionVertical = 0f;
+		}
 
 		if (onSlope && !IsJumping && wasGrounded && isGrounded)
 			controller.Move(Vector3.down * Gravity * 500f * Time.deltaTime);
 		else
 			controller.Move(Vector3.down * -motionVertical * Time.deltaTime);
-
-		if (motionVertical <= 0)
-			isValidKeepJump = false;
 	}
 
 	private void Move()
 	{
-		Vector3 dir = (cam.Forward * input.Vertical + cam.Right * input.Horizontal).normalized * (input.Run ? runSpeed : walkSpeed);
+		Vector3 dir;
+		if (RunBlocked)
+			dir = (cam.Forward * input.Vertical + cam.Right * input.Horizontal).normalized * walkSpeed;
+		else
+			dir = (cam.Forward * input.Vertical + cam.Right * input.Horizontal).normalized * (input.Run ? runSpeed : walkSpeed);
+
+		if (IsJumping)
+		{
+			controller.Move(motionHorizontal * Time.deltaTime);
+			return;
+		}
 
 		if (MovementBlocked)
 		{
@@ -173,11 +184,10 @@ public class ControllerSystem : MonoBehaviour
 
 	private void ProccessAnimations()
 	{
-		var velocity = new Vector2(controller.velocity.x, controller.velocity.z);
-		anim.SetFloat("Velocity", velocity.magnitude);
-		anim.SetFloat("VelocityX", input.Horizontal);
-		anim.SetFloat("VelocityZ", input.Vertical);
-		anim.SetBool("IsGrounded", isGrounded);
+		anim.SetFloat("Velocity", motionHorizontal.magnitude / runSpeed);
+		anim.SetFloat("Velocity X", input.Horizontal, 0.3f, Time.deltaTime);
+		anim.SetFloat("Velocity Z", input.Vertical, 0.3f, Time.deltaTime);
+		anim.SetBool("Is Grounded", isGrounded);
 	}
 
 	private void CheckGrounded()
@@ -196,21 +206,25 @@ public class ControllerSystem : MonoBehaviour
 	private IEnumerator OnJump()
 	{
 		IsJumping = true;
-		isValidKeepJump = true;
+		combat.CanAttack = false;
+		RotationBlocked = true;
 
 		while (isGrounded)
 		{
 			yield return null;
-			if (!isValidKeepJump)
+			if (motionVertical <= 0)
 				break;
 		}
 		yield return new WaitUntil(() => isGrounded);
 
+		combat.CanAttack = true;
+		RotationBlocked = false;
 		IsJumping = false;
 	}
 
 	private IEnumerator OnDodge()
 	{
+		combat.CanAttack = false;
 		MovementBlocked = true;
 		RotationBlocked = true;
 		IsDodging = true;
@@ -228,6 +242,7 @@ public class ControllerSystem : MonoBehaviour
 			controller.SimpleMove(destination);
 			yield return null;
 		}
+		combat.CanAttack = true;
 		MovementBlocked = false;
 		RotationBlocked = false;
 		IsDodging = false;

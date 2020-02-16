@@ -49,7 +49,7 @@ public class CameraBehaviour : MonoBehaviour
 
 	private float curTime = 0f;
 	private float collisionPointDistance = 0f;
-	private Vector3 collisionOffset = Vector3.zero;
+	private Vector3 collisionTransition = Vector3.zero;
 
 	#endregion
 
@@ -60,13 +60,13 @@ public class CameraBehaviour : MonoBehaviour
 	[SerializeField]
 	private float focusHeight = 0f;
 	[SerializeField]
-	private SideSelector cameraSide = SideSelector.Left;
-	[SerializeField]
 	[Range(0f, 360f)]
 	private float xMinimum = 70f;
+	[SerializeField]
+	private float secondaryTargetTransitionSpeed = 2f;
 
-	public Transform Focus { get; set; }
-	private bool HasFocus => Focus != null;
+	public Transform SecondaryTarget { get; set; }
+	private bool HasSecondaryTarget => SecondaryTarget != null;
 
 	#endregion
 
@@ -80,36 +80,30 @@ public class CameraBehaviour : MonoBehaviour
 		currentDistance = distance;
 	}
 
-	
 	// Update is called once per frame
 	private void LateUpdate()
     {
 		if (target == null) return;
-		
-		if (!HasFocus)
+
+		if (!HasSecondaryTarget)
 		{
 			Move(target.position - transform.forward * currentDistance + playerOffset);
 		}
 		else
 		{
-			if (cameraSide == SideSelector.Left)
-				Move(target.position - transform.forward * currentDistance + (playerOffset + (-transform.right / 2)));
-			else
-				Move(target.position - transform.forward * currentDistance + (playerOffset + (transform.right / 2)));
-
-			var look = Quaternion.LookRotation(new Vector3(Focus.position.x, focusHeight, Focus.position.z) - transform.position);
+			Move(target.position - transform.forward * currentDistance + (playerOffset + (transform.right / 2)));
+			var look = Quaternion.LookRotation(new Vector3(SecondaryTarget.position.x, focusHeight, SecondaryTarget.position.z) - transform.position);
 			var lookClamped = look.eulerAngles;
 			if (lookClamped.x >= xMinimum)
 				lookClamped.x = xMinimum;
 			transform.eulerAngles = lookClamped;
 		}
-		
 		CalculateDirections();
 	}
 	
 	private void Update()
 	{
-		if (!HasFocus)
+		if (!HasSecondaryTarget)
 		{
 			heading += Input.GetAxisRaw("Mouse X") * Time.deltaTime * mouseSensitivityX;
 			if (heading >= 360f || heading <= -360f)
@@ -141,12 +135,10 @@ public class CameraBehaviour : MonoBehaviour
 		}
 		else
 		{
-			collisionOffset = Util.LerpVector(transform.forward * collisionPointDistance, Vector3.zero, 1f, ref curTime);
-			transform.position = point + collisionOffset;
+			collisionTransition = Util.LerpVector(transform.forward * collisionPointDistance, Vector3.zero, 1f, ref curTime);
+			transform.position = point + collisionTransition;
 		}
 	}
-
-	
 
 	private void CalculateDirections()
 	{
@@ -170,16 +162,10 @@ public class CameraBehaviour : MonoBehaviour
 		Gizmos.DrawLine(targetPos, targetPos + (transform.forward * (distanceLimits.y - currentDistance)));
 		Gizmos.DrawLine(transform.position, transform.position + (transform.forward * (distanceLimits.x - currentDistance)));
 
-		if (HasFocus)
+		if (HasSecondaryTarget)
 		{
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(transform.position, new Vector3(Focus.position.x, focusHeight, Focus.position.z));
+			Gizmos.DrawLine(transform.position, new Vector3(SecondaryTarget.position.x, focusHeight, SecondaryTarget.position.z));
 		}
 	}
-
-}
-
-public enum SideSelector : int
-{
-	Right, Left
 }

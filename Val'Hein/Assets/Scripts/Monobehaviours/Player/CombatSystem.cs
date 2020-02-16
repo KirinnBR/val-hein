@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using System.Linq;
 
 #pragma warning disable CS0649
 public class CombatSystem : MonoBehaviour
@@ -10,12 +10,10 @@ public class CombatSystem : MonoBehaviour
 
 	[Header("Combat Settings")]
 	
-	[Tooltip("The time, in seconds, it takes for the player to stop the combat mode.")]
-	[SerializeField]
-	private float maxSecondsToEndCombat = 5f;
 	[Tooltip("The radius of detection of an enemy.")]
 	[SerializeField]
 	private float enemyDetectionRadius = 10f;
+	public float EnemyDetectionRadius { get { return enemyDetectionRadius; } }
 	[Tooltip("The logic representation of an attack.")]
 	[SerializeField]
 	private List<PlayerAttack> attacks;
@@ -29,32 +27,26 @@ public class CombatSystem : MonoBehaviour
 	[ConditionalHide("hasWeapon", true)]
 	[SerializeField]
 	private Weapon weapon;
-	public float EnemyDetectionRadius { get { return enemyDetectionRadius; } }
 	public bool HasTarget { get; private set; }
-	public bool IsAttacking { get; private set; } = false;
+	public bool CanAttack { get; set; } = true;
 	public float CurrentHealth { get; private set; }
-	private float CurrentStamina { get; set; }
-	private int CurrentAttackIndex { get; set; } = 0;
-	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
-	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
-	private PlayerAttack CurrentAttack => attacks[CurrentAttackIndex];
-	private bool LastHit => CurrentAttackIndex == attacks.Count - 1;
-	private bool waitingForEndCombat = false;
-	private bool onCombat = false;
+	private HitMarkerConfigurer hitMarkerConfigurer { get { return combatSettings.hitMarkerManager; } }
+	private HitMarker[] hitMarkers { get { return combatSettings.hitMarkers; } }
+	private PlayerAttack CurrentAttack => attacks[currentAttackIndex];
+	private bool LastHit => currentAttackIndex == attacks.Count - 1;
 	private bool animationFinished = false;
+	private int currentAttackIndex = 0;
 	private Transform targetEnemy;
-	private Collider targetCollider;
+	private Collider targetEnemyCollider;
 	private int targetEnemyIndex;
+	private bool isAttacking = false;
+	private bool onCombat = false;
 
-	private List<Transform> focusedEnemies = new List<Transform>();
+	private List<Transform> targetableEnemies = new List<Transform>();
 	private Coroutine computeComboCoroutine = null;
 	private Coroutine activeMarkersCoroutine = null;
-	private Coroutine waitForCombatTimeCoroutine = null;
+	private Coroutine trackAnimationCoroutine = null;
 	private Coroutine updateTargetCoroutine = null;
-
-	public class OnTakeDamageEvent : UnityEvent<float> { }
-
-	public OnTakeDamageEvent OnTakeDamage = new OnTakeDamageEvent();
 
 	#endregion
 
@@ -72,137 +64,163 @@ public class CombatSystem : MonoBehaviour
 
 	#region Common Methods
 
-	// Start is called before the first frame update
 	void Start()
 	{
 		CurrentHealth = stats.baseHealth;
-		CurrentStamina = stats.baseStamina;
 		if (hasWeapon)
 			weapon.MergeStatsWithUser(stats);
 		else
-			hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
-		OnTakeDamage.AddListener(ui.UpdateHealthBar);
+			hitMarkerConfigurer.ConfigureMarkers(hitMarkers);
 	}
 	// Update is called once per frame
 	private void Update()
 	{
-		if (GameManager.IsInitialized && GameManager.Instance.CurrentGameState != GameManager.GameState.Running) return;
 		ProccessInput();
-		UpdateAnimationVariables();
+		anim.SetBool("On Combat", onCombat);
 	}
 
-	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
+	private void FixedUpdate()
+	{
+		SetTargetableEnemies();
+	}
+
+	private void LateUpdate()
+	{
+		anim.ResetTrigger("Attack");
+	}
 
 	private void ProccessInput()
 	{
 		if (input.Attack)
-			if (!IsAttacking && !controller.IsJumping && !controller.IsDodging)
-				ProccessAttackAnimation();
+			ProccessAttackAnimation();
 		if (input.Target)
-		{
-			if (!HasTarget)
-				SetTarget();
-			else
-				UnsetTarget();
-		}
-	}
-
-	private void UpdateAnimationVariables()
-	{
-		if (IsAttacking)
-		{
-			if (!onCombat)
-			{
-				onCombat = true;
-				anim.SetBool("On Combat", onCombat);
-			}
-		}
-		else
-		{
-			if (!waitingForEndCombat)
-			{
-				if (onCombat)
-				{
-					if (!HasTarget)
-						onCombat = false;
-					anim.SetBool("On Combat", onCombat);
-				}
-			}
-		}
-	}
-
-	private void SetTarget()
-	{
-		//Quando setar, pega todos os inimigos e calcula o mais perto. Depois, inicia a co-rotina UpdateTarget().
-		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.UseGlobal);
-		float closestDistance = float.MaxValue;
-		Transform closestEnemy = null;
-		foreach (var enemy in enemies)
-		{
-			Transform currentEnemy = enemy.transform;
-
-			if (currentEnemy.Equals(transform)) continue;
-
-			float distanceEnemy = Vector3.Distance(transform.position, currentEnemy.position);
-			if (distanceEnemy < closestDistance)
-			{
-				closestDistance = distanceEnemy;
-				closestEnemy = currentEnemy;
-			}
-			focusedEnemies.Add(currentEnemy);
-		}
-
-		targetEnemy = closestEnemy;
-		targetEnemyIndex = focusedEnemies.IndexOf(targetEnemy);
-
-		HasTarget = targetEnemy != null;
-
-		cam.Focus = targetEnemy;
-
-		if (HasTarget)
-		{
-			targetCollider = targetEnemy.GetComponent<Collider>();
-			onCombat = true;
-		}
-
-		if (updateTargetCoroutine != null)
-			StopCoroutine(updateTargetCoroutine);
-		updateTargetCoroutine = StartCoroutine(UpdateTarget());
-	}
-
-	private void UnsetTarget()
-	{
-		focusedEnemies.Clear();
-		targetEnemy = null;
-		HasTarget = false;
-		cam.Focus = null;
-		updateTargetCoroutine = null;
+			SetTarget();
 	}
 
 	private void ProccessAttackAnimation()
 	{
-		if (LastHit)
-			StopCoroutine(computeComboCoroutine);
-		else
-		{
-			if (computeComboCoroutine != null)
-				StopCoroutine(computeComboCoroutine);
-			computeComboCoroutine = StartCoroutine(ComputeCombo());
-		}
+		if (isAttacking || !CanAttack) return;
 
 		animationFinished = false;
 
-		anim.SetInteger("Attack Index", CurrentAttackIndex);
+		anim.SetInteger("Attack Index", currentAttackIndex);
 		anim.SetTrigger("Attack");
 
-		IsAttacking = true;
+		isAttacking = true;
 		controller.MovementBlocked = true;
 		controller.RotationBlocked = true;
-		waitingForEndCombat = true;
 
-		if (waitForCombatTimeCoroutine != null)
-			StopCoroutine(waitForCombatTimeCoroutine);
-		waitForCombatTimeCoroutine = StartCoroutine(WaitForCombatTime());
+		if (trackAnimationCoroutine != null)
+			StopCoroutine(trackAnimationCoroutine);
+		trackAnimationCoroutine = StartCoroutine(TrackAnimation());
+	}
+
+	private void SetTargetableEnemies()
+	{
+		targetableEnemies.Clear();
+		var enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.UseGlobal);
+		foreach (var enemy in enemies)
+		{
+			var enemyT = enemy.transform;
+			if (transform.Equals(enemyT)) continue;
+			targetableEnemies.Add(enemyT);
+		}
+		onCombat = targetableEnemies.Count > 0;
+	}
+
+	private void SetTarget()
+	{
+		if (HasTarget)
+		{
+			UnsetTarget();
+			return;
+		}
+
+		if (FindTarget())
+		{
+			anim.SetBool("Is Targeting", true);
+			controller.RotationBlocked = true;
+			controller.RunBlocked = true;
+			HasTarget = true;
+			updateTargetCoroutine = StartCoroutine(UpdateTarget());
+		}
+	}
+
+	private bool FindTarget()
+	{
+		if (targetableEnemies.Count < 1) return false;
+
+		float closest = enemyDetectionRadius + 10f;
+
+		foreach (var enemy in targetableEnemies)
+		{
+			var dist = Vector3.Distance(transform.position, enemy.position);
+			if (dist < closest)
+			{
+				targetEnemy = enemy;
+				closest = dist;
+			}
+		}
+		targetEnemyIndex = targetableEnemies.IndexOf(targetEnemy);
+		targetEnemyCollider = targetEnemy.GetComponent<Collider>();
+		cam.SecondaryTarget = targetEnemy;
+		return true;
+	}
+
+	private void UnsetTarget()
+	{
+		anim.SetBool("Is Targeting", false);
+		controller.RotationBlocked = false;
+		controller.RunBlocked = false;
+		targetEnemy = null;
+		HasTarget = false;
+		cam.SecondaryTarget = null;
+		StopCoroutine(updateTargetCoroutine);
+	}
+
+	private void ActivateMarkers()
+	{
+		if (hasWeapon)
+			weapon.ActivateMarkers(CurrentAttack.damageMultiplier);
+		else
+		{
+			if (combatSettings.continuousDamage)
+				activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
+			else
+				activeMarkersCoroutine = StartCoroutine(CheckCollisions());
+		}
+	}
+
+	private void DeactivateMarkers()
+	{
+		if (hasWeapon)
+			weapon.DeactivateMarkers();
+		else
+			StopCoroutine(activeMarkersCoroutine);
+	}
+
+	private void FinishAnimation()
+	{
+		if (animationFinished) return;
+
+		controller.MovementBlocked = false;
+
+		if (!HasTarget)
+			controller.RotationBlocked = false;
+		
+		isAttacking = false;
+		animationFinished = true;
+
+		if (computeComboCoroutine != null)
+			StopCoroutine(computeComboCoroutine);
+
+		if (LastHit)
+			currentAttackIndex = 0;
+		else
+		{
+			computeComboCoroutine = StartCoroutine(ComputeCombo());
+			currentAttackIndex++;
+		}
 	}
 
 	#endregion
@@ -214,7 +232,7 @@ public class CombatSystem : MonoBehaviour
 		FinishAnimation();
 		anim.SetTrigger("Hurt");
 		CurrentHealth -= ammount;
-		OnTakeDamage.Invoke(CurrentHealth);
+		//OnTakeDamage.Invoke(CurrentHealth);
 		if (CurrentHealth <= 0)
 			Die();
 	}
@@ -230,15 +248,59 @@ public class CombatSystem : MonoBehaviour
 
 	#region Coroutines
 
+	private IEnumerator TrackAnimation()
+	{
+		int currentFrame = 1;
+		bool isHitMarkersActive = false;
+		int currentHitMarkerIndex = 0;
+		int hitMarkerLength = CurrentAttack.hitMarkersTime.Length;
+		while (true)
+		{
+			if (currentFrame == CurrentAttack.animationLength)
+			{
+				FinishAnimation();
+				break;
+			}
+
+			if (currentHitMarkerIndex < hitMarkerLength)
+			{
+				var hitMarkerTime = CurrentAttack.hitMarkersTime[currentHitMarkerIndex];
+
+				if (!isHitMarkersActive)
+				{
+					if (hitMarkerTime != null)
+					{
+						if (currentFrame == hitMarkerTime.x)
+						{
+							ActivateMarkers();
+							isHitMarkersActive = true;
+						}
+					}
+				}
+				else
+				{
+					if (currentFrame == hitMarkerTime.y)
+					{
+						DeactivateMarkers();
+						isHitMarkersActive = false;
+						currentHitMarkerIndex++;
+					}
+				}
+			}
+			currentFrame++;
+			yield return null;
+		}
+	}
+
 	private IEnumerator ComputeCombo()
 	{
-		int aux = CurrentAttackIndex;
+		int aux = currentAttackIndex;
 		yield return new WaitForSeconds(CurrentAttack.timeToBlendCombo);
 		Debug.Log("Stopped at index " + aux);
-		CurrentAttackIndex = 0;
-		computeComboCoroutine = null;
-		yield break;
+		currentAttackIndex = 0;
 	}
+
+	private void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
 
 	private IEnumerator CheckCollisions()
 	{
@@ -276,68 +338,23 @@ public class CombatSystem : MonoBehaviour
 		}
 	}
 
-	private IEnumerator WaitForCombatTime()
-	{
-		yield return new WaitForSeconds(maxSecondsToEndCombat);
-		waitingForEndCombat = false;
-		IsAttacking = false;
-	}
-
 	private IEnumerator UpdateTarget()
 	{
-
-		IEnumerator CheckForTargets()
+		var completeTwirl = false;
+		while (true)
 		{
-			while (true)
+			if (!targetableEnemies.Contains(targetEnemy) || targetEnemyCollider.enabled == false)
 			{
-				Collider[] enemies = Physics.OverlapSphere(transform.position, enemyDetectionRadius, combatLayer, QueryTriggerInteraction.UseGlobal);
-				focusedEnemies.Clear();
-				foreach (var enemy in enemies)
-				{
-					var enemyT = enemy.transform;
-					if (transform.Equals(enemyT)) continue;
-					focusedEnemies.Add(enemyT);
-				}
-				yield return new WaitForSeconds(0.1f);
-			}
-		}
-
-		bool completeTwirl = false;
-
-		void SetNewFocus()
-		{
-			targetEnemy = focusedEnemies[targetEnemyIndex];
-			cam.Focus = targetEnemy;
-			targetCollider = targetEnemy.GetComponent<Collider>();
-			completeTwirl = false;
-		}
-
-		Coroutine checkForTargetsCoroutine = StartCoroutine(CheckForTargets());
-		while (targetEnemy != null)
-		{
-			if (Vector3.Distance(transform.position, targetEnemy.position) > enemyDetectionRadius + 0.2f) break;
-
-			if (targetCollider.enabled == false)
-			{
-				if (focusedEnemies.Count == 0)
+				if (!FindTarget())
 					break;
-				targetEnemyIndex = focusedEnemies.FindIndex(enemy => enemy.transform != null);
-				SetNewFocus();
+				else
+				{
+					completeTwirl = false;
+					continue;
+				}
 			}
 
-			if (input.MouseScrollWheel > 0)
-			{
-				targetEnemyIndex++;
-				if (targetEnemyIndex == focusedEnemies.Count) targetEnemyIndex = 0;
-				SetNewFocus();
-			}
-
-			if (input.MouseScrollWheel < 0)
-			{
-				targetEnemyIndex--;
-				if (targetEnemyIndex < 0) targetEnemyIndex = focusedEnemies.Count - 1;
-				SetNewFocus();
-			}
+			//Mouse ScrollWheel Input.
 
 			if (completeTwirl)
 			{
@@ -346,70 +363,16 @@ public class CombatSystem : MonoBehaviour
 			else
 			{
 				var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
-				transform.rotation = Quaternion.Lerp(transform.rotation, look, controller.turnSpeed * Time.deltaTime);
+				transform.rotation = Quaternion.Slerp(transform.rotation, look, controller.turnSpeed * Time.deltaTime * 2f);
 				if (Quaternion.Angle(transform.rotation, look) < 5f)
+				{
+					transform.rotation = look;
 					completeTwirl = true;
+				}
 			}
 			yield return null;
 		}
-
-		StopCoroutine(checkForTargetsCoroutine);
 		UnsetTarget();
-	}
-
-	private IEnumerator UpdateStamina()
-	{
-		CurrentStamina -= 10f;
-		yield return new WaitForSeconds(2.5f);
-		while (CurrentStamina < stats.baseStamina)
-		{
-			CurrentStamina += 0.5f;
-			yield return null;
-		}
-		CurrentStamina = stats.baseStamina;
-	}
-
-	#endregion
-
-	#region Animation Event Methods
-
-	public void ActivateMarkers()
-	{
-		if (hasWeapon)
-			weapon.ActivateMarkers(CurrentAttack.damageMultiplier);
-		else
-		{
-			if (combatSettings.continuousDamage)
-				activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
-			else
-				activeMarkersCoroutine = StartCoroutine(CheckCollisions());
-		}
-	}
-
-	public void DeactivateMarkers(DeactivationType finish)
-	{
-		if (hasWeapon)
-			weapon.DeactivateMarkers();
-		else
-			StopCoroutine(activeMarkersCoroutine);
-
-		if (finish == DeactivationType.FinishAnimation)
-			FinishAnimation();
-	}
-
-	public void FinishAnimation()
-	{
-		if (animationFinished) return;
-
-		controller.MovementBlocked = false;
-		controller.RotationBlocked = false;
-		IsAttacking = false;
-		animationFinished = true;
-
-		if (LastHit)
-			CurrentAttackIndex = 0;
-		else
-			CurrentAttackIndex++;
 	}
 
 	#endregion

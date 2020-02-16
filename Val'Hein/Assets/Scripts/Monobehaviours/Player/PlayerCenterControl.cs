@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(ControllerSystem), typeof(CombatSystem), typeof(UISystem))]
-[RequireComponent(typeof(InputSystem), typeof(Animator))]
+[RequireComponent(typeof(InputSystem), typeof(InventorySystem), typeof(Animator))]
 public class PlayerCenterControl : Singleton<PlayerCenterControl>
 {
 	[Header("References")]
 
-	[Tooltip("The camera that the player will use.")]
+	[Tooltip("The camera that this player will use.")]
 	public CameraBehaviour playerCamera;
 	[Tooltip("The armor settings the player is using.")]
-	public ArmorStatsIncreaser playerArmor;
+	public ArmorSet playerArmor;
 	[Tooltip("The player's stats.")]
 	public Stats playerStats;
 	[Tooltip("The level data for player.")]
@@ -26,7 +26,7 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 	//public PlayerClass playerClass { get; private set; }
 	public UISystem ui { get; private set; }
 	public Animator anim { get; private set; }
-
+	
 	protected override void Awake()
 	{
 		base.Awake();

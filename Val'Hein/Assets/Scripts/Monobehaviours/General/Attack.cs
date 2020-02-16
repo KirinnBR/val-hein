@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class Attack
@@ -6,13 +7,23 @@ public class Attack
 	[Tooltip("Multiplier damage a certain attack will deal.")]
 	[Range(1f, 10f)]
 	public float damageMultiplier;
+	[Tooltip("The length of the specific attack animation.")]
+	public int animationLength;
+	[Tooltip("When to enable and disable Hit Markers. P.S.: You can't enable or disable markers after the end of animation. X should be lesser than Y.")]
+	public Vector2[] hitMarkersTime;
+
+	public Attack()
+	{
+		damageMultiplier = 1f;
+		animationLength = 30;
+	}
+
 }
 
 [System.Serializable]
 public class PlayerAttack : Attack
 {
-	[Tooltip("The time to blend the next attack before the end of animation of this attack.")]
-	[Range(0.001f, 5f)]
+	[Tooltip("The time, in seconds, to combo after the end of animation.")]
 	public float timeToBlendCombo;
 }
 
@@ -20,6 +31,5 @@ public class PlayerAttack : Attack
 public class NPCAttack : Attack
 {
 	[Tooltip("The delay to use another attack.")]
-	[Range(0f, 10f)]
 	public float timeToRest;
 }

@@ -5,8 +5,11 @@ using UnityEngine;
 public class HitMarker : MonoBehaviour
 {
 	[Header("Hit Marker Settings")]
+	[HideInInspector]
 	public float radius = 0.05f;
+	[HideInInspector]
 	public LayerMask hitLayer;
+	[HideInInspector]
 	public string ownerTag = "Entity";
 	public QueryTriggerInteraction triggerInteraction { get; set; } = QueryTriggerInteraction.Ignore;
 #if UNITY_EDITOR

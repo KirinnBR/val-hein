@@ -16,12 +16,12 @@ public class Weapon : MonoBehaviour
 
 	private float damageMultiplier;
 
-	private HitMarkerManager hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
-	private List<HitMarker> hitMarkers { get { return combatSettings.hitMarkers; } }
+	private HitMarkerConfigurer hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
+	private HitMarker[] hitMarkers { get { return combatSettings.hitMarkers; } }
 
 	private void Start()
 	{
-		hitMarkerManager.ConfigureMarkers(hitMarkers.ToArray());
+		hitMarkerManager.ConfigureMarkers(hitMarkers);
 	}
 
 	public void MergeStatsWithUser(Stats stats)

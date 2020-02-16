@@ -58,6 +58,15 @@ public class NPC : MonoBehaviour, IDamageable
 
 	#endregion
 
+	#region Item Drop Settings
+
+	[Header("Item Drop Settings")]
+
+	[SerializeField]
+	private ItemPickUp[] itemsToDrop;
+
+	#endregion
+
 	#region Combat Settings
 
 	[Header("Combat Settings")]
@@ -92,7 +101,7 @@ public class NPC : MonoBehaviour, IDamageable
 	public float CurrentHealth { get; private set; }
 	protected int CurrentAttackIndex { get; set; } = 0;
 	protected int CurrentAttackCombo { get; set; } = 0;
-	protected List<HitMarker> HitMarkers { get { return combatSettings.hitMarkers; } }
+	protected HitMarker[] hitMarkers { get { return combatSettings.hitMarkers; } }
 	protected NPCAttack CurrentAttack => attacks[CurrentAttackIndex];
 	protected bool IsAttacking { get; set; } = false;
 	protected bool IsDefending { get; set; } = false;
@@ -148,7 +157,7 @@ public class NPC : MonoBehaviour, IDamageable
 		if (hasWeapon)
 			weapon.MergeStatsWithUser(stats);
 		else
-			combatSettings.hitMarkerManager.ConfigureMarkers(HitMarkers.ToArray());
+			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers);
 
 		agent.acceleration = agentAcceleration;
 		agent.angularSpeed = agentAngularSpeed;
@@ -228,7 +237,7 @@ public class NPC : MonoBehaviour, IDamageable
 		List<IDamageable> cannotHit = new List<IDamageable>();
 		while (true)
 		{
-			foreach (var marker in HitMarkers)
+			foreach (var marker in hitMarkers)
 			{
 				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
@@ -245,7 +254,7 @@ public class NPC : MonoBehaviour, IDamageable
 		List<IDamageable> cannotHit = new List<IDamageable>();
 		while (true)
 		{
-			foreach (var marker in HitMarkers)
+			foreach (var marker in hitMarkers)
 			{
 				if (marker.TryGetDamageable(out IDamageable dmg) && !cannotHit.Contains(dmg))
 				{
