@@ -9,7 +9,7 @@ public class Attack
 	public float damageMultiplier;
 	[Tooltip("The length of the specific attack animation.")]
 	public int animationLength;
-	[Tooltip("When to enable and disable Hit Markers. P.S.: You can't enable or disable markers after the end of animation. X should be lesser than Y.")]
+	[Tooltip("When to enable and disable Hit Markers. P.S.: X and Y must always be lesser than Animation Length. X must always be lesser than Y.")]
 	public Vector2[] hitMarkersTime;
 
 	public Attack()

@@ -20,6 +20,8 @@ public class InputSystem : MonoBehaviour
     private KeyCode targetKey = KeyCode.F;
     [SerializeField]
     private MouseButtonCode attackButton = MouseButtonCode.LeftButton;
+    [SerializeField]
+    private KeyCode pauseKey = KeyCode.Escape;
 
 	#endregion
 
@@ -39,9 +41,19 @@ public class InputSystem : MonoBehaviour
     public bool Dodge => Input.GetKeyDown(dodgeKey);
     public bool Target => Input.GetKeyDown(targetKey);
     public bool Attack => Input.GetMouseButtonDown((int)attackButton);
+    public bool Pause => Input.GetKeyDown(pauseKey);
     public float Horizontal => Input.GetAxisRaw("Horizontal");
     public float Vertical => Input.GetAxisRaw("Vertical");
     public float MouseScrollWheel => -Input.GetAxisRaw("Mouse ScrollWheel");
 
-	#endregion
+    #endregion
+
+    private void Update()
+    {
+        if (Pause)
+        {
+            //GameManager.Instance.PauseGame();
+        }
+    }
+
 }

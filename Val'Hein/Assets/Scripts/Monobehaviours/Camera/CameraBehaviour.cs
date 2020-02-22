@@ -129,7 +129,7 @@ public class CameraBehaviour : MonoBehaviour
 	{
 		if (Physics.Linecast(target.position + playerOffset, point, out RaycastHit hit, collisionLayer, QueryTriggerInteraction.Ignore))
 		{
-			transform.position = hit.point;
+			transform.position = hit.point + transform.forward / 10;
 			collisionPointDistance = Vector3.Distance(point, hit.point);
 			curTime = 0f;
 		}

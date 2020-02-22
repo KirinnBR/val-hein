@@ -22,7 +22,6 @@ public class GameManager : Singleton<GameManager>
 
 	private List<GameObject> instancedSystemPrefabs;
 	private List<AsyncOperation> loadOperations;
-	private string currentLevel = string.Empty;
 
 	private void Start()
 	{
@@ -32,7 +31,6 @@ public class GameManager : Singleton<GameManager>
 		instancedSystemPrefabs = new List<GameObject>();
 		
 		InstantiateSystemPrefabs();
-		onGameStateChanged.AddListener(UIManager.Instance.UpdateUI);
 	}
 
 	public void OnLoadOperationComplete(AsyncOperation ao)
@@ -44,8 +42,7 @@ public class GameManager : Singleton<GameManager>
 			//Dispatch messages.
 			//Transition between scenes.
 		}
-
-		Debug.Log($"{currentLevel} loaded.");
+		Debug.Log(SceneManager.GetActiveScene().name + " loaded.");
 		onSceneLoadedComplete.Invoke();
 	}
 
@@ -54,9 +51,9 @@ public class GameManager : Singleton<GameManager>
 		Debug.Log("Unloaded");
 	}
 
-	public void LoadLevel(string levelName)
+	public void LoadLevel(string levelName, LoadSceneMode loadSceneMode)
 	{
-		var ao = SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
+		var ao = SceneManager.LoadSceneAsync(levelName, loadSceneMode);
 
 		if (ao == null)
 		{
@@ -65,7 +62,6 @@ public class GameManager : Singleton<GameManager>
 		}
 		ao.completed += OnLoadOperationComplete;
 		loadOperations.Add(ao);
-		currentLevel = levelName;
 	}
 
 	public void UnloadLevel(string levelName)

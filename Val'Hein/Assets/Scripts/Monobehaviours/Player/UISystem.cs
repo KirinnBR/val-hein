@@ -1,18 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UISystem : MonoBehaviour
 {
+
 
     private float currentHealth;
 
     private Coroutine changeHealthCoroutine;
 
+    private GameObject canvas { get { return PlayerCenterControl.Instance.Canvas; } }
+    private Slider healthBar { get { return PlayerCenterControl.Instance.HealthBar; } }
+
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = PlayerCenterControl.Instance.combat.CurrentHealth;
+        healthBar.value = healthBar.maxValue = currentHealth;
     }
 
     // Update is called once per frame
@@ -48,7 +54,7 @@ public class UISystem : MonoBehaviour
                     break;
                 }
             }
-            currentHealth = Mathf.Lerp(currentHealth, newHealth, 0.2f);
+            currentHealth = Mathf.Lerp(currentHealth, newHealth, 5f * Time.deltaTime);
             yield return null;
         }
         changeHealthCoroutine = null;

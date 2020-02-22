@@ -10,7 +10,7 @@ public class CombatSystem : MonoBehaviour
 
 	[Header("Combat Settings")]
 	
-	[Tooltip("The radius of detection of an enemy.")]
+	[Tooltip("The radius to detect an enemy and enter in combat mode.")]
 	[SerializeField]
 	private float enemyDetectionRadius = 10f;
 	public float EnemyDetectionRadius { get { return enemyDetectionRadius; } }
@@ -30,15 +30,14 @@ public class CombatSystem : MonoBehaviour
 	public bool HasTarget { get; private set; }
 	public bool CanAttack { get; set; } = true;
 	public float CurrentHealth { get; private set; }
-	private HitMarkerConfigurer hitMarkerConfigurer { get { return combatSettings.hitMarkerManager; } }
 	private HitMarker[] hitMarkers { get { return combatSettings.hitMarkers; } }
 	private PlayerAttack CurrentAttack => attacks[currentAttackIndex];
 	private bool LastHit => currentAttackIndex == attacks.Count - 1;
-	private bool animationFinished = false;
+	private bool animationFinished = true;
 	private int currentAttackIndex = 0;
 	private Transform targetEnemy;
-	private Collider targetEnemyCollider;
 	private int targetEnemyIndex;
+	private Collider targetEnemyCollider;
 	private bool isAttacking = false;
 	private bool onCombat = false;
 
@@ -48,13 +47,15 @@ public class CombatSystem : MonoBehaviour
 	private Coroutine trackAnimationCoroutine = null;
 	private Coroutine updateTargetCoroutine = null;
 
+	//public bool CanAttack { get; set; } = true;
+
 	#endregion
 
 	#region External Properties
 
-	private Stats stats { get { return PlayerCenterControl.Instance.playerStats; } }
-	private LayerMask combatLayer { get { return PlayerCenterControl.Instance.combatCheckLayer; } }
-	private CameraBehaviour cam { get { return PlayerCenterControl.Instance.playerCamera; } }
+	private Stats stats { get { return PlayerCenterControl.Instance.Stats; } }
+	private LayerMask combatLayer { get { return PlayerCenterControl.Instance.CombatCheckLayer; } }
+	private CameraBehaviour cam { get { return PlayerCenterControl.Instance.Camera; } }
 	private ControllerSystem controller { get { return PlayerCenterControl.Instance.controller; } }
 	private InputSystem input { get { return PlayerCenterControl.Instance.input; } }
 	private UISystem ui { get { return PlayerCenterControl.Instance.ui; } }
@@ -70,7 +71,7 @@ public class CombatSystem : MonoBehaviour
 		if (hasWeapon)
 			weapon.MergeStatsWithUser(stats);
 		else
-			hitMarkerConfigurer.ConfigureMarkers(hitMarkers);
+			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers);
 	}
 	// Update is called once per frame
 	private void Update()
@@ -99,7 +100,7 @@ public class CombatSystem : MonoBehaviour
 
 	private void ProccessAttackAnimation()
 	{
-		if (isAttacking || !CanAttack) return;
+		if (isAttacking || !CanAttack || !animationFinished) return;
 
 		animationFinished = false;
 
@@ -113,6 +114,9 @@ public class CombatSystem : MonoBehaviour
 		if (trackAnimationCoroutine != null)
 			StopCoroutine(trackAnimationCoroutine);
 		trackAnimationCoroutine = StartCoroutine(TrackAnimation());
+
+		if (computeComboCoroutine != null)
+			StopCoroutine(computeComboCoroutine);
 	}
 
 	private void SetTargetableEnemies()
@@ -203,6 +207,7 @@ public class CombatSystem : MonoBehaviour
 	{
 		if (animationFinished) return;
 
+
 		controller.MovementBlocked = false;
 
 		if (!HasTarget)
@@ -210,9 +215,6 @@ public class CombatSystem : MonoBehaviour
 		
 		isAttacking = false;
 		animationFinished = true;
-
-		if (computeComboCoroutine != null)
-			StopCoroutine(computeComboCoroutine);
 
 		if (LastHit)
 			currentAttackIndex = 0;
@@ -250,7 +252,7 @@ public class CombatSystem : MonoBehaviour
 
 	private IEnumerator TrackAnimation()
 	{
-		int currentFrame = 1;
+		int currentFrame = 0;
 		bool isHitMarkersActive = false;
 		int currentHitMarkerIndex = 0;
 		int hitMarkerLength = CurrentAttack.hitMarkersTime.Length;
@@ -258,6 +260,7 @@ public class CombatSystem : MonoBehaviour
 		{
 			if (currentFrame == CurrentAttack.animationLength)
 			{
+				Debug.Log("Animation finished. Frames: " + currentFrame);
 				FinishAnimation();
 				break;
 			}
