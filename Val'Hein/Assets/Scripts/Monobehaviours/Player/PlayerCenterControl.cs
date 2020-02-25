@@ -16,17 +16,17 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 	[Tooltip("The armor settings the player is using.")]
 	[SerializeField]
 	private ArmorSet armor;
-	public ArmorSet Armor { get { return armor; } }
+	public ArmorSet Armor { get => armor; }
 
 	[Tooltip("The player's stats.")]
 	[SerializeField]
 	private Stats stats;
-	public Stats Stats { get { return stats; } }
+	public Stats Stats { get => stats; }
 
 	[Tooltip("The level data for player.")]
 	[SerializeField]
 	private LevelDefinitions level;
-	public LevelDefinitions Level { get { return level; } }
+	public LevelDefinitions Level { get => level; }
 
 	#endregion
 
@@ -37,12 +37,16 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 	[Tooltip("The LayerMask that the player's physics calculations will use.")]
 	[SerializeField]
 	private LayerMask physicsCheckLayer;
-	public LayerMask PhysicsCheckLayer { get { return physicsCheckLayer; } }
+	public LayerMask PhysicsCheckLayer { get => physicsCheckLayer; }
 
 	[Tooltip("The LayerMask that the player's combat physics calculations will use.")]
 	[SerializeField]
 	private LayerMask combatCheckLayer;
-	public LayerMask CombatCheckLayer { get { return combatCheckLayer; } }
+	public LayerMask CombatCheckLayer { get => combatCheckLayer; }
+
+	[SerializeField]
+	private LayerMask itemsLayer;
+	public LayerMask ItemsLayer { get => itemsLayer; }
 
 	#endregion
 
@@ -53,23 +57,7 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 	[Tooltip("The camera that this player will use.")]
 	[SerializeField]
 	private new CameraBehaviour camera;
-	public CameraBehaviour Camera { get { return camera; } }
-
-	#endregion
-
-	#region Canvas References
-
-	[Header("Canvas References")]
-
-	[Tooltip("The Canvas of the player. (It should be inside the player GameObject.)")]
-	[SerializeField]
-	private GameObject canvas;
-	public GameObject Canvas { get { return canvas; } }
-
-	[Tooltip("The player's health bar.")]
-	[SerializeField]
-	private Slider healthBar;
-	public Slider HealthBar { get { return healthBar; } }
+	public CameraBehaviour Camera { get => camera; }
 
 	#endregion
 

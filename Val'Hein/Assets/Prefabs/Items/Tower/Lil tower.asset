@@ -9,15 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16219d16e7fd0234dad475b6c61f4cdf, type: 3}
-  m_Name: Player Stats
+  m_Script: {fileID: 11500000, guid: 06493808c88977d4296f2ad80854bf47, type: 3}
+  m_Name: Lil tower
   m_EditorClassIdentifier: 
-  baseHealth: 20
-  baseResistance: 10
-  baseStamina: 100
-  baseStrength: 20
-  basePrecision: 50
-  basePower: 10
-  baseIntelligence: 10
-  baseRunicKnowledge: 10
-  baseAgility: 10
+  name: Lil tower
+  sprite: {fileID: 21300000, guid: a3456365843a62d44984d98db5c2d88f, type: 3}
+  dropRate: 100

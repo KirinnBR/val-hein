@@ -9,15 +9,14 @@ public class MouseManager : Singleton<MouseManager>
     // Start is called before the first frame update
     void Start()
     {
-		IsMouseLocked = false;
-		ChangeLock();
+		SetLock(false);
     }
 
-	public void ChangeLock()
+	public void SetLock(bool locked)
 	{
-		IsMouseLocked = !IsMouseLocked;
-		Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
-		Cursor.visible = !Cursor.visible;
+		Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+		Cursor.visible = !locked;
+		IsMouseLocked = locked;
 	}
 
 

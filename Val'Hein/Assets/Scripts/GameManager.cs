@@ -17,7 +17,6 @@ public class GameManager : Singleton<GameManager>
 
 	public GameObject[] SystemPrefabs;
 	public GameState CurrentGameState { get; private set; }
-	public UnityEvent onGameStateChanged;
 	public UnityEvent onSceneLoadedComplete;
 
 	private List<GameObject> instancedSystemPrefabs;
@@ -77,27 +76,20 @@ public class GameManager : Singleton<GameManager>
 		ao.completed += OnUnloadOperationComplete;
 	}
 
-	public void ChangeGameState (GameState state)
-	{
-		if (state == GameState.Paused)
-		{
-			PauseGame();
-		}
-		else if (state == GameState.Running)
-		{
-			ResumeGame();
-		}
-		onGameStateChanged.Invoke();
-	}
-
 	public void PauseGame()
 	{
+		if (CurrentGameState == GameState.Paused) return;
+
+		MouseManager.Instance.SetLock(false);
 		Time.timeScale = 0f;
 		CurrentGameState = GameState.Paused;
 	}
 
 	public void ResumeGame()
 	{
+		if (CurrentGameState == GameState.Running) return;
+
+		MouseManager.Instance.SetLock(true);
 		Time.timeScale = 1f;
 		CurrentGameState = GameState.Running;
 	}

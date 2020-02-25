@@ -7,7 +7,7 @@ public enum ArmorType
 	Head, Chest, Hands, Legs, Boots, Misc
 }
 
-[CreateAssetMenu(fileName = "New Armor Set", menuName = "Stats/Armor/ArmorSet")]
+[CreateAssetMenu(fileName = "New Armor Set", menuName = "Entities/Armor Set")]
 public class ArmorSet : ScriptableObject
 {
 	[System.Serializable]

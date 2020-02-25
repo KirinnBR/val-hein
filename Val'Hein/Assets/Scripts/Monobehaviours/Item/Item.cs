@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Item : MonoBehaviour
+public class Item : MonoBehaviour, IInteractable
 {
     [SerializeField]
-    private ItemPickUp itemDefinitions;
+    private ItemData item;
 
-
-    // Start is called before the first frame update
-    void Start()
+    public void Interact()
     {
-        
+        PlayerCenterControl.Instance.inventory.StoreItem(item);
+        Destroy(gameObject);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Spawn(Vector3 position)
     {
-        
+        if (Util.ChanceOf(item.dropRate))
+        {
+            Instantiate(gameObject, position, Quaternion.identity);
+        }
     }
+
 }

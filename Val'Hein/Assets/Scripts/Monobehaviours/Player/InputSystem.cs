@@ -4,56 +4,35 @@ using UnityEngine;
 
 public class InputSystem : MonoBehaviour
 {
-	#region Input Settings
 
-	[Header("Input Settings")]
+    #region References
 
-    [SerializeField]
-    private KeyCode jumpKey = KeyCode.Space;
-    [SerializeField]
-    private KeyCode runKey = KeyCode.LeftShift;
-    [SerializeField]
-    private bool invertRun = true;
-    [SerializeField]
-    private KeyCode dodgeKey = KeyCode.LeftControl;
-    [SerializeField]
-    private KeyCode targetKey = KeyCode.F;
-    [SerializeField]
-    private MouseButtonCode attackButton = MouseButtonCode.LeftButton;
-    [SerializeField]
-    private KeyCode pauseKey = KeyCode.Escape;
-
-	#endregion
-
-	#region References
-
-	public bool Jump => Input.GetKeyDown(jumpKey);
-    public bool Run
-    { 
-        get
-        {
-            var run = Input.GetKey(runKey);
-            if (invertRun)
-                run = !run;
-            return run;
-        } 
-    }
-    public bool Dodge => Input.GetKeyDown(dodgeKey);
-    public bool Target => Input.GetKeyDown(targetKey);
-    public bool Attack => Input.GetMouseButtonDown((int)attackButton);
-    public bool Pause => Input.GetKeyDown(pauseKey);
+    public bool Jump => Input.GetAxis("Jump") > 0;
+    public bool Run => Input.GetAxis("Run") > 0;
+    public bool Dodge => Input.GetAxis("Dodge") > 0;
+    public bool Target => Input.GetAxis("Target") > 0;
+    public bool Attack => Input.GetAxis("Fire1") > 0;
+    public bool Pause => Input.GetAxis("Pause") > 0;
     public float Horizontal => Input.GetAxisRaw("Horizontal");
     public float Vertical => Input.GetAxisRaw("Vertical");
     public float MouseScrollWheel => -Input.GetAxisRaw("Mouse ScrollWheel");
+    //public bool OpenInventory => Input.GetAxis("Inventory") > 0;
+    
+    public bool Interact => Input.GetAxis("Interact") > 0;
 
     #endregion
 
     private void Update()
     {
-        if (Pause)
+        /*if (Pause)
         {
-            //GameManager.Instance.PauseGame();
+            GameManager.Instance.PauseGame();
         }
+
+        if (GetKeyDown("Inventory"))
+        {
+            ui.ToggleInventory();
+        }*/
     }
 
 }

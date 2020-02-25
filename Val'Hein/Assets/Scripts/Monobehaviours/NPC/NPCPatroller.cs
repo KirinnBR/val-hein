@@ -36,8 +36,8 @@ public class NPCPatroller : NPC
 	// Update is called once per frame
 	private void Update()
 	{
-		UpdateActualState();
-		UpdateAnimator();
+		//UpdateActualState();
+		//UpdateAnimator();
 	}
 
 	private void UpdateActualState()

@@ -63,7 +63,7 @@ public class NPC : MonoBehaviour, IDamageable
 	[Header("Item Drop Settings")]
 
 	[SerializeField]
-	private ItemPickUp[] itemsToDrop;
+	private Item[] itemsToDrop;
 
 	#endregion
 
@@ -344,18 +344,22 @@ public class NPC : MonoBehaviour, IDamageable
 			Die();
 		else
 		{
-			anim.SetTrigger("Hurt");
-			FinishAnimation();
+			//anim.SetTrigger("Hurt");
+			//FinishAnimation();
 		}
 	}
 
 	protected virtual void Die()
 	{
 		StopAllCoroutines();
+		foreach (var item in itemsToDrop)
+		{
+			item.Spawn(transform.position);
+		}
 		CurrentHealth = 0;
 		GetComponent<Collider>().enabled = false;
-		FinishAnimation();
-		anim.SetTrigger("Die");
+		//FinishAnimation();
+		//anim.SetTrigger("Die");
 	}
 
 	#endregion

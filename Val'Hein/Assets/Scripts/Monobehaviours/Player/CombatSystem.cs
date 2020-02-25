@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.Events;
 
 #pragma warning disable CS0649
 public class CombatSystem : MonoBehaviour
@@ -47,7 +48,9 @@ public class CombatSystem : MonoBehaviour
 	private Coroutine trackAnimationCoroutine = null;
 	private Coroutine updateTargetCoroutine = null;
 
-	//public bool CanAttack { get; set; } = true;
+	public class HealthEvent : UnityEvent<float> { }
+
+	public HealthEvent onHealthChange = new HealthEvent();
 
 	#endregion
 
@@ -76,6 +79,10 @@ public class CombatSystem : MonoBehaviour
 	// Update is called once per frame
 	private void Update()
 	{
+		if (Input.GetKeyDown(KeyCode.K))
+		{
+			TakeDamage(10f);
+		}
 		ProccessInput();
 		anim.SetBool("On Combat", onCombat);
 	}
@@ -234,9 +241,19 @@ public class CombatSystem : MonoBehaviour
 		FinishAnimation();
 		anim.SetTrigger("Hurt");
 		CurrentHealth -= ammount;
-		//OnTakeDamage.Invoke(CurrentHealth);
+		onHealthChange.Invoke(CurrentHealth);
 		if (CurrentHealth <= 0)
 			Die();
+	}
+
+	public void HealDamage(float amount)
+	{
+		CurrentHealth += amount;
+		if (CurrentHealth > stats.baseHealth)
+		{
+			CurrentHealth = stats.baseHealth;
+		}
+		onHealthChange.Invoke(CurrentHealth);
 	}
 
 	private void Die()
@@ -260,7 +277,6 @@ public class CombatSystem : MonoBehaviour
 		{
 			if (currentFrame == CurrentAttack.animationLength)
 			{
-				Debug.Log("Animation finished. Frames: " + currentFrame);
 				FinishAnimation();
 				break;
 			}
@@ -353,7 +369,6 @@ public class CombatSystem : MonoBehaviour
 				else
 				{
 					completeTwirl = false;
-					continue;
 				}
 			}
 

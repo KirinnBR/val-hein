@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Level Definitions", menuName = "Entities/Stats/LevelDefinitions")]
+[CreateAssetMenu(fileName = "New Level Definitions", menuName = "Entities/Level Definitions")]
 public class LevelDefinitions : ScriptableObject
 {
 	[System.Serializable]

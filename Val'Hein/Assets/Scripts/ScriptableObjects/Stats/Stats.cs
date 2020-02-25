@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Stats", menuName = "Entities/Stats/Stats")]
+[CreateAssetMenu(fileName = "New Stats", menuName = "General/Stats")]
 public class Stats : ScriptableObject
 {
 	[Header("Vitals")]
 	[Header("Standart Stats")]
 	public float baseHealth = 100f;
-	public float baseResistance = 10f;
+	//public float baseMana = 100f;
 	public float baseStamina = 100f;
+	public float baseResistance = 10f;
 
-	[Header("Physical damage")]
+	[Header("Physical Damage")]
 	public float baseStrength = 10f;
 	[Range(0, 100)]
 	public float basePrecision = 50f;
@@ -21,8 +22,22 @@ public class Stats : ScriptableObject
 	public float baseIntelligence = 10f;
 	public float baseRunicKnowledge = 10f;
 
-	[Header("Physical speed")]
+	[Header("Physical Speed")]
 	public float baseAgility = 10f;
+
+	public void MergeStats(Stats otherStats)
+	{
+		baseHealth += otherStats.baseHealth;
+		baseStamina += otherStats.baseStamina;
+		baseResistance += otherStats.baseResistance;
+		baseStrength += otherStats.baseStrength;
+		basePrecision += otherStats.basePrecision;
+		basePower += otherStats.basePower;
+		baseIntelligence += otherStats.baseIntelligence;
+		baseRunicKnowledge += otherStats.baseRunicKnowledge;
+		baseAgility += otherStats.baseAgility;
+	}
+
 
 	public override string ToString()
 	{
