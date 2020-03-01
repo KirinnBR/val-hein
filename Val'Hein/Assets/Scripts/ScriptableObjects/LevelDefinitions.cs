@@ -5,19 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Level Definitions", menuName = "Entities/Level Definitions")]
 public class LevelDefinitions : ScriptableObject
 {
-	[System.Serializable]
-	public class StatsLevelUp
-	{
-		public float healthModifier;
-		public float resistanceModifier;
-		public float strengthModifier;
-		public float precisionModifier;
-		public float powerModifier;
-		public float intelligenceModifier;
-		public float runicKnowledgeModifier;
-		public float agilityModifier;
-		public float experienceToLevelUpModifier;
-	}
 
 	[Header("Experience")]
 	[HideInInspector]
@@ -25,7 +12,6 @@ public class LevelDefinitions : ScriptableObject
 	public float experienceToLevelUp = 100f;
 	[HideInInspector]
 	public int level = 1;
-	public StatsLevelUp[] onLevelUps;
 
 	[Header("References")]
 	public Stats statsToIncrease;
@@ -37,10 +23,14 @@ public class LevelDefinitions : ScriptableObject
 		{
 			LevelUp();
 		}
+		
 	}
+	
 
 	public void LevelUp()
 	{
+		Debug.Log("Leveled up!");
+		/*
 		level++;
 		experience = 0;
 		var modifiers = onLevelUps[level - 1];
@@ -53,6 +43,7 @@ public class LevelDefinitions : ScriptableObject
 		statsToIncrease.baseRunicKnowledge += modifiers.runicKnowledgeModifier;
 		statsToIncrease.baseAgility += modifiers.agilityModifier;
 		experienceToLevelUp += modifiers.experienceToLevelUpModifier;
+		*/
 	}
 
 }

@@ -5,48 +5,27 @@ using UnityEngine.UI;
 
 #pragma warning disable CS0649
 
-[RequireComponent(typeof(ControllerSystem), typeof(CombatSystem), typeof(UISystem))]
-[RequireComponent(typeof(InputSystem), typeof(InventorySystem), typeof(Animator))]
+[RequireComponent(typeof(PlayerControllerSystem), typeof(PlayerCombatSystem), typeof(PlayerUISystem))]
+[RequireComponent(typeof(PlayerInputSystem), typeof(PlayerInventorySystem), typeof(Animator))]
 public class PlayerCenterControl : Singleton<PlayerCenterControl>
 {
-	#region Scriptable Objects References
-
-	[Header("Scriptable Objects References")]
-
-	[Tooltip("The armor settings the player is using.")]
-	[SerializeField]
-	private ArmorSet armor;
-	public ArmorSet Armor { get => armor; }
-
-	[Tooltip("The player's stats.")]
-	[SerializeField]
-	private Stats stats;
-	public Stats Stats { get => stats; }
-
-	[Tooltip("The level data for player.")]
-	[SerializeField]
-	private LevelDefinitions level;
-	public LevelDefinitions Level { get => level; }
-
-	#endregion
-
 	#region Layer References
 
 	[Header("Layer References")]
 
 	[Tooltip("The LayerMask that the player's physics calculations will use.")]
 	[SerializeField]
-	private LayerMask physicsCheckLayer;
-	public LayerMask PhysicsCheckLayer { get => physicsCheckLayer; }
+	private LayerMask m_physicsCheckLayer;
+	public LayerMask physicsCheckLayer => m_physicsCheckLayer;
 
 	[Tooltip("The LayerMask that the player's combat physics calculations will use.")]
 	[SerializeField]
-	private LayerMask combatCheckLayer;
-	public LayerMask CombatCheckLayer { get => combatCheckLayer; }
+	private LayerMask m_combatCheckLayer;
+	public LayerMask combatCheckLayer => m_combatCheckLayer;
 
 	[SerializeField]
-	private LayerMask itemsLayer;
-	public LayerMask ItemsLayer { get => itemsLayer; }
+	private LayerMask m_itemsLayer;
+	public LayerMask itemsLayer => m_itemsLayer;
 
 	#endregion
 
@@ -56,18 +35,18 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 
 	[Tooltip("The camera that this player will use.")]
 	[SerializeField]
-	private new CameraBehaviour camera;
-	public CameraBehaviour Camera { get => camera; }
+	private CameraBehaviour m_camera;
+	public new CameraBehaviour camera => m_camera;
 
 	#endregion
 
 	#region Required Components Instances
 
-	public ControllerSystem controller { get; private set; }
-	public CombatSystem combat { get; private set; }
-	public InputSystem input { get; private set; }
-	public InventorySystem inventory { get; private set; }
-	public UISystem ui { get; private set; }
+	public PlayerControllerSystem controller { get; private set; }
+	public PlayerCombatSystem combat { get; private set; }
+	public PlayerUISystem ui { get; private set; }
+	public PlayerInputSystem input { get; private set; }
+	public PlayerInventorySystem inventory { get; private set; }
 	public Animator anim { get; private set; }
 
 	#endregion
@@ -75,12 +54,11 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 	protected override void Awake()
 	{
 		base.Awake();
-		controller = GetComponent<ControllerSystem>();
-		combat = GetComponent<CombatSystem>();
-		input = GetComponent<InputSystem>();
-		inventory = GetComponent<InventorySystem>();
-		ui = GetComponent<UISystem>();
+		controller = GetComponent<PlayerControllerSystem>();
+		combat = GetComponent<PlayerCombatSystem>();
+		input = GetComponent<PlayerInputSystem>();
+		inventory = GetComponent<PlayerInventorySystem>();
+		ui = GetComponent<PlayerUISystem>();
 		anim = GetComponent<Animator>();
-		//playerClass = GetComponent<PlayerClass>();
 	}
 }

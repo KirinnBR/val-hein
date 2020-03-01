@@ -6,18 +6,11 @@ public class Attack
 {
 	[Tooltip("Multiplier damage a certain attack will deal.")]
 	[Range(1f, 10f)]
-	public float damageMultiplier;
+	public int damageMultiplier;
 	[Tooltip("The length of the specific attack animation.")]
 	public int animationLength;
 	[Tooltip("When to enable and disable Hit Markers. P.S.: X and Y must always be lesser than Animation Length. X must always be lesser than Y.")]
 	public Vector2[] hitMarkersTime;
-
-	public Attack()
-	{
-		damageMultiplier = 1f;
-		animationLength = 30;
-	}
-
 }
 
 [System.Serializable]

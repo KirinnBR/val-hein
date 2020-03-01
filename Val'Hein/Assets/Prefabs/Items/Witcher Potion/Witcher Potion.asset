@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3591cb89e305c6c41a80568594800ada, type: 3}
+  m_Name: Witcher Potion
+  m_EditorClassIdentifier: 
+  name: Witcher Potion
+  icon: {fileID: 21300000, guid: 36adb488844a0854a9e9d13db5e54729, type: 3}
+  dropRate: 100
+  sellValue: 100
+  weight: 5.5
+  buffStats:
+    vitals:
+      health: 50
+      mana: 50
+      stamina: 50
+    attributes:
+      resistance: 15
+      strength: 20
+      precision: 25
+      power: 30
+      intelligence: 35
+      runicKnowledge: 40
+      agility: 45
+  buffTime: 10

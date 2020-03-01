@@ -5,9 +5,11 @@ using UnityEngine;
 public class TestEnemy : MonoBehaviour, IDamageable
 {
 
-    public float health = 100f;
+    public int health = 100;
 
-    public void TakeDamage(float ammount)
+    public Stats Stats => new Stats();
+
+    public void TakeDamage(int ammount)
     {
         health -= ammount;
         if (health <= 0)

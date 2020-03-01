@@ -126,8 +126,8 @@ public class NPCPatroller : NPC
 		{
 			anim.SetFloat("Speed", agent.velocity.magnitude);
 			//Set bidimensional parameters, like:
-			//anim.SetFloat("Speed X", agent.velocity.x);
-			//anim.SetFloat("Speed Y", agent.velocity.y);
+			anim.SetFloat("Speed X", agent.velocity.x);
+			anim.SetFloat("Speed Y", agent.velocity.y);
 		}
 	}
 
@@ -258,9 +258,7 @@ public class NPCPatroller : NPC
 
 	private IEnumerator BeastCombat()
 	{
-#pragma warning disable CS0162
-		Debug.LogWarning("Beast Combat on development.");
-		yield break;
+		throw new System.NotImplementedException("Beast Combat on development.");
 
 		void MoveAgent(Vector3 point)
 		{
@@ -310,8 +308,7 @@ public class NPCPatroller : NPC
 
 	private IEnumerator HumanCombat()
 	{
-		Debug.LogWarning("Human Combat on development.");
-		yield break;
+		throw new System.NotImplementedException("Beast Combat on development.");
 
 		void MoveAgent(Vector3 point)
 		{

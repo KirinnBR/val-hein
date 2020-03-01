@@ -6,15 +6,13 @@ public class Weapon : MonoBehaviour
 {
 	public Stats statsIncreasers;
 
-	private Stats userStats;
-
 	public CombatSettings combatSettings;
 
 	private Coroutine activeMarkersCoroutine;
 
-	private float finalDamage;
+	private int finalDamage;
 
-	private float damageMultiplier;
+	private int damageMultiplier;
 
 	private HitMarkerConfigurer hitMarkerManager { get { return combatSettings.hitMarkerManager; } }
 	private HitMarker[] hitMarkers { get { return combatSettings.hitMarkers; } }
@@ -24,13 +22,7 @@ public class Weapon : MonoBehaviour
 		hitMarkerManager.ConfigureMarkers(hitMarkers);
 	}
 
-	public void MergeStatsWithUser(Stats stats)
-	{
-		userStats = stats;
-		finalDamage = statsIncreasers.baseStrength + userStats.baseStrength;
-	}
-
-	public void ActivateMarkers(float multiplier)
+	public void ActivateMarkers(int multiplier)
 	{
 		damageMultiplier = multiplier;
 		if (combatSettings.continuousDamage)

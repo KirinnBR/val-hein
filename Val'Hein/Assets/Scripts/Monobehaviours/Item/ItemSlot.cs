@@ -8,10 +8,8 @@ public class ItemSlot : MonoBehaviour
 {
 	public ItemData item { get; set; }
 
-	private Image img;
-    private Button btn;
-
-    private InventorySystem inventory { get { return PlayerCenterControl.Instance.inventory; } }
+	protected Image img;
+    protected Button btn;
 
     private void Start()
     {
@@ -20,31 +18,27 @@ public class ItemSlot : MonoBehaviour
         btn.onClick.AddListener(UseItem);
     }
 
-    public void SetSlot(ItemData newItem)
+    public virtual void SetSlot(ItemData newItem)
     {
         item = newItem;
-        img.sprite = item.sprite;
-        img.enabled = true;
-        Debug.Log("New slot on " + name + ": " + item.name);
+        img.sprite = item.icon;
     }
 
-    public void ClearSlot()
+    public virtual void ClearSlot()
+    {
+        item = null;
+        img.sprite = null;
+    }
+
+    public virtual void UseItem()
     {
         if (item != null)
         {
-            Debug.Log("Cleared slot " + name + ": " + item.name);
+            item.Use();
         }
-        
-        item = null;
-        img.sprite = null;
-        img.enabled = false;
-    }
-
-    public void UseItem()
-    {
-        if (item.Use())
+        else
         {
-            inventory.RemoveItem(item);
+            Debug.Log("There's nothing in this slot.");
         }
     }
 

@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ArmorType
-{
-	Head, Chest, Hands, Legs, Boots, Misc
-}
-
 [CreateAssetMenu(fileName = "New Armor Set", menuName = "Entities/Armor Set")]
 public class ArmorSet : ScriptableObject
 {
@@ -19,4 +14,9 @@ public class ArmorSet : ScriptableObject
 	};
 
 	public Armor[] armorParts;
+}
+
+public enum ArmorType
+{
+	Head, Chest, Hands, Legs, Boots, Misc
 }

@@ -29,11 +29,13 @@ public class NPCEditor : Editor
 	{
 		Vector3 dirAngleA = npc.DirFromAngle(-npc.normalVisionAngle / 2, false);
 		Vector3 dirAngleB = npc.DirFromAngle(npc.normalVisionAngle / 2, false);
-		Handles.color = Color.white;
-		Handles.DrawWireArc(npc.transform.position, Vector3.up, Vector3.forward, 360, npc.wideDistanceVisionRadius);
+		Handles.color = Color.yellow;
+		Handles.DrawWireArc(npc.transform.position, Vector3.up, Vector3.forward, 360f, npc.wideDistanceVisionRadius);
 		Handles.color = Color.red - new Color(0f, 0f, 0f, 0.6f);
-		Handles.DrawSolidArc(npc.transform.position, Vector3.up, dirAngleB, 360 - npc.normalVisionAngle, npc.perifericVisionRadius);
+		Handles.DrawSolidArc(npc.transform.position, Vector3.up, dirAngleB, 360f - npc.normalVisionAngle, npc.perifericVisionRadius);
 		Handles.DrawSolidArc(npc.transform.position, Vector3.up, dirAngleA, npc.normalVisionAngle, npc.normalVisionRadius);
+		Handles.color = Color.white;
+		Handles.DrawWireArc(npc.transform.position, Vector3.up, npc.transform.forward, 360f, npc.DropRange);
 
 		if (npc is NPCArcher)
 			DrawArcherGUI();

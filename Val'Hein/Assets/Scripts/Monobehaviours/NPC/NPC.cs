@@ -63,7 +63,11 @@ public class NPC : MonoBehaviour, IDamageable
 	[Header("Item Drop Settings")]
 
 	[SerializeField]
-	private Item[] itemsToDrop;
+	private float dropRange = 2f;
+	public float DropRange => dropRange;
+
+	[SerializeField]
+	private ItemObject[] itemsToDrop;
 
 	#endregion
 
@@ -71,9 +75,11 @@ public class NPC : MonoBehaviour, IDamageable
 
 	[Header("Combat Settings")]
 
-	[Tooltip("Stats of the NPC.")]
 	[SerializeField]
 	protected Stats stats;
+
+	public Stats Stats => stats;
+
 	[SerializeField]
 	protected List<NPCAttack> attacks;
 	[SerializeField]
@@ -132,6 +138,7 @@ public class NPC : MonoBehaviour, IDamageable
 	#endregion
 
 	protected Animator anim;
+
 #if UNITY_EDITOR
 	/*Editor utility.*/
 	public Vector3 StartPos { get; set; }
@@ -141,7 +148,7 @@ public class NPC : MonoBehaviour, IDamageable
 #if UNITY_EDITOR
 		StartPos = transform.position;
 #endif
-		CurrentHealth = stats.baseHealth;
+		CurrentHealth = stats.health;
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 		npcCanvas = canvas.GetComponent<Canvas>();
@@ -155,9 +162,16 @@ public class NPC : MonoBehaviour, IDamageable
 			attacksPerCombo = Random.Range(1, attacks.Count);
 
 		if (hasWeapon)
-			weapon.MergeStatsWithUser(stats);
+			stats += weapon.statsIncreasers;
 		else
 			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers);
+
+		if (referenceCamera == null)
+		{
+			Debug.LogWarning("Reference camera not set. Using MainCamera instead.");
+			referenceCamera = Camera.main;
+		}
+		npcCanvas.GetComponent<Canvas>().worldCamera = referenceCamera;
 
 		agent.acceleration = agentAcceleration;
 		agent.angularSpeed = agentAngularSpeed;
@@ -168,8 +182,7 @@ public class NPC : MonoBehaviour, IDamageable
 	{
 		SearchObjects();
 		UpdateUIElements();
-		if (referenceCamera != null)
-			canvas.transform.LookAt(referenceCamera.transform, Vector3.up);
+		canvas.transform.LookAt(referenceCamera.transform, Vector3.up);
 	}
 
 	protected void UpdateUIElements()
@@ -268,7 +281,7 @@ public class NPC : MonoBehaviour, IDamageable
 		}
 	}
 
-	protected void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.baseStrength * CurrentAttack.damageMultiplier);
+	protected void DoDamage(IDamageable dmg) => dmg.TakeDamage(stats.strength * CurrentAttack.damageMultiplier);
 
 	protected IEnumerator SetAttackCooldown()
 	{
@@ -334,12 +347,12 @@ public class NPC : MonoBehaviour, IDamageable
 
 	#region IDamageable Methods
 
-	public virtual void TakeDamage(float ammount)
+	public virtual void TakeDamage(int ammount)
 	{
 		if (IsDefending)
-			CurrentHealth -= ammount - stats.baseResistance * 2;
+			CurrentHealth -= ammount - stats.resistance * 2;
 		else
-			CurrentHealth -= ammount - stats.baseResistance;
+			CurrentHealth -= ammount - stats.resistance;
 		if (CurrentHealth <= 0)
 			Die();
 		else
@@ -354,7 +367,12 @@ public class NPC : MonoBehaviour, IDamageable
 		StopAllCoroutines();
 		foreach (var item in itemsToDrop)
 		{
-			item.Spawn(transform.position);
+			var randomAngle = Random.value * 360;
+			Vector3 spawnPos;
+			spawnPos.x = transform.position.x + (dropRange * Mathf.Sin(randomAngle * Mathf.Deg2Rad));
+			spawnPos.y = transform.position.y;
+			spawnPos.z = transform.position.z + (dropRange * Mathf.Cos(randomAngle * Mathf.Deg2Rad));
+			item.Spawn(spawnPos);
 		}
 		CurrentHealth = 0;
 		GetComponent<Collider>().enabled = false;

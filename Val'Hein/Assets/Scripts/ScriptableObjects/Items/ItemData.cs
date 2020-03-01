@@ -1,44 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 
-public enum ItemType
+public abstract class ItemData : ScriptableObject
 {
-    Trash, Consumable, Potion, Armor, Weapon
-}
+    protected PlayerCenterControl player => PlayerCenterControl.Instance;
 
-[CreateAssetMenu(fileName = "New Item", menuName = "Loot/Item")]
-public class ItemData : ScriptableObject
-{
-    [Header("Item Data")]
+    [Header("Basic Item Settings")]
 
     public string name = "Item";
-    public Sprite sprite;
+    public Sprite icon;
     [Range(0.001f, 100f)]
     public float dropRate = 100f;
-    public ItemType itemType = ItemType.Trash;
+    public int sellValue = 100;
+    public float weight = 1f;
 
-    public Stats statsIncreaser;
-
-    public bool Use()
-    {
-        switch (itemType)
-        {
-            case ItemType.Trash:
-                return false;
-            case ItemType.Consumable:
-                PlayerCenterControl.Instance.combat.HealDamage(statsIncreaser.baseHealth);
-                return true;
-            case ItemType.Potion:
-                return true;
-            case ItemType.Armor:
-                return true;
-            case ItemType.Weapon:
-                return true;
-            default:
-                return false;
-        }
-    }
+    public abstract bool Use();
+    public abstract bool Sell();
 
 }
