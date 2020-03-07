@@ -46,6 +46,35 @@ public struct Stats
 	public int runicKnowledge { get => attributes.runicKnowledge; set => attributes.runicKnowledge = value; }
 	public int agility { get => attributes.agility; set => attributes.agility = value; }
 
+	public static Stats ClampStats(Stats toBeClamped, Stats clampReference)
+	{
+		Stats result = toBeClamped;
+
+		result.vitals = VitalsStats.Clamp(result.vitals, clampReference.vitals);
+		result.attributes = AttributeStats.Clamp(result.attributes, clampReference.attributes);
+
+		return result;
+	}
+
+	public static Stats ClampVitals(Stats toBeClamped, Stats clampReference)
+	{
+		Stats result = toBeClamped;
+
+		result.vitals = VitalsStats.Clamp(result.vitals, clampReference.vitals);
+
+		return result;
+	}
+
+	public static Stats ClampAttributes(Stats toBeClamped, Stats clampReference)
+	{
+		Stats result = toBeClamped;
+
+		result.attributes = AttributeStats.Clamp(result.attributes, clampReference.attributes);
+
+		return result;
+	}
+
+
 	public static Stats operator +(Stats a, Stats b)
 	{
 		Stats result = new Stats

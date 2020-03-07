@@ -24,10 +24,11 @@ public class EquipmentItemData : ItemData
 
     public enum EquipmentType
     {
-        Helmet = 0, LeftWeapon = 1, RightWeapon = 2, Gloves = 3, Chest = 4, Pants = 5, Boots = 6
+        Gloves = 0, Chest = 1, Pants = 2, Boots = 3, LeftWeapon = 4, RightWeapon = 5
     }
 
     public static int EquipmentTypeLength => System.Enum.GetValues(typeof(EquipmentType)).Length;
     public int Index => (int)type;
+    public bool IsWeapon => type == EquipmentType.RightWeapon || type == EquipmentType.LeftWeapon;
 
 }

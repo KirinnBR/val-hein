@@ -160,15 +160,16 @@ public class NPC : MonoBehaviour, IDamageable
 
 		if (randomizeAttacksPerCombo)
 			attacksPerCombo = Random.Range(1, attacks.Count);
-
+		/*
 		if (hasWeapon)
 			stats += weapon.statsIncreasers;
 		else
 			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers);
+		*/
 
 		if (referenceCamera == null)
 		{
-			Debug.LogWarning("Reference camera not set. Using MainCamera instead.");
+			Debug.LogWarning("[NPC] Reference camera not set. Using MainCamera instead.");
 			referenceCamera = Camera.main;
 		}
 		npcCanvas.GetComponent<Canvas>().worldCamera = referenceCamera;
@@ -368,10 +369,11 @@ public class NPC : MonoBehaviour, IDamageable
 		foreach (var item in itemsToDrop)
 		{
 			var randomAngle = Random.value * 360;
+			var randomDistance = Random.value * dropRange;
 			Vector3 spawnPos;
-			spawnPos.x = transform.position.x + (dropRange * Mathf.Sin(randomAngle * Mathf.Deg2Rad));
+			spawnPos.x = transform.position.x + (randomDistance * Mathf.Sin(randomAngle * Mathf.Deg2Rad));
 			spawnPos.y = transform.position.y;
-			spawnPos.z = transform.position.z + (dropRange * Mathf.Cos(randomAngle * Mathf.Deg2Rad));
+			spawnPos.z = transform.position.z + (randomDistance * Mathf.Cos(randomAngle * Mathf.Deg2Rad));
 			item.Spawn(spawnPos);
 		}
 		CurrentHealth = 0;

@@ -198,6 +198,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 11172981}
   m_CullTransparentMesh: 0
+--- !u!1 &30578480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 30578481}
+  m_Layer: 8
+  m_Name: Weapon Slot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &30578481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30578480}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.072, y: 0, z: 0.28}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1282938264}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &142278903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1415,6 +1445,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1282938264 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5037966646106102337, guid: bff1a277fc6bef94a943377964f16e43,
+    type: 3}
+  m_PrefabInstance: {fileID: 5146468431644912789}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1337149693
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2374,7 +2410,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c5b1b1e360238144a2e7e72667f182d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  npcName: NPC
+  npcName: Thief
   canvas: {fileID: 2054057959}
   referenceCamera: {fileID: 0}
   perifericVisionRadius: 3
@@ -2387,12 +2423,9 @@ MonoBehaviour:
   obstacleObjectsLayer:
     serializedVersion: 2
     m_Bits: 512
-  dropRange: 2.5
+  dropRange: 3
   itemsToDrop:
-  - {fileID: 3656371549843510347, guid: a97bda1a72badf54fa5e50f6137ffccf, type: 3}
-  - {fileID: 5447941359354131966, guid: 1390066f7d803a7449e774e79afebbd3, type: 3}
-  - {fileID: 3776337407274187604, guid: 38b63bb22d674104cac4443c43c04895, type: 3}
-  - {fileID: 3049331982281666545, guid: 1c4b9cb95a7d5274495c4f446c4c3cf6, type: 3}
+  - {fileID: 781435638697097713, guid: 264ed6c5669600447ae74d939e8477ca, type: 3}
   stats:
     vitals:
       health: 50
@@ -3727,6 +3760,11 @@ PrefabInstance:
       propertyPath: m_camera
       value: 
       objectReference: {fileID: 7655798944353617639}
+    - target: {fileID: 5146468429901762455, guid: bff1a277fc6bef94a943377964f16e43,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5146468429749944368, guid: bff1a277fc6bef94a943377964f16e43,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -3742,11 +3780,6 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 1003021515}
-    - target: {fileID: 5146468429901762455, guid: bff1a277fc6bef94a943377964f16e43,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 420838978915791423, guid: bff1a277fc6bef94a943377964f16e43,
         type: 3}
       propertyPath: m_AnchorMin.y

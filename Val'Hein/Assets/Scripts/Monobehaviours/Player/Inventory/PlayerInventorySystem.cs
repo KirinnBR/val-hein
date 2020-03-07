@@ -5,8 +5,12 @@ using UnityEngine.Events;
 
 public class PlayerInventorySystem : MonoBehaviour
 {
+    [Header("Item detection settings")]
+
     [SerializeField]
-    private float interactSphereRadius = 5f;
+    private Vector3 boxOffset = Vector3.zero;
+    [SerializeField]
+    private Vector3 boxSize = Vector3.one;
     [SerializeField]
     private float m_maxWeight = 100f;
 
@@ -15,19 +19,20 @@ public class PlayerInventorySystem : MonoBehaviour
 
     private PlayerInputSystem input { get => PlayerCenterControl.Instance.input; }
     private PlayerCombatSystem combat { get => PlayerCenterControl.Instance.combat; }
+    private PlayerUISystem ui { get => PlayerCenterControl.Instance.ui; }
     private LayerMask itemsLayer { get => PlayerCenterControl.Instance.itemsLayer; }
 
     public UnityEvent onItemsChangeCallback = new UnityEvent();
 
     public List<ItemData> storedItems { get; private set; } = new List<ItemData>();
-    public EquipmentItemData[] storedEquipment { get; private set; }
-
+    public EquipmentItemData[] storedArmor { get; private set; }
 
     private bool hasItem = false;
+    private Collider itemCollider;
 
     private void Start()
     {
-        storedEquipment = new EquipmentItemData[EquipmentItemData.EquipmentTypeLength];
+        storedArmor = new EquipmentItemData[EquipmentItemData.EquipmentTypeLength];
     }
 
     private void Update()
@@ -36,9 +41,7 @@ public class PlayerInventorySystem : MonoBehaviour
         {
             if (input.Interact)
             {
-                Collider[] itemCollider = new Collider[1];
-                Physics.OverlapSphereNonAlloc(transform.position, interactSphereRadius, itemCollider, itemsLayer);
-                if (itemCollider[0].TryGetComponent(out IInteractable interactable))
+                if (itemCollider.TryGetComponent(out IInteractable interactable))
                 {
                     interactable.Interact();
                 }
@@ -48,28 +51,36 @@ public class PlayerInventorySystem : MonoBehaviour
 
     private void FixedUpdate()
     {
-        hasItem = Physics.CheckSphere(transform.position, interactSphereRadius, itemsLayer);
+        var col = Physics.OverlapBox(transform.position + transform.TransformDirection(boxOffset), boxSize / 2, Quaternion.LookRotation(transform.forward), itemsLayer);
+
+        hasItem = col.Length > 0;
+
+        if (hasItem)
+        {
+            itemCollider = col[0];
+        }
+
+        ui.InteractText.enabled = hasItem;
     }
 
     public bool Equip(EquipmentItemData item)
     {
+        //TODO: Instantiate Equipment in world space.
+
         var itemIndex = item.Index;
-        if (storedEquipment[itemIndex] != null)
+        if (storedArmor[itemIndex] != null)
         {
-            var oldItem = storedEquipment[itemIndex];
-            Debug.Log($"Switching {oldItem.name} to {item.name}");
+            var oldItem = storedArmor[itemIndex];
             storedItems.Add(oldItem);
             
             weight += oldItem.weight;
             combat.Debuff(oldItem.buffStats);
-            storedEquipment[itemIndex] = null;
 
 
             if (storedItems.Remove(item))
             {
                 weight -= item.weight;
-                storedEquipment[itemIndex] = item;
-
+                storedArmor[itemIndex] = item;
                 combat.Buff(item.buffStats);
                 onItemsChangeCallback.Invoke();
                 return true;
@@ -85,8 +96,8 @@ public class PlayerInventorySystem : MonoBehaviour
             {
                 Debug.Log("Equiping item");
                 weight -= item.weight;
-                storedEquipment[itemIndex] = item;
-
+                storedArmor[itemIndex] = item;
+                Debug.Log("Storing armor at " + itemIndex + " index");
                 combat.Buff(item.buffStats);
 
                 onItemsChangeCallback.Invoke();
@@ -103,7 +114,7 @@ public class PlayerInventorySystem : MonoBehaviour
     public bool Unequip(EquipmentItemData item)
     {
         Debug.Log("Unequiping item");
-        storedEquipment[item.Index] = null;
+        storedArmor[item.Index] = null;
         storedItems.Add(item);
         weight += item.weight;
 
@@ -140,10 +151,8 @@ public class PlayerInventorySystem : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        UnityEditor.Handles.color = Color.white;
-        UnityEditor.Handles.DrawWireArc(transform.position, Vector3.up, transform.forward, 360, interactSphereRadius);
-        //Gizmos.color = Color.white;
-        //Gizmos.DrawWireSphere(transform.position, interactSphereRadius);
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(transform.position + transform.TransformDirection(boxOffset), boxSize);
     }
 
 }

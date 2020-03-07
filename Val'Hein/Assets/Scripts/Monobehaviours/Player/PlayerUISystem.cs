@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,10 @@ public class PlayerUISystem : MonoBehaviour
     private GameObject inventoryDisplay;
     [SerializeField]
     private Text weightText;
+    [SerializeField]
+    private Text interactText;
+
+    public Text InteractText => interactText;
 
     private Coroutine changeHealthCoroutine;
 
@@ -67,9 +72,10 @@ public class PlayerUISystem : MonoBehaviour
     public void UpdateInventoryUI()
     {
         var itemSlots = inventoryDisplay.GetComponentsInChildren<ItemSlot>();
-        var equipmentSlots = inventoryDisplay.GetComponentsInChildren<EquipmentSlot>();
+        var equipmentSlots = inventoryDisplay.GetComponentsInChildren<EquipmentSlot>().OrderBy(x => x.equipmentType).ToArray();
+
         int i = 0;
-        while (i < itemSlots.Length || i < equipmentSlots.Length)
+        while (i < itemSlots.Length)
         {
             if (i < inventory.storedItems.Count)
             {
@@ -79,11 +85,12 @@ public class PlayerUISystem : MonoBehaviour
             {
                 itemSlots[i].ClearSlot();
             }
+
             if (i < equipmentSlots.Length)
             {
-                if (inventory.storedEquipment[i] != null)
+                if (inventory.storedArmor[i] != null)
                 {
-                    equipmentSlots[i].SetSlot(inventory.storedEquipment[i]);
+                    equipmentSlots[inventory.storedArmor[i].Index].SetSlot(inventory.storedArmor[i]);
                 }
                 else
                 {

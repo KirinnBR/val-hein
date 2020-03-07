@@ -26,18 +26,18 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 	[SerializeField]
 	private List<PlayerAttack> attacks;
 
-	[Tooltip("Does the player holds some kind of weapon?")]
-	[SerializeField]
-	private bool hasWeapon = true;
+	//[Tooltip("Does the player holds some kind of weapon?")]
+	//[SerializeField]
+	//private bool hasWeapon = true;
 
 	[SerializeField]
 	[ConditionalHide("hasWeapon", false)]
 	private CombatSettings combatSettings;
 
-	[Tooltip("The weapon the player is holding")]
-	[ConditionalHide("hasWeapon", true)]
-	[SerializeField]
-	private Weapon weapon;
+	//[Tooltip("The weapon the player is holding")]
+	//[ConditionalHide("hasWeapon", true)]
+	//[SerializeField]
+	//private Weapon weapon;
 
 	public HealthEvent onHealthChanged = new HealthEvent();
 	
@@ -80,10 +80,7 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 
 	void Start()
 	{
-		if (hasWeapon)
-			stats += weapon.statsIncreasers;
-		else
-			combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers);
+		combatSettings.hitMarkerManager.ConfigureMarkers(hitMarkers);
 		currentStats = stats;
 	}
 	// Update is called once per frame
@@ -201,23 +198,15 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 
 	private void ActivateMarkers()
 	{
-		if (hasWeapon)
-			weapon.ActivateMarkers(currentAttack.damageMultiplier);
+		if (combatSettings.continuousDamage)
+			activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
 		else
-		{
-			if (combatSettings.continuousDamage)
-				activeMarkersCoroutine = StartCoroutine(CheckCollisionsContinuous());
-			else
-				activeMarkersCoroutine = StartCoroutine(CheckCollisions());
-		}
+			activeMarkersCoroutine = StartCoroutine(CheckCollisions());
 	}
 
 	private void DeactivateMarkers()
 	{
-		if (hasWeapon)
-			weapon.DeactivateMarkers();
-		else
-			StopCoroutine(activeMarkersCoroutine);
+		StopCoroutine(activeMarkersCoroutine);
 	}
 
 	private void FinishAnimation()
@@ -261,9 +250,10 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 		Debug.LogError("Player died");
 	}
 
-	public void Heal(int amount)
+	public void Heal(VitalsStats vitalsHeal)
 	{
-		currentStats.health += amount;
+		currentStats += vitalsHeal;
+		currentStats = Stats.ClampVitals(currentStats, stats);
 
 		if (currentStats.health > stats.health)
 			currentStats.health = stats.health;
@@ -271,16 +261,28 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 		onHealthChanged.Invoke(currentStats.health);
 	}
 
-	public void Buff(AttributeStats buffStats)
+	public void Buff(Stats buffStats)
 	{
-		stats += buffStats;
 		currentStats += buffStats;
+		stats += buffStats;
 	}
 
-	public void Debuff(AttributeStats debuffStats)
+	public void Debuff(Stats buffStats)
 	{
-		stats -= debuffStats;
-		currentStats -= debuffStats;
+		stats -= buffStats;
+		currentStats = Stats.ClampStats(currentStats, stats);
+	}
+
+	public void Buff(AttributeStats buffAttributes)
+	{
+		stats += buffAttributes;
+		currentStats += buffAttributes;
+	}
+
+	public void Debuff(AttributeStats debuffAttributes)
+	{
+		stats -= debuffAttributes;
+		currentStats = Stats.ClampStats(currentStats, stats);
 	}
 
 	public void Buff(Stats buffStats, float buffTime)
@@ -290,63 +292,37 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 		trackBuffDebuffCoroutine = StartCoroutine(TrackBuffDebuff(buffStats, buffTime, true));
 	}
 
-	public void Debuff(Stats buffStats, float buffTime)
+	public void Debuff(Stats debuffStats, float buffTime)
 	{
 		if (trackBuffDebuffCoroutine != null)
 			StopCoroutine(trackBuffDebuffCoroutine);
-		trackBuffDebuffCoroutine = StartCoroutine(TrackBuffDebuff(buffStats, buffTime, false));
+		trackBuffDebuffCoroutine = StartCoroutine(TrackBuffDebuff(debuffStats, buffTime, false));
 	}
 
 	private IEnumerator TrackBuffDebuff(Stats buffStats, float buffTime, bool isBuff)
 	{
-		Debug.Log("Player stats buffed.");
-		stats += buffStats;
-		currentStats += buffStats;
-		onHealthChanged.Invoke(currentStats.health);
-		yield return new WaitForSeconds(buffTime);
-		Debug.Log("Buff time is over");
-		stats -= buffStats;
-		ClampStats();
-		onHealthChanged.Invoke(currentStats.health);
+		if (isBuff)
+		{
+			stats += buffStats;
+			currentStats += buffStats;
+			onHealthChanged.Invoke(currentStats.health);
+			yield return new WaitForSeconds(buffTime);
+			stats -= buffStats;
+			currentStats = Stats.ClampStats(currentStats, stats);
+			onHealthChanged.Invoke(currentStats.health);
+		}
+		else
+		{
+			stats -= buffStats;
+			currentStats = Stats.ClampStats(currentStats, stats);
+			onHealthChanged.Invoke(currentStats.health);
+			yield return new WaitForSeconds(buffTime);
+
+		}
+
+		
 	}
 
-	public void MergeVitals(VitalsStats vitals)
-	{
-		Debug.Log("Player has been healed in " + vitals.health + " points.");
-		currentStats += vitals;
-		ClampVitals();
-		onHealthChanged.Invoke(currentStats.health);
-	}
-
-	public void MergeAttributes(AttributeStats attributes)
-	{
-		currentStats += attributes;
-		ClampAttributes();
-	}
-
-	private void ClampStats()
-	{
-		ClampVitals();
-		ClampAttributes();
-	}
-
-	private void ClampVitals()
-	{
-		if (currentStats.health > stats.health) currentStats.health = stats.health;
-		if (currentStats.mana > stats.mana) currentStats.mana = stats.mana;
-		if (currentStats.stamina > stats.stamina) currentStats.stamina = stats.stamina;
-	}
-
-	private void ClampAttributes()
-	{
-		if (currentStats.agility > stats.agility) currentStats.agility = stats.agility;
-		if (currentStats.intelligence > stats.intelligence) currentStats.intelligence = stats.intelligence;
-		if (currentStats.power > stats.power) currentStats.power = stats.power;
-		if (currentStats.precision > stats.precision) currentStats.precision = stats.precision;
-		if (currentStats.resistance > stats.resistance) currentStats.resistance = stats.resistance;
-		if (currentStats.runicKnowledge > stats.runicKnowledge) currentStats.runicKnowledge = stats.runicKnowledge;
-		if (currentStats.strength > stats.strength) currentStats.strength = stats.strength;
-	}
 
 	#endregion
 

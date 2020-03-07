@@ -23,6 +23,22 @@ public struct AttributeStats
 		this.agility = agility;
 	}
 
+	public static AttributeStats Clamp(AttributeStats toBeClamped, AttributeStats clampReference)
+	{
+		var result = toBeClamped;
+
+		if (result.agility > clampReference.agility) result.agility = clampReference.agility;
+		if (result.intelligence > clampReference.intelligence) result.intelligence = clampReference.intelligence;
+		if (result.power > clampReference.power) result.power = clampReference.power;
+		if (result.precision > clampReference.precision) result.precision = clampReference.precision;
+		if (result.resistance > clampReference.resistance) result.resistance = clampReference.resistance;
+		if (result.runicKnowledge > clampReference.runicKnowledge) result.runicKnowledge = clampReference.runicKnowledge;
+		if (result.strength > clampReference.strength) result.strength = clampReference.strength;
+
+
+		return result;
+	}
+
 	public static AttributeStats operator +(AttributeStats a, AttributeStats b)
 	{
 		AttributeStats result = new AttributeStats

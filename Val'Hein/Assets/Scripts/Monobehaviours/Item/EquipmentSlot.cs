@@ -13,6 +13,8 @@ public class EquipmentSlot : MonoBehaviour
     private Image img;
     private Button btn;
 
+    private PlayerInventorySystem inventory => PlayerCenterControl.Instance.inventory;
+
     private void Start()
     {
         img = GetComponent<Image>();
@@ -34,15 +36,7 @@ public class EquipmentSlot : MonoBehaviour
 
     public void UseItem()
     {
-        if (item != null)
-        {
-            item.Use();
-        }
-        else
-        {
-            Debug.Log("There's nothing in this slot.");
-        }
+        inventory.Unequip(item);
     }
-
 
 }

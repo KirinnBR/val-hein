@@ -37,6 +37,7 @@ public class PlayerControllerSystem : MonoBehaviour
 	[Tooltip("The force of the dodge.")]
 	private float dodgeForce = 10f;
 	public bool IsJumping { get; private set; } = false;
+	private bool canJump = true;
 	public bool IsDodging { get; private set; } = false;
 	public bool RotationBlocked { get; set; } = false;
 	public bool MovementBlocked { get; set; } = false;
@@ -103,6 +104,7 @@ public class PlayerControllerSystem : MonoBehaviour
 		{
 			if (knockingOnRoof)
 				motionVertical = 0f;
+
 		}
 		else if (wasGrounded && !isGrounded)
 		{
@@ -157,16 +159,8 @@ public class PlayerControllerSystem : MonoBehaviour
 		
 		if (dir != Vector3.zero)
 		{
-			if (IsJumping)
-			{
-				motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime * jumpControl);
-				Rotate(dir, jumpControl);
-			}
-			else
-			{
-				if (Rotate(dir))
-					motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
-			}
+			if (Rotate(dir))
+				motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
 		}
 		else
 		{
@@ -208,6 +202,10 @@ public class PlayerControllerSystem : MonoBehaviour
 
 	private void Jump()
 	{
+		if (!canJump)
+		{
+			return;
+		}
 		anim.SetTrigger("Jump");
 		motionVertical = Mathf.Sqrt(2 * Gravity * jumpHeight);
 		StartCoroutine(OnJump());
@@ -234,11 +232,12 @@ public class PlayerControllerSystem : MonoBehaviour
 				onSlope = false;
 		}
 	}
-	
+
 	private IEnumerator OnJump()
 	{
 		IsJumping = true;
 		combat.CanAttack = false;
+		canJump = false;
 
 		while (isGrounded)
 		{
@@ -247,9 +246,10 @@ public class PlayerControllerSystem : MonoBehaviour
 				break;
 		}
 		yield return new WaitUntil(() => isGrounded);
-		IsJumping = false;
 		MovementBlocked = true;
-		yield return new WaitForSeconds(0.2f);
+		IsJumping = false;
+		yield return new WaitForSeconds(0.3f);
+		canJump = true;
 		combat.CanAttack = true;
 		MovementBlocked = false;
 	}
