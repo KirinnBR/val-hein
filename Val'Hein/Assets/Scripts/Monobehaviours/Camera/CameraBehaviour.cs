@@ -135,7 +135,7 @@ public class CameraBehaviour : MonoBehaviour
 		}
 		else
 		{
-			collisionTransition = Util.LerpVector(transform.forward * collisionPointDistance, Vector3.zero, 1f, ref curTime);
+			collisionTransition = Util.Lerp(transform.forward * collisionPointDistance, Vector3.zero, 1f, ref curTime);
 			transform.position = point + collisionTransition;
 		}
 	}

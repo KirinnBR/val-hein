@@ -4830,6 +4830,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5146468431328034346, guid: bff1a277fc6bef94a943377964f16e43,
+        type: 3}
+      propertyPath: dodgeTime
+      value: 0.3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bff1a277fc6bef94a943377964f16e43, type: 3}
 --- !u!1 &5181998496461172078

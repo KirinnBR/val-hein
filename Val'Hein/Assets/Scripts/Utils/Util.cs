@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class Util
 {
-    public static bool ChanceOf(float rate)
+	public static bool ChanceOf(float rate)
 	{
 		if (rate > 100 || rate < 0) throw new System.ArgumentOutOfRangeException("rate", rate, "The argument is greater than 100 or less than 0");
 
@@ -18,7 +18,7 @@ public static class Util
 		return (from - to).normalized;
 	}
 
-	public static Vector3 LerpVector(Vector3 from, Vector3 to, float time, ref float curTime)
+	public static Vector3 Lerp(Vector3 from, Vector3 to, float time, ref float curTime)
 	{
 		if (curTime < 0)
 			throw new System.ArgumentOutOfRangeException("curTime", curTime, "curTime must be equals or greater than 0.");
@@ -39,7 +39,22 @@ public static class Util
 		return result;
 	}
 
-	public static float LerpFloat(float from, float to, float time, ref float curTime)
+	public static bool Lerp(Vector3 from, Vector3 to, float time, ref float curTime, CharacterController controller)
+	{
+		if (curTime < 0)
+			throw new System.ArgumentOutOfRangeException("curTime", curTime, "curTime must be equals or greater than 0.");
+		else if (curTime >= time)
+			return true;
+
+		float posTrajectory = curTime / time;
+
+		Vector3 dir = (to - from) * posTrajectory;
+		controller.Move(dir * Time.deltaTime);
+		curTime += Time.deltaTime;
+		return false;
+	}
+
+	public static float Lerp(float from, float to, float time, ref float curTime)
 	{
 		if (curTime < 0)
 			throw new System.ArgumentOutOfRangeException("curTime", curTime, "curTime must be equals or greater than 0.");

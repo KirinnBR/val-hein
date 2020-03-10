@@ -64,6 +64,10 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 	private Coroutine updateTargetCoroutine = null;
 	private Coroutine trackBuffDebuffCoroutine = null;
 
+	private BaseState<PlayerCombatSystem> currentState;
+	public PlayerAttackingState attackingState { get; } = new PlayerAttackingState();
+	public PlayerAttackWaitState attackWaitState { get; } = new PlayerAttackWaitState();
+
 	#endregion
 
 	#region External Properties
@@ -86,10 +90,6 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 	// Update is called once per frame
 	private void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.K))
-		{
-			TakeDamage(20);
-		}
 		ProccessInput();
 		anim.SetBool("On Combat", onCombat);
 	}
@@ -376,7 +376,6 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 	{
 		int aux = currentAttackIndex;
 		yield return new WaitForSeconds(currentAttack.timeToBlendCombo);
-		Debug.Log("Stopped at index " + aux);
 		currentAttackIndex = 0;
 	}
 
@@ -442,7 +441,7 @@ public class PlayerCombatSystem : MonoBehaviour, IDamageable
 			else
 			{
 				var look = Quaternion.LookRotation(new Vector3(targetEnemy.position.x, transform.position.y, targetEnemy.position.z) - transform.position);
-				transform.rotation = Quaternion.Slerp(transform.rotation, look, controller.turnSpeed * Time.deltaTime * 2f);
+				transform.rotation = Quaternion.Slerp(transform.rotation, look, controller.TurnSpeed * Time.deltaTime * 2f);
 				if (Quaternion.Angle(transform.rotation, look) < 5f)
 				{
 					transform.rotation = look;
