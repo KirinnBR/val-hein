@@ -1,6 +1,4 @@
-﻿using System;
-
-[System.Serializable]
+﻿[System.Serializable]
 public struct AttributeStats
 {
 	public int resistance;
@@ -23,20 +21,15 @@ public struct AttributeStats
 		this.agility = agility;
 	}
 
-	public static AttributeStats Clamp(AttributeStats toBeClamped, AttributeStats clampReference)
+	public void Clamp(AttributeStats max)
 	{
-		var result = toBeClamped;
-
-		if (result.agility > clampReference.agility) result.agility = clampReference.agility;
-		if (result.intelligence > clampReference.intelligence) result.intelligence = clampReference.intelligence;
-		if (result.power > clampReference.power) result.power = clampReference.power;
-		if (result.precision > clampReference.precision) result.precision = clampReference.precision;
-		if (result.resistance > clampReference.resistance) result.resistance = clampReference.resistance;
-		if (result.runicKnowledge > clampReference.runicKnowledge) result.runicKnowledge = clampReference.runicKnowledge;
-		if (result.strength > clampReference.strength) result.strength = clampReference.strength;
-
-
-		return result;
+		if (agility > max.agility) agility = max.agility;
+		if (intelligence > max.intelligence) intelligence = max.intelligence;
+		if (power > max.power) power = max.power;
+		if (precision > max.precision) precision = max.precision;
+		if (resistance > max.resistance) resistance = max.resistance;
+		if (runicKnowledge > max.runicKnowledge) runicKnowledge = max.runicKnowledge;
+		if (strength > max.strength) strength = max.strength;
 	}
 
 	public static AttributeStats operator +(AttributeStats a, AttributeStats b)

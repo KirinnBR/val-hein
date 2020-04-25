@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c468ac13243fb904ca501dd233a76bc4, type: 3}
+  m_Name: 1738e913bc2e3064a97b0acc16528ccc
+  m_EditorClassIdentifier: 
+  raycastOffset: {x: 0, y: 1, z: 0}
+  searchWallCooldown: 0.3
+  angle: 180
+  numSamples: 10

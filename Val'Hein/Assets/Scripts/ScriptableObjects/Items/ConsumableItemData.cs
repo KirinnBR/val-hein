@@ -20,7 +20,7 @@ public class ConsumableItemData : ItemData
 
     public override bool Use()
     {
-        player.combat.Heal(vitalsBuffs);
+        //player.combat.Heal(vitalsBuffs);
         player.inventory.RemoveItem(this);
         return true;
     }

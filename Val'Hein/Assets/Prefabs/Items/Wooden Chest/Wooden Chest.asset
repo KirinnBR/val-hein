@@ -17,7 +17,8 @@ MonoBehaviour:
   dropRate: 100
   sellValue: 100
   weight: 50
-  type: 4
+  prefab: {fileID: 3656371549843510350, guid: a97bda1a72badf54fa5e50f6137ffccf, type: 3}
+  type: 1
   buffStats:
     resistance: 100
     strength: 50
@@ -26,3 +27,4 @@ MonoBehaviour:
     intelligence: 58
     runicKnowledge: 800
     agility: 400
+  equipmentPrefab: {fileID: 0}

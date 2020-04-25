@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &30578480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 30578481}
+  m_Layer: 8
+  m_Name: Weapon Slot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &30578481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30578480}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.072, y: 0, z: 0.28}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5037966646106102337}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &76794471453582485
 GameObject:
   m_ObjectHideFlags: 0
@@ -13,7 +43,7 @@ GameObject:
   - component: {fileID: 632439268687909361}
   - component: {fileID: 4508563337021971974}
   - component: {fileID: 6572657996356392794}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (4)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -143,7 +173,7 @@ GameObject:
   - component: {fileID: 1310592006603657606}
   - component: {fileID: 6589120357181963545}
   - component: {fileID: 2348177766021745153}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (32)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -364,7 +394,7 @@ GameObject:
   - component: {fileID: 77930958590450966}
   - component: {fileID: 6811143923219954135}
   - component: {fileID: 3165937355373131143}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (19)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -555,7 +585,7 @@ GameObject:
   - component: {fileID: 297716578219271426}
   - component: {fileID: 7922696269740485922}
   - component: {fileID: 8936422187975057174}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -666,7 +696,7 @@ GameObject:
   - component: {fileID: 3917858904101505238}
   - component: {fileID: 3020945232913773963}
   - component: {fileID: 5409388856484542413}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: ChestItem
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -784,7 +814,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459b7c6e92a9ffe49a478354a14903f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentType: 1
+  equipmentType: 0
 --- !u!1 &490085436063731195
 GameObject:
   m_ObjectHideFlags: 0
@@ -796,7 +826,7 @@ GameObject:
   - component: {fileID: 420276806464418543}
   - component: {fileID: 422493108375750857}
   - component: {fileID: 531034305174312137}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Inventory Display
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -874,7 +904,7 @@ GameObject:
   - component: {fileID: 530421536484049127}
   - component: {fileID: 6519655058957669958}
   - component: {fileID: 1589286042017552184}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -1100,7 +1130,7 @@ GameObject:
   - component: {fileID: 973701183982444935}
   - component: {fileID: 4354962132360367272}
   - component: {fileID: 118287459114495321}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (8)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -1260,7 +1290,7 @@ GameObject:
   - component: {fileID: 6991503357165014882}
   - component: {fileID: 9086017350970244017}
   - component: {fileID: 6819286491655457698}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (14)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -1420,7 +1450,7 @@ GameObject:
   - component: {fileID: 8683444032154582612}
   - component: {fileID: 5943591973481898608}
   - component: {fileID: 4862002123113540256}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (29)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -1609,7 +1639,7 @@ GameObject:
   - component: {fileID: 2299749888820812647}
   - component: {fileID: 4514621621701783957}
   - component: {fileID: 5017258697228614211}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1752,7 +1782,7 @@ GameObject:
   - component: {fileID: 6305341389338873164}
   - component: {fileID: 2464268289672109038}
   - component: {fileID: 6172836959025379377}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (7)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -1880,7 +1910,7 @@ GameObject:
   - component: {fileID: 2054521943747751266}
   - component: {fileID: 5327508239752766137}
   - component: {fileID: 967718487170631012}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2053,8 +2083,8 @@ GameObject:
   - component: {fileID: 3149519500722256887}
   - component: {fileID: 1225210829664706368}
   - component: {fileID: 77734409626849549}
-  - component: {fileID: 4894401753436795889}
-  m_Layer: 8
+  - component: {fileID: 251696623}
+  m_Layer: 5
   m_Name: RightWeaponItem
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -2160,7 +2190,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &4894401753436795889
+--- !u!114 &251696623
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2169,10 +2199,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1796392522969832848}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 459b7c6e92a9ffe49a478354a14903f5, type: 3}
+  m_Script: {fileID: 11500000, guid: 969495253f01d494abeb83b1bd22f1b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentType: 5
+  weaponHand: 1
 --- !u!1 &1803720457369569733
 GameObject:
   m_ObjectHideFlags: 0
@@ -2278,7 +2308,7 @@ GameObject:
   - component: {fileID: 1611397956634688144}
   - component: {fileID: 8266130130926747253}
   - component: {fileID: 7193127767769004827}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (16)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -2408,7 +2438,7 @@ GameObject:
   - component: {fileID: 2092014365007288816}
   - component: {fileID: 2189027846352844111}
   - component: {fileID: 510936832505290845}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (28)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -2632,7 +2662,7 @@ GameObject:
   - component: {fileID: 5647988932094994854}
   - component: {fileID: 5886778811690791205}
   - component: {fileID: 360965559465730140}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: BootsItem
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -2750,7 +2780,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459b7c6e92a9ffe49a478354a14903f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentType: 3
+  equipmentType: 0
 --- !u!1 &2325901269988272283
 GameObject:
   m_ObjectHideFlags: 0
@@ -2764,7 +2794,7 @@ GameObject:
   - component: {fileID: 1261403407138348344}
   - component: {fileID: 6590975569017759910}
   - component: {fileID: 2772154547577879293}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (22)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -2894,7 +2924,7 @@ GameObject:
   - component: {fileID: 975701469206788277}
   - component: {fileID: 787161940721244908}
   - component: {fileID: 2530097990196151506}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (5)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -3208,7 +3238,7 @@ GameObject:
   - component: {fileID: 1714513615020348548}
   - component: {fileID: 4864186371130289430}
   - component: {fileID: 2551796676572718029}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (3)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -3368,7 +3398,7 @@ GameObject:
   - component: {fileID: 4204603756721019889}
   - component: {fileID: 8434144596081594534}
   - component: {fileID: 1543251778505422282}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (25)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -3620,7 +3650,7 @@ GameObject:
   - component: {fileID: 3384351584425645101}
   - component: {fileID: 6779721117919619500}
   - component: {fileID: 628179101123192169}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (24)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -4159,12 +4189,13 @@ GameObject:
   - component: {fileID: 148998169202578759}
   - component: {fileID: 7825948601344096317}
   - component: {fileID: 5146468431328034389}
+  - component: {fileID: 4855811830958382548}
   - component: {fileID: 5146468431328034350}
+  - component: {fileID: 4418404045939794325}
   - component: {fileID: 5146468431328034344}
   - component: {fileID: 5146468431328034346}
   - component: {fileID: 4155106828787066971}
   - component: {fileID: 584189520538709793}
-  - component: {fileID: 4418404045939794325}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -4221,11 +4252,24 @@ CharacterController:
   serializedVersion: 2
   m_Height: 1.8
   m_Radius: 0.3
-  m_SlopeLimit: 90
+  m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &4855811830958382548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3767824945763460948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c590817307945b499f614ea889531f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 11400000, guid: 8456d0a2187480244a0da11f1f836b10, type: 2}
 --- !u!114 &5146468431328034350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4238,16 +4282,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b3ee0e84491594db3d5d1e630cef99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_physicsCheckLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  m_combatCheckLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  m_itemsLayer:
-    serializedVersion: 2
-    m_Bits: 1024
   m_camera: {fileID: 0}
+--- !u!114 &4418404045939794325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3767824945763460948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dfc7d0445672b14ebf721dff77d99cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &5146468431328034344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4276,17 +4323,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e03aa9e6c2614b9479cc0020dc069281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 3
-  runSpeed: 6
+  walkSpeed: 5
+  runSpeed: 10
   acceleration: 10
-  stoppingAcceleration: 10
-  turnSpeed: 6
-  jumpHeight: 4
-  jumpControl: 0.5
+  turnSpeed: 8
+  jumpHeight: 5
   dodgeTime: 0.25
-  dodgeForce: 10
+  dodgeDistance: 10
+  groundCheckLayer:
+    serializedVersion: 2
+    m_Bits: 12288
   center: {x: 0, y: 0, z: 0}
-  height: 0.7
+  height: 0.8
+  radius: 0.15
 --- !u!114 &4155106828787066971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4299,71 +4348,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f13ffdece47ca42469c5382af781c5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats:
+  m_stats:
     vitals:
       health: 100
-      mana: 200
+      mana: 100
       stamina: 100
     attributes:
-      resistance: 20
+      resistance: 10
       strength: 30
-      precision: 50
+      precision: 10
       power: 10
-      intelligence: 20
-      runicKnowledge: 15
+      intelligence: 10
+      runicKnowledge: 10
       agility: 10
-  enemyDetectionRadius: 10
-  attacks:
+  m_hitMarkers:
+  - {fileID: 5146468429780585755}
+  - {fileID: 5146468431351926690}
+  - {fileID: 5146468431276423603}
+  - {fileID: 5146468431244143376}
+  - {fileID: 5146468431517122859}
+  - {fileID: 5146468430382534802}
+  m_continuousDamage: 0
+  m_continuousDamageInterval: 0
+  m_combatLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  m_enemyDetectionRadius: 10
+  m_attacks:
   - damageMultiplier: 1
-    animationLength: 24
+    animationLength: 20
     hitMarkersTime:
     - {x: 8, y: 18}
-    timeToBlendCombo: 0.5
+    m_30FramesSample: 0
+    timeToBlendCombo: 1
   - damageMultiplier: 1
-    animationLength: 24
+    animationLength: 20
     hitMarkersTime:
     - {x: 8, y: 18}
-    timeToBlendCombo: 0.5
+    m_30FramesSample: 0
+    timeToBlendCombo: 1
   - damageMultiplier: 1
-    animationLength: 24
+    animationLength: 20
     hitMarkersTime:
     - {x: 8, y: 18}
-    timeToBlendCombo: 0.5
+    m_30FramesSample: 0
+    timeToBlendCombo: 1
   - damageMultiplier: 1
-    animationLength: 24
+    animationLength: 20
     hitMarkersTime:
     - {x: 8, y: 18}
-    timeToBlendCombo: 0.5
-  combatSettings:
-    hitMarkers:
-    - {fileID: 5146468429780585755}
-    - {fileID: 5146468431351926690}
-    - {fileID: 5146468431276423603}
-    - {fileID: 5146468431244143376}
-    - {fileID: 5146468431517122859}
-    - {fileID: 5146468430382534802}
-    hitMarkerManager:
-      ownerTag: Player
-      hitLayer:
-        serializedVersion: 2
-        m_Bits: 256
-      triggerInteraction: 0
-    continuousDamage: 0
-    continuousDamageInterval: 0
-  onHealthChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5146468431328034344}
-        m_MethodName: UpdateHealthBar
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+    m_30FramesSample: 0
+    timeToBlendCombo: 1
+  currentAttackFrame: 0
 --- !u!114 &584189520538709793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4376,9 +4412,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec5ebbd8eb3f30c4daeb8f64086f812a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxOffset: {x: 0, y: 0.8, z: 0.2}
-  boxSize: {x: 0.7, y: 1.8, z: 1}
+  boxOffset: {x: 0, y: 1, z: 0.2}
+  boxSize: {x: 1, y: 2, z: 1}
   m_maxWeight: 100
+  itemsLayer:
+    serializedVersion: 2
+    m_Bits: 2048
   onItemsChangeCallback:
     m_PersistentCalls:
       m_Calls:
@@ -4393,18 +4432,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &4418404045939794325
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3767824945763460948}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1dfc7d0445672b14ebf721dff77d99cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3964288291139906862
 GameObject:
   m_ObjectHideFlags: 0
@@ -4576,7 +4603,7 @@ GameObject:
   - component: {fileID: 7673488830471532743}
   - component: {fileID: 7710337056683264368}
   - component: {fileID: 8590095804458428836}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (20)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -4961,8 +4988,8 @@ GameObject:
   - component: {fileID: 5574824959751562223}
   - component: {fileID: 3297494931288393860}
   - component: {fileID: 4347050139521346970}
-  - component: {fileID: 2767665033373400877}
-  m_Layer: 8
+  - component: {fileID: 558121746}
+  m_Layer: 5
   m_Name: LeftWeaponItem
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -5068,7 +5095,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2767665033373400877
+--- !u!114 &558121746
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5077,10 +5104,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4378993266231253031}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 459b7c6e92a9ffe49a478354a14903f5, type: 3}
+  m_Script: {fileID: 11500000, guid: 969495253f01d494abeb83b1bd22f1b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentType: 4
+  weaponHand: 0
 --- !u!1 &4388878067385979354
 GameObject:
   m_ObjectHideFlags: 0
@@ -5094,7 +5121,7 @@ GameObject:
   - component: {fileID: 3220976845753840507}
   - component: {fileID: 4238348700695659219}
   - component: {fileID: 7037169566863371969}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (33)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -5256,7 +5283,7 @@ GameObject:
   - component: {fileID: 6917018231269648109}
   - component: {fileID: 544607498766875376}
   - component: {fileID: 3197505214417911610}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (10)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -5446,7 +5473,7 @@ GameObject:
   - component: {fileID: 5845299073507623492}
   - component: {fileID: 8521144277797647943}
   - component: {fileID: 8729580906995407703}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Equipment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5557,7 +5584,7 @@ GameObject:
   - component: {fileID: 9047446050899700882}
   - component: {fileID: 3759239623254369253}
   - component: {fileID: 4241922618304052479}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (9)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -5687,7 +5714,7 @@ GameObject:
   - component: {fileID: 7747012446491365167}
   - component: {fileID: 7183875834595023975}
   - component: {fileID: 2885956709869849135}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (18)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -5879,7 +5906,7 @@ GameObject:
   - component: {fileID: 2807297952542069008}
   - component: {fileID: 3119086699757020157}
   - component: {fileID: 6945132659168405334}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Weight Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5957,7 +5984,7 @@ GameObject:
   - component: {fileID: 5146468429709581154}
   - component: {fileID: 5146468429709581155}
   - component: {fileID: 5146468429709581152}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Items
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6015,7 +6042,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 247.2, y: -5}
+  m_AnchoredPosition: {x: 247.20001, y: -5}
   m_SizeDelta: {x: 454.4, y: -30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5146468429709581154
@@ -6089,7 +6116,7 @@ GameObject:
   - component: {fileID: 5146468429749944368}
   - component: {fileID: 5146468429749944370}
   - component: {fileID: 5146468429749944371}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6195,10 +6222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  hitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  ownerTag: Entity
+  showHitLines: 0
 --- !u!1 &5146468429901762452
 GameObject:
   m_ObjectHideFlags: 0
@@ -6211,7 +6235,7 @@ GameObject:
   - component: {fileID: 5146468429901762448}
   - component: {fileID: 5146468429901762449}
   - component: {fileID: 5146468429901762454}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Player Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6232,7 +6256,6 @@ RectTransform:
   - {fileID: 5146468430019160732}
   - {fileID: 420276806464418543}
   - {fileID: 8185848075922950362}
-  - {fileID: 7706511942810718034}
   m_Father: {fileID: 148998169202578759}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6250,9 +6273,9 @@ Canvas:
   m_GameObject: {fileID: 5146468429901762452}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
-  m_PlaneDistance: 15.03
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -6311,7 +6334,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5146468430019160732}
   - component: {fileID: 5146468430019160735}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Player Health Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6413,12 +6436,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5146468430382534800}
-  m_LocalRotation: {x: 0.00013017112, y: 0.00000003641984, z: -4.7320095e-12, w: 1}
-  m_LocalPosition: {x: 0.26, y: 0, z: -0}
+  m_LocalRotation: {x: 0.000059881917, y: 0.00000008112332, z: -1.6250681e-11, w: 1}
+  m_LocalPosition: {x: -0.018737972, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1778400913334854152}
-  m_RootOrder: 3
+  m_Father: {fileID: 5037966646106102337}
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5146468430382534802
 MonoBehaviour:
@@ -6433,10 +6456,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  hitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  ownerTag: Entity
+  showHitLines: 0
 --- !u!1 &5146468430798945213
 GameObject:
   m_ObjectHideFlags: 0
@@ -6448,7 +6468,7 @@ GameObject:
   - component: {fileID: 5146468430798945212}
   - component: {fileID: 5146468430798945214}
   - component: {fileID: 5146468430798945215}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6534,12 +6554,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5146468431244143382}
-  m_LocalRotation: {x: 0.00013017112, y: 0.00000003641984, z: -4.7320095e-12, w: 1}
-  m_LocalPosition: {x: 0.436, y: 0, z: 0}
+  m_LocalRotation: {x: 0.000059881917, y: 0.00000008112332, z: -1.6250681e-11, w: 1}
+  m_LocalPosition: {x: 0.15726203, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1778400913334854152}
-  m_RootOrder: 1
+  m_Father: {fileID: 5037966646106102337}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5146468431244143376
 MonoBehaviour:
@@ -6554,10 +6574,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  hitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  ownerTag: Entity
+  showHitLines: 0
 --- !u!1 &5146468431276423601
 GameObject:
   m_ObjectHideFlags: 0
@@ -6602,10 +6619,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  hitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  ownerTag: Entity
+  showHitLines: 0
 --- !u!1 &5146468431351926688
 GameObject:
   m_ObjectHideFlags: 0
@@ -6650,10 +6664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  hitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  ownerTag: Entity
+  showHitLines: 0
 --- !u!1 &5146468431381027861
 GameObject:
   m_ObjectHideFlags: 0
@@ -6663,7 +6674,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5146468431381027860}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6714,12 +6725,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5146468431517122857}
-  m_LocalRotation: {x: 0.00013017112, y: 0.00000003641984, z: -4.7320095e-12, w: 1}
-  m_LocalPosition: {x: 0.345, y: -0, z: -0}
+  m_LocalRotation: {x: 0.000059881917, y: 0.00000008112332, z: -1.6250681e-11, w: 1}
+  m_LocalPosition: {x: 0.06626201, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1778400913334854152}
-  m_RootOrder: 2
+  m_Father: {fileID: 5037966646106102337}
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5146468431517122859
 MonoBehaviour:
@@ -6734,10 +6745,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 0.05
-  hitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  ownerTag: Entity
+  showHitLines: 0
 --- !u!1 &5177948269744894445
 GameObject:
   m_ObjectHideFlags: 0
@@ -6749,7 +6757,7 @@ GameObject:
   - component: {fileID: 6541323694044052784}
   - component: {fileID: 1274913808246296024}
   - component: {fileID: 8285781214115159951}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7140,6 +7148,10 @@ Transform:
   - {fileID: 7579498308609316861}
   - {fileID: 3229895863981913342}
   - {fileID: 7655668625324284035}
+  - {fileID: 30578481}
+  - {fileID: 5146468431244143377}
+  - {fileID: 5146468431517122856}
+  - {fileID: 5146468430382534803}
   m_Father: {fileID: 1778400913334854152}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7156,7 +7168,7 @@ GameObject:
   - component: {fileID: 6451364174269082675}
   - component: {fileID: 2461521199512208432}
   - component: {fileID: 2821529531620030986}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: PantsItem
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -7274,7 +7286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459b7c6e92a9ffe49a478354a14903f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentType: 2
+  equipmentType: 0
 --- !u!1 &5478994306588828117
 GameObject:
   m_ObjectHideFlags: 0
@@ -7319,7 +7331,7 @@ GameObject:
   - component: {fileID: 4293932068820951006}
   - component: {fileID: 6027015740424956155}
   - component: {fileID: 7498928077162075506}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (23)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -7449,7 +7461,7 @@ GameObject:
   - component: {fileID: 2054353707005549908}
   - component: {fileID: 411325951390471683}
   - component: {fileID: 6710449747881248350}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (26)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -7577,7 +7589,7 @@ GameObject:
   - component: {fileID: 2017779813712106448}
   - component: {fileID: 5400313647405941148}
   - component: {fileID: 7857505650892186784}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7720,7 +7732,7 @@ GameObject:
   - component: {fileID: 1043756193189586477}
   - component: {fileID: 4168566608138615403}
   - component: {fileID: 1665008434705665775}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (12)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -8037,7 +8049,7 @@ GameObject:
   - component: {fileID: 6924212405703339919}
   - component: {fileID: 6397009504679877326}
   - component: {fileID: 3604134317181420616}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: GlovesItem
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -8229,7 +8241,7 @@ GameObject:
   - component: {fileID: 2217269172051010582}
   - component: {fileID: 1974769064440606049}
   - component: {fileID: 716148555659607992}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (15)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -8480,7 +8492,7 @@ GameObject:
   - component: {fileID: 6910418401099388436}
   - component: {fileID: 6598835381525227421}
   - component: {fileID: 5148006678670930728}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (31)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -8610,7 +8622,7 @@ GameObject:
   - component: {fileID: 7232723609145986537}
   - component: {fileID: 4678351646737981039}
   - component: {fileID: 436758165633634426}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (17)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -8770,7 +8782,7 @@ GameObject:
   - component: {fileID: 6313468136358105418}
   - component: {fileID: 238609424016576782}
   - component: {fileID: 4747582388628607124}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (27)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -8991,7 +9003,7 @@ GameObject:
   - component: {fileID: 1958173315576236611}
   - component: {fileID: 702145968070710955}
   - component: {fileID: 1494134618836891325}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (2)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -9426,7 +9438,7 @@ GameObject:
   - component: {fileID: 2268697973166283572}
   - component: {fileID: 8188914174982497186}
   - component: {fileID: 6949524248084226382}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (11)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -9572,9 +9584,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5037966646106102337}
-  - {fileID: 5146468431244143377}
-  - {fileID: 5146468431517122856}
-  - {fileID: 5146468430382534803}
   m_Father: {fileID: 613334429861403914}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -9591,7 +9600,7 @@ GameObject:
   - component: {fileID: 3811382824928534967}
   - component: {fileID: 2037728629513330784}
   - component: {fileID: 9071781692607686467}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (6)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -9721,7 +9730,7 @@ GameObject:
   - component: {fileID: 1816907389212366654}
   - component: {fileID: 259193799086934966}
   - component: {fileID: 8897874632378972207}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (30)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -9851,7 +9860,7 @@ GameObject:
   - component: {fileID: 2912248280552402972}
   - component: {fileID: 2290819426165297607}
   - component: {fileID: 1055498101893080339}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (1)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -10210,7 +10219,7 @@ GameObject:
   - component: {fileID: 6808935732591902874}
   - component: {fileID: 719488647218808457}
   - component: {fileID: 7489000961002047312}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (13)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -10338,7 +10347,7 @@ GameObject:
   - component: {fileID: 8185848075922950362}
   - component: {fileID: 8317240503954714303}
   - component: {fileID: 5465746123772645277}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Interact Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10434,72 +10443,6 @@ Transform:
   m_Father: {fileID: 7767656499138706296}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7887028161421572501
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7706511942810718034}
-  - component: {fileID: 4026416881563084778}
-  - component: {fileID: 6128222565535999832}
-  m_Layer: 8
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7706511942810718034
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7887028161421572501}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 5146468429901762455}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4026416881563084778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7887028161421572501}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!114 &6128222565535999832
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7887028161421572501}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!1 &7897620846773358070
 GameObject:
   m_ObjectHideFlags: 0
@@ -10513,7 +10456,7 @@ GameObject:
   - component: {fileID: 7041044080606214110}
   - component: {fileID: 829658711327271059}
   - component: {fileID: 5920155812809258078}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (34)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}
@@ -11075,7 +11018,7 @@ GameObject:
   - component: {fileID: 5247442549384963642}
   - component: {fileID: 7397442608944325686}
   - component: {fileID: 6174865221399631369}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11431,7 +11374,7 @@ GameObject:
   - component: {fileID: 1811853809148769593}
   - component: {fileID: 4032067758321971444}
   - component: {fileID: 7328043949027523481}
-  m_Layer: 8
+  m_Layer: 5
   m_Name: Item (21)
   m_TagString: InventoryDisplaySlot
   m_Icon: {fileID: 0}

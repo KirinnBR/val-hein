@@ -17,6 +17,7 @@ MonoBehaviour:
   dropRate: 100
   sellValue: 100
   weight: 5.5
+  prefab: {fileID: 2544605221875984683, guid: 1c4b9cb95a7d5274495c4f446c4c3cf6, type: 3}
   buffStats:
     vitals:
       health: 50

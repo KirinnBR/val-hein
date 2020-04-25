@@ -10,7 +10,7 @@ public class CombatSystemEditor : Editor
 	{
 		PlayerCombatSystem player = target as PlayerCombatSystem;
 		Handles.color = Color.yellow;
-		Handles.DrawWireArc(player.transform.position, Vector3.up, player.transform.forward, 360, player.EnemyDetectionRadius);
+		Handles.DrawWireArc(player.transform.position, Vector3.up, player.transform.forward, 360, player.enemyDetectionRadius);
 	}
 
 }

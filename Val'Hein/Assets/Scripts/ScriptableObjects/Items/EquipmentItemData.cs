@@ -22,13 +22,4 @@ public class EquipmentItemData : ItemData
         return player.inventory.Equip(this);
     }
 
-    public enum EquipmentType
-    {
-        Gloves = 0, Chest = 1, Pants = 2, Boots = 3, LeftWeapon = 4, RightWeapon = 5
-    }
-
-    public static int EquipmentTypeLength => System.Enum.GetValues(typeof(EquipmentType)).Length;
-    public int Index => (int)type;
-    public bool IsWeapon => type == EquipmentType.RightWeapon || type == EquipmentType.LeftWeapon;
-
 }

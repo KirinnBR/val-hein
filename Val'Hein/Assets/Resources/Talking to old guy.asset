@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78b3fd9154634ebdb8c8a48960b9a16a, type: 3}
+  m_Name: Talking to old guy
+  m_EditorClassIdentifier: 
+  NodeLinks:
+  - BaseNodeGUID: cc4bf701-d2d4-42bb-bae6-9c96b2581896
+    PortName: Next
+    TargetNodeGUID: 8296db9a-778d-4502-a420-724ae3aef200
+  - BaseNodeGUID: 8296db9a-778d-4502-a420-724ae3aef200
+    PortName: Morning.
+    TargetNodeGUID: 830bf5ef-6723-4ba5-aa6d-d468bb4c0f16
+  - BaseNodeGUID: 8296db9a-778d-4502-a420-724ae3aef200
+    PortName: Hello! How are u doing?
+    TargetNodeGUID: 0d5dc278-d116-4b80-8a50-47005e12bf4e
+  - BaseNodeGUID: 830bf5ef-6723-4ba5-aa6d-d468bb4c0f16
+    PortName: Wanting to buy something
+    TargetNodeGUID: 96d76295-d79f-4547-95fc-5bcfe2083b19
+  - BaseNodeGUID: 0d5dc278-d116-4b80-8a50-47005e12bf4e
+    PortName: Let's just get to business, alright?
+    TargetNodeGUID: 6b707a86-f6c4-4ffb-9645-a079d9de7a3a
+  - BaseNodeGUID: 0d5dc278-d116-4b80-8a50-47005e12bf4e
+    PortName: I am good. Anything new about the mercenaries?
+    TargetNodeGUID: 70fe7be9-26ac-47c9-841c-30870612d622
+  - BaseNodeGUID: 830bf5ef-6723-4ba5-aa6d-d468bb4c0f16
+    PortName: I wanted to know about the mercenaries.
+    TargetNodeGUID: f441f333-01b6-4101-8894-9b2cfb0ffc7b
+  - BaseNodeGUID: 70fe7be9-26ac-47c9-841c-30870612d622
+    PortName: Ok... What do you have to sell?
+    TargetNodeGUID: 8326df00-9bc6-445f-ad8b-99032791284a
+  - BaseNodeGUID: 70fe7be9-26ac-47c9-841c-30870612d622
+    PortName: I know how hidden can a mercenary be. Anyways, bye!
+    TargetNodeGUID: f5462510-d72b-42ea-95a1-4d50575d9e54
+  - BaseNodeGUID: f441f333-01b6-4101-8894-9b2cfb0ffc7b
+    PortName: I know how hidden can a mercenary be. Anyways, bye!
+    TargetNodeGUID: 0b26e0a2-7217-4604-954e-bbb0f6c2bce1
+  - BaseNodeGUID: f441f333-01b6-4101-8894-9b2cfb0ffc7b
+    PortName: Ok... What do you have to sell?
+    TargetNodeGUID: 88ae3452-3a3f-4372-884d-06f855ff6759
+  DialogueNodeData:
+  - NodeGUID: 830bf5ef-6723-4ba5-aa6d-d468bb4c0f16
+    DialogueText: What brings you here?
+    Position: {x: 518, y: 101}
+  - NodeGUID: 8296db9a-778d-4502-a420-724ae3aef200
+    DialogueText: Welcome, stranger!
+    Position: {x: 215, y: 201}
+  - NodeGUID: 0d5dc278-d116-4b80-8a50-47005e12bf4e
+    DialogueText: Just fine. What about you?
+    Position: {x: 523, y: 287}
+  - NodeGUID: 6b707a86-f6c4-4ffb-9645-a079d9de7a3a
+    DialogueText: You are the boss!
+    Position: {x: 957, y: 290}
+  - NodeGUID: f5462510-d72b-42ea-95a1-4d50575d9e54
+    DialogueText: Have a nice day!
+    Position: {x: 1438, y: 549}
+  - NodeGUID: 8326df00-9bc6-445f-ad8b-99032791284a
+    DialogueText: Check those out!
+    Position: {x: 1436, y: 409}
+  - NodeGUID: 70fe7be9-26ac-47c9-841c-30870612d622
+    DialogueText: Nah. They are ghosts, as always...
+    Position: {x: 963, y: 456}
+  - NodeGUID: 96d76295-d79f-4547-95fc-5bcfe2083b19
+    DialogueText: Check those out!
+    Position: {x: 833, y: -29}
+  - NodeGUID: f441f333-01b6-4101-8894-9b2cfb0ffc7b
+    DialogueText: Nah. They are ghosts, as always...
+    Position: {x: 920, y: 124}
+  - NodeGUID: 0b26e0a2-7217-4604-954e-bbb0f6c2bce1
+    DialogueText: Have a nice day!
+    Position: {x: 1438, y: 223}
+  - NodeGUID: 88ae3452-3a3f-4372-884d-06f855ff6759
+    DialogueText: Check those out!
+    Position: {x: 1429, y: 61}
+  ExposedProperties:
+  - PropertyName: Jump
+    PropertyValue: Jump
+  CommentBlockData: []

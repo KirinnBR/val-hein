@@ -12,15 +12,11 @@ public struct VitalsStats
 		this.stamina = stamina;
 	}
 
-	public static VitalsStats Clamp(VitalsStats toBeClamped, VitalsStats clampReference)
+	public void Clamp(VitalsStats max)
 	{
-		var result = toBeClamped;
-
-		if (result.health > clampReference.health) result.health = clampReference.health;
-		if (result.mana > clampReference.mana) result.mana = clampReference.mana;
-		if (result.stamina > clampReference.stamina) result.stamina = clampReference.stamina;
-
-		return result;
+		if (health > max.health) health = max.health;
+		if (mana > max.mana) mana = max.mana;
+		if (stamina > max.stamina) stamina = max.stamina;
 	}
 
 	public static VitalsStats operator +(VitalsStats a, VitalsStats b)

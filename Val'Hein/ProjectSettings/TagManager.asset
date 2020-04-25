@@ -24,13 +24,13 @@ TagManager:
   - UI
   - 
   - 
-  - Entities
-  - Environment
+  - Player
+  - Friendly NPC
+  - Hostile NPC
   - Items
-  - 
-  - 
-  - 
-  - 
+  - Non-Obstacle Environment
+  - Obstacle Environment
+  - Manager
   - 
   - 
   - 

@@ -1,14 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class Util
 {
 	public static bool ChanceOf(float rate)
 	{
-		if (rate > 100 || rate < 0) throw new System.ArgumentOutOfRangeException("rate", rate, "The argument is greater than 100 or less than 0");
+		if (rate > 1f || rate < 0f) throw new System.ArgumentOutOfRangeException(nameof(rate), rate, "The argument is greater than 1 or less than 0");
 
-		float random = Random.Range(0f, 100f);
+		float random = Random.value;
 
 		return rate >= random;
 	}
@@ -21,7 +19,7 @@ public static class Util
 	public static Vector3 Lerp(Vector3 from, Vector3 to, float time, ref float curTime)
 	{
 		if (curTime < 0)
-			throw new System.ArgumentOutOfRangeException("curTime", curTime, "curTime must be equals or greater than 0.");
+			throw new System.ArgumentOutOfRangeException(nameof(curTime), curTime, "curTime must be equals or greater than 0.");
 		else if (curTime == 0)
 		{
 			curTime += Time.deltaTime;
@@ -30,28 +28,25 @@ public static class Util
 		else if (curTime >= time)
 			return to;
 
-		float trajectory = curTime / time;
-
-		Vector3 result = Vector3.Lerp(from, to, trajectory);
-
 		curTime += Time.deltaTime;
 
-		return result;
+		return Vector3.Lerp(from, to, curTime / time);
 	}
 
-	public static bool Lerp(Vector3 from, Vector3 to, float time, ref float curTime, CharacterController controller)
+	public static Vector3 Slerp(Vector3 from, Vector3 to, float time, ref float curTime)
 	{
-		if (curTime < 0)
-			throw new System.ArgumentOutOfRangeException("curTime", curTime, "curTime must be equals or greater than 0.");
+		if (curTime < 0 || curTime == 0)
+		{
+			curTime = 0;
+			curTime += Time.deltaTime;
+			return from;
+		}
 		else if (curTime >= time)
-			return true;
+			return to;
 
-		float posTrajectory = curTime / time;
-
-		Vector3 dir = (to - from) * posTrajectory;
-		controller.Move(dir * Time.deltaTime);
 		curTime += Time.deltaTime;
-		return false;
+
+		return Vector3.Slerp(from, to, curTime / time);
 	}
 
 	public static float Lerp(float from, float to, float time, ref float curTime)
@@ -99,4 +94,5 @@ public static class Util
 			UnityEditor.Handles.DrawWireDisc(Vector3.down * pointOffset, Vector3.up, _radius);
 		}
 	}
+
 }

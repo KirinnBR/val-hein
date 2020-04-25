@@ -87,7 +87,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3014256972892258312}
-  - component: {fileID: 781435638697097713}
   - component: {fileID: 6515543664679967904}
   m_Layer: 10
   m_Name: Great Sword
@@ -112,19 +111,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &781435638697097713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3014256972892258315}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e39af83283da264590229ec312c4c0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 11400000, guid: 7c4f7c94e3fe7904084bc625ed8c0aef, type: 2}
 --- !u!65 &6515543664679967904
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -22,7 +22,7 @@ public class PotionItemData : ItemData
 
     public override bool Use()
     {
-        player.combat.Buff(buffStats, buffTime);
+        //player.combat.Buff(buffStats, buffTime);
         player.inventory.RemoveItem(this);
         return true;
     }

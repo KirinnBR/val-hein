@@ -14,6 +14,18 @@ public abstract class ItemData : ScriptableObject
     public int sellValue = 100;
     public float weight = 1f;
 
+    public GameObject prefab;
+
+    public void Spawn(Vector3 position)
+    {
+        if (Util.ChanceOf(dropRate))
+        {
+            Instantiate(prefab, position, Quaternion.identity)
+            .AddComponent<ItemObject>()
+            .item = this;
+        }
+    }
+
     public abstract bool Use();
     public abstract bool Sell();
 

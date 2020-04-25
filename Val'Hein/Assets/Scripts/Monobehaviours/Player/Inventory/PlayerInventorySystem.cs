@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,6 +12,8 @@ public class PlayerInventorySystem : MonoBehaviour
     private Vector3 boxSize = Vector3.one;
     [SerializeField]
     private float m_maxWeight = 100f;
+    [SerializeField]
+    private LayerMask itemsLayer;
 
     public float maxWeight => m_maxWeight;
     public float weight { get; private set; } = 0f;
@@ -20,28 +21,35 @@ public class PlayerInventorySystem : MonoBehaviour
     private PlayerInputSystem input { get => PlayerCenterControl.Instance.input; }
     private PlayerCombatSystem combat { get => PlayerCenterControl.Instance.combat; }
     private PlayerUISystem ui { get => PlayerCenterControl.Instance.ui; }
-    private LayerMask itemsLayer { get => PlayerCenterControl.Instance.itemsLayer; }
 
     public UnityEvent onItemsChangeCallback = new UnityEvent();
 
     public List<ItemData> storedItems { get; private set; } = new List<ItemData>();
-    public EquipmentItemData[] storedArmor { get; private set; }
+
+    public Dictionary<EquipmentType, EquipmentItemData> storedEquipment { get; } = new Dictionary<EquipmentType, EquipmentItemData>(4);
+    public Dictionary<WeaponHand, WeaponItemData> storedWeapon { get; } = new Dictionary<WeaponHand, WeaponItemData>(2);
 
     private bool hasItem = false;
-    private Collider itemCollider;
+
+    private Collider[] itemCollider = new Collider[1];
 
     private void Start()
     {
-        storedArmor = new EquipmentItemData[EquipmentItemData.EquipmentTypeLength];
+        storedEquipment.Add(EquipmentType.Chest, null);
+        storedEquipment.Add(EquipmentType.Gloves, null);
+        storedEquipment.Add(EquipmentType.Pants, null);
+        storedEquipment.Add(EquipmentType.Boots, null);
+        storedWeapon.Add(WeaponHand.LeftHanded, null);
+        storedWeapon.Add(WeaponHand.RightHanded, null);
     }
 
     private void Update()
     {
-        if (hasItem)
+        if (input.Interact)
         {
-            if (input.Interact)
+            if (hasItem)
             {
-                if (itemCollider.TryGetComponent(out IInteractable interactable))
+                if (itemCollider[0].TryGetComponent(out IInteractable interactable))
                 {
                     interactable.Interact();
                 }
@@ -51,14 +59,9 @@ public class PlayerInventorySystem : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var col = Physics.OverlapBox(transform.position + transform.TransformDirection(boxOffset), boxSize / 2, Quaternion.LookRotation(transform.forward), itemsLayer);
+        var hit = Physics.OverlapBoxNonAlloc(transform.position + transform.TransformDirection(boxOffset), boxSize / 2, itemCollider, Quaternion.LookRotation(transform.forward), itemsLayer);
 
-        hasItem = col.Length > 0;
-
-        if (hasItem)
-        {
-            itemCollider = col[0];
-        }
+        hasItem = hit == 1;
 
         ui.InteractText.enabled = hasItem;
     }
@@ -67,85 +70,175 @@ public class PlayerInventorySystem : MonoBehaviour
     {
         //TODO: Instantiate Equipment in world space.
 
-        var itemIndex = item.Index;
-        if (storedArmor[itemIndex] != null)
+        var oldItem = storedEquipment[item.type];
+
+        if (oldItem != null)
         {
-            var oldItem = storedArmor[itemIndex];
-            storedItems.Add(oldItem);
-            
-            weight += oldItem.weight;
+            //Taking off old equipment.
+            Store(oldItem);
             combat.Debuff(oldItem.buffStats);
 
-
+            //Assigning new equipment.
             if (storedItems.Remove(item))
             {
                 weight -= item.weight;
-                storedArmor[itemIndex] = item;
+                storedEquipment[item.type] = item;
                 combat.Buff(item.buffStats);
                 onItemsChangeCallback.Invoke();
                 return true;
             }
             else
             {
-                Debug.Log($"Could not find {item.name} in items.");
+                Debug.LogError($"Could not find {item.name} in items.");
+                return false;
             }
         }
         else
         {
             if (storedItems.Remove(item))
             {
-                Debug.Log("Equiping item");
                 weight -= item.weight;
-                storedArmor[itemIndex] = item;
-                Debug.Log("Storing armor at " + itemIndex + " index");
+                storedEquipment[item.type] = item;
                 combat.Buff(item.buffStats);
-
                 onItemsChangeCallback.Invoke();
                 return true;
             }
             else
             {
-                Debug.Log("Could not find equipment in items.");
+                Debug.LogError($"Could not find {item.name} in items.");
+                return false;
             }
         }
-        return false;
     }
 
-    public bool Unequip(EquipmentItemData item)
+    public bool Equip(WeaponItemData item)
     {
-        Debug.Log("Unequiping item");
-        storedArmor[item.Index] = null;
-        storedItems.Add(item);
-        weight += item.weight;
+        if (item.hand == WeaponHand.DoubleHanded)
+        {
 
+            if (storedWeapon[WeaponHand.LeftHanded] != null)
+            {
+                var oldItem = storedWeapon[WeaponHand.LeftHanded];
+
+                Store(oldItem);
+
+                combat.Debuff(oldItem.buff);
+            }
+
+            if (storedWeapon[WeaponHand.RightHanded] != null)
+            {
+                var oldItem = storedWeapon[WeaponHand.RightHanded];
+
+                Store(oldItem);
+
+                combat.Debuff(oldItem.buff);
+            }
+
+            if (storedItems.Remove(item))
+            {
+                storedWeapon[WeaponHand.LeftHanded] = item;
+                weight -= item.weight;
+                combat.Buff(item.buff);
+                onItemsChangeCallback.Invoke();
+                return true;
+            }
+            else
+            {
+                Debug.LogError($"Could not find {item.name} in items.");
+                return false;
+            }
+        }
+        else
+        {
+            var oldItem = storedWeapon[item.hand];
+            if (oldItem != null)
+            {
+                Store(oldItem);
+                combat.Debuff(oldItem.buff);
+
+                if (storedItems.Remove(item))
+                {
+                    storedWeapon[item.hand] = item;
+                    weight -= item.weight;
+                    combat.Buff(item.buff);
+                    onItemsChangeCallback.Invoke();
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError($"Could not find {item.name} in items.");
+                    return false;
+                }
+            }
+            else
+            {
+                if (storedItems.Remove(item))
+                {
+                    storedWeapon[item.hand] = item;
+                    weight -= item.weight;
+                    combat.Buff(item.buff);
+                    onItemsChangeCallback.Invoke();
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError($"Could not find {item.name} in items.");
+                    return false;
+                }
+            }
+        }
+    }
+
+
+    public void Unequip(EquipmentItemData item)
+    {
+        storedEquipment[item.type] = null;
         combat.Debuff(item.buffStats);
 
+        Store(item);
+
         onItemsChangeCallback.Invoke();
-        return true;
     }
 
-    public bool StoreItem(ItemData item)
+    public void Unequip(WeaponItemData item)
     {
-        if (weight + item.weight <= maxWeight)
-        {
-            storedItems.Add(item);
-            weight += item.weight;
-            onItemsChangeCallback.Invoke();
-            return true;
-        }
+        if (item.hand == WeaponHand.DoubleHanded)
+            storedWeapon[WeaponHand.LeftHanded] = null;
         else
-        {
+            storedWeapon[item.hand] = null;
+
+        combat.Debuff(item.buff);
+
+        Store(item);
+
+        onItemsChangeCallback.Invoke();
+    }
+
+    public void StoreItem(ItemData item)
+    {
+        Store(item);
+        onItemsChangeCallback.Invoke();
+    }
+
+    private void Store(ItemData item)
+    {
+        storedItems.Add(item);
+        weight += item.weight;
+        if (weight >= maxWeight)
             Debug.Log("The player is too heavy.");
-            return false;
-        }
     }
 
     public void RemoveItem(ItemData item)
     {
+        Remove(item);
+        onItemsChangeCallback.Invoke();
+    }
+
+    private void Remove(ItemData item)
+    {
         if (storedItems.Remove(item))
         {
             weight -= item.weight;
-            onItemsChangeCallback.Invoke();
         }
     }
 
@@ -154,5 +247,6 @@ public class PlayerInventorySystem : MonoBehaviour
         Gizmos.color = Color.white;
         Gizmos.DrawWireCube(transform.position + transform.TransformDirection(boxOffset), boxSize);
     }
+
 
 }

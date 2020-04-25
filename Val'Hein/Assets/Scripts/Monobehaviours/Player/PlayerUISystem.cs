@@ -30,7 +30,7 @@ public class PlayerUISystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        maxHealth = PlayerCenterControl.Instance.combat.Stats.health;
+        maxHealth = PlayerCenterControl.Instance.combat.stats.health;
         weightText.text = $"Weight: {inventory.weight}/{inventory.maxWeight}";
         healthBar.value = healthBar.maxValue = maxHealth;
         currentHealth = maxHealth;
@@ -73,38 +73,40 @@ public class PlayerUISystem : MonoBehaviour
     {
         var itemSlots = inventoryDisplay.GetComponentsInChildren<ItemSlot>();
         var equipmentSlots = inventoryDisplay.GetComponentsInChildren<EquipmentSlot>().OrderBy(x => x.equipmentType).ToArray();
+        var weaponSlots = inventoryDisplay.GetComponentsInChildren<WeaponSlot>();
 
-        int i = 0;
-        while (i < itemSlots.Length)
+        for (int i = 0; i < itemSlots.Length; i++)
         {
             if (i < inventory.storedItems.Count)
-            {
                 itemSlots[i].SetSlot(inventory.storedItems[i]);
-            }
             else
-            {
                 itemSlots[i].ClearSlot();
-            }
-
-            if (i < equipmentSlots.Length)
-            {
-                if (inventory.storedArmor[i] != null)
-                {
-                    equipmentSlots[inventory.storedArmor[i].Index].SetSlot(inventory.storedArmor[i]);
-                }
-                else
-                {
-                    equipmentSlots[i].ClearSlot();
-                }
-            }
-            i++;
         }
+
+        for (int i = 0; i < equipmentSlots.Length; i++)
+        {
+            var equipment = inventory.storedEquipment[(EquipmentType)i];
+            if (equipment != null)
+                equipmentSlots[i].SetSlot(equipment);
+            else
+                equipmentSlots[i].ClearSlot();
+        }
+
+        for (int i = 0; i < weaponSlots.Length; i++)
+        {
+            var weapon = inventory.storedWeapon[(WeaponHand)i];
+            if (weapon != null)
+                weaponSlots[i].SetSlot(weapon);
+            else
+                weaponSlots[i].ClearSlot();
+        }
+
         weightText.text = $"Weight: {inventory.weight}/{inventory.maxWeight}";
     }
 
     private IEnumerator ChangeHealth(float newHealth)
     {
-        var newMaxHealth = PlayerCenterControl.Instance.combat.Stats.health;
+        var newMaxHealth = PlayerCenterControl.Instance.combat.stats.health;
         while ((maxHealth != newMaxHealth) || (currentHealth != newHealth))
         {
             if (Mathf.Abs(maxHealth - newMaxHealth) < 0.1f)

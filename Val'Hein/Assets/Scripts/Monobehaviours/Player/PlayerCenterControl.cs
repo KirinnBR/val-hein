@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.Profiling;
 
 #pragma warning disable CS0649
 
@@ -9,25 +7,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(PlayerInputSystem), typeof(PlayerInventorySystem), typeof(Animator))]
 public class PlayerCenterControl : Singleton<PlayerCenterControl>
 {
-	#region Layer References
-
-	[Header("Layer References")]
-
-	[Tooltip("The LayerMask that the player's physics calculations will use.")]
-	[SerializeField]
-	private LayerMask m_physicsCheckLayer;
-	public LayerMask physicsCheckLayer => m_physicsCheckLayer;
-
-	[Tooltip("The LayerMask that the player's combat physics calculations will use.")]
-	[SerializeField]
-	private LayerMask m_combatCheckLayer;
-	public LayerMask combatCheckLayer => m_combatCheckLayer;
-
-	[SerializeField]
-	private LayerMask m_itemsLayer;
-	public LayerMask itemsLayer => m_itemsLayer;
-
-	#endregion
 
 	#region Camera Reference
 
@@ -61,4 +40,5 @@ public class PlayerCenterControl : Singleton<PlayerCenterControl>
 		ui = GetComponent<PlayerUISystem>();
 		anim = GetComponent<Animator>();
 	}
+
 }

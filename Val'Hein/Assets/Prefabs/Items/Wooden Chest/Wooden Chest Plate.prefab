@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3656371549843510349}
   - component: {fileID: 3656371549843510348}
   - component: {fileID: 3656371549843510351}
-  - component: {fileID: 3656371549843510347}
   m_Layer: 10
   m_Name: Wooden Chest Plate
   m_TagString: Untagged
@@ -93,16 +92,3 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3656371549843510347
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3656371549843510350}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e39af83283da264590229ec312c4c0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 11400000, guid: 606792ee487325449a0c447e57237ca3, type: 2}

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Profiling;
+﻿using UnityEngine;
 
 #pragma warning disable CS0649
 [RequireComponent(typeof(CharacterController))]
@@ -34,18 +31,15 @@ public class PlayerControllerSystem : MonoBehaviour
 	[Tooltip("The force of the dodge.")]
 	[SerializeField]
 	private float dodgeDistance = 10f;
+	[SerializeField]
+	private LayerMask groundCheckLayer;
 
-	public bool DodgeBlocked { get; set; } = false;
-	public bool JumpBlocked { get; set; } = false;
-	public bool RotationBlocked { get; set; } = false;
-	public bool MovementBlocked { get; set; } = false;
-	public bool RunBlocked { get; set; } = false;
-
-	private Vector3 motionHorizontal = Vector3.zero;
+	private Vector3 motionHorizontal = Vector2.zero;
 	private float motionVertical = 0f;
+	private Vector3 motion;
 	private float angle = 0f;
 
-	private Vector3 dodgeStartPos;
+	private Vector3 dodgeStartPos, dodgeEndPos;
 
 	#endregion
 
@@ -59,140 +53,99 @@ public class PlayerControllerSystem : MonoBehaviour
 	[SerializeField]
 	[Tooltip("The height of the capsule.")]
 	private float height = 0.8f;
+	[SerializeField]
+	private float radius = 0.2f;
 
 	public float Gravity => 25f;
-	public bool isGrounded, wasGrounded, onSlope;
-
-	#endregion
-
-	#region States References
-
-	private BaseState<PlayerControllerSystem> currentState;
-	public PlayerJumpingState jumpingState { get; } = new PlayerJumpingState();
-	public PlayerMovingState movingState { get; } = new PlayerMovingState();
-	public PlayerDodgingState dodgingState { get; } = new PlayerDodgingState();
+	private bool isGrounded = true, wasGrounded = true, onSlope = false;
+	private bool isJumping = false;
 
 	#endregion
 
 	#region External Properties
 
-	public PlayerInputSystem input { get { return PlayerCenterControl.Instance.input; } }
+	private PlayerInputSystem input { get { return PlayerCenterControl.Instance.input; } }
 	private Animator anim { get { return PlayerCenterControl.Instance.anim; } }
 	private CameraBehaviour cam { get { return PlayerCenterControl.Instance.camera; } }
-	private PlayerCombatSystem combat { get { return PlayerCenterControl.Instance.combat; } }
-	private LayerMask groundCheckLayer { get { return PlayerCenterControl.Instance.physicsCheckLayer; } }
 	private CharacterController controller;
 
 	#endregion
+
+	public bool lockGravity { get; set; } = false;
+	public bool lockMovement { get; set; } = false;
+	public bool lockRotation { get; set; } = false;
 
 	#region Common Methods
 
 	private void Start()
 	{
 		controller = GetComponent<CharacterController>();
-		TransitionToState(movingState);
-	}
-
-	private void Update()
-	{
-		Profiler.BeginSample("UPDATING STATE");
-		currentState.Update(this);
-		Profiler.EndSample();
-	}
-
-	private void FixedUpdate()
-	{
-		CheckGrounded();
-	}
-
-	private void CheckGrounded()
-	{
-		wasGrounded = isGrounded;
-		isGrounded = Physics.CheckCapsule(transform.position + center + (Vector3.up * (height / 2)), transform.position + center + (Vector3.down * (height / 2)), controller.radius, groundCheckLayer, QueryTriggerInteraction.UseGlobal);
-		anim.SetBool("Is Grounded", isGrounded);
-		if (isGrounded)
-		{
-			if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, controller.height, groundCheckLayer, QueryTriggerInteraction.UseGlobal))
-				onSlope = hit.normal != Vector3.up;
-			else
-				onSlope = false;
-		}
 	}
 
 	#endregion
 
 	#region State Methods
 
-	public void TransitionToState(BaseState<PlayerControllerSystem> newState)
-	{
-		currentState = newState;
-		currentState.EnterState(this);
-	}
-
-	public void ProccessInput()
-	{
-		if (input.Jump && !JumpBlocked)
-		{
-			TransitionToState(jumpingState);
-		}
-		if (input.Dodge && !DodgeBlocked)
-		{
-			TransitionToState(dodgingState);
-		}
-	}
-
-	public void ApplyGravity()
-	{
-		if (motionVertical >= -Gravity)
-			motionVertical += -Gravity * Time.deltaTime;
-
-		if (wasGrounded && !isGrounded)
-		{
-			motionVertical = 0f;
-		}
-
-		if (onSlope && wasGrounded && isGrounded)
-			controller.Move(Vector3.down * Gravity * 500f * Time.deltaTime);
-		else
-			controller.Move(Vector3.down * -motionVertical * Time.deltaTime);
-	}
-
 	public void Move()
 	{
-		Vector3 dir;
-		if (RunBlocked)
-			dir = (cam.Forward * input.Vertical + cam.Right * input.Horizontal).normalized * walkSpeed;
-		else
-			dir = (cam.Forward * input.Vertical + cam.Right * input.Horizontal).normalized * (input.Run ? runSpeed : walkSpeed);
-
-		if (MovementBlocked)
+		if (!lockGravity)
 		{
-			motionHorizontal = Vector3.Lerp(motionHorizontal, Vector3.zero, acceleration * Time.deltaTime);
-			controller.Move(motionHorizontal * Time.deltaTime);
-			return;
+			wasGrounded = isGrounded;
+			isGrounded = Physics.CheckCapsule(transform.position + center + Vector3.up * height / 2, transform.position + center + Vector3.down * height / 2, radius, groundCheckLayer, QueryTriggerInteraction.UseGlobal);
+			anim.SetBool("Is Grounded", isGrounded);
+			if (isGrounded)
+			{
+				if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, height, groundCheckLayer, QueryTriggerInteraction.UseGlobal))
+					onSlope = hit.normal != Vector3.up;
+				else
+					onSlope = false;
+
+				if (motionVertical >= -Gravity)
+					motionVertical -= Gravity * Time.deltaTime;
+				if (onSlope && wasGrounded && !isJumping)
+				{
+					motionVertical = -Gravity * 500f;
+				}
+			}
+			else
+			{
+				motionVertical -= Gravity * Time.deltaTime;
+
+				if (wasGrounded && !isJumping)
+				{
+					motionVertical = 0f;
+				}
+			}
 		}
 
-		if (dir != Vector3.zero)
+		if (!lockMovement)
 		{
-			if (Rotate(dir))
+			Vector3 dir = (cam.Forward * input.Vertical + cam.Right * input.Horizontal).normalized * (input.Run ? runSpeed : walkSpeed);
+
+			if (dir != Vector3.zero)
+			{
+				if (Rotate(dir))
+					motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
+			}
+			else
+			{
 				motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
-		}
-		else
-		{
-			motionHorizontal = Vector3.Lerp(motionHorizontal, dir, acceleration * Time.deltaTime);
-			Rotate(dir);
+				Rotate(dir);
+			}
+
+			if (motionHorizontal.magnitude <= .01f)
+				motionHorizontal = Vector3.zero;
+
 		}
 
-		if (motionHorizontal.magnitude <= .01f)
-			motionHorizontal = Vector3.zero;
+		motion = new Vector3(motionHorizontal.x, motionVertical, motionHorizontal.z);
 
-		controller.Move(motionHorizontal * Time.deltaTime);
+		controller.Move(motion * Time.deltaTime);
 	}
 
 	private bool Rotate(Vector3 dir, float controlEfficiency = 1f)
 	{
-		if (RotationBlocked) return false;
-		if (dir == Vector3.zero)
+		if (dir == Vector3.zero || lockRotation)
 		{
 			angle = 0f;
 			return false;
@@ -216,60 +169,49 @@ public class PlayerControllerSystem : MonoBehaviour
 		anim.SetFloat("Angle", angle);
 	}
 
-	public Vector3 Dodge()
+	public void Dodge()
 	{
-
 		Vector3 dir = motionHorizontal.normalized;
 		if (input.Horizontal == 0 && input.Vertical == 0)
 			dir = -transform.forward;
 		dir *= dodgeDistance;
 		dodgeStartPos = transform.position;
-		return dir;
+		dodgeEndPos = transform.position + dir;
 	}
 
-	public void UpdateDodge(Vector3 dir, ref float timeDodging)
+	public bool UpdateDodge(ref float timeDodging)
 	{
-		if (Util.Lerp(dodgeStartPos, dodgeStartPos + dir, dodgeTime, ref timeDodging, controller))
+		timeDodging += Time.deltaTime;
+		if (timeDodging >= dodgeTime)
 		{
-			TransitionToState(movingState);
+			return false;
+			//PlayerStateSystem.ExitState();
 		}
+		return true;
 	}
 
 	public void Jump()
 	{
-		combat.CanAttack = false;
+		isJumping = true;
 		anim.SetTrigger("Jump");
 		motionVertical = Mathf.Sqrt(2 * Gravity * jumpHeight);
 	}
 
-	public void UpdateJump()
+	public bool UpdateJump()
 	{
-		Vector3 newDir = new Vector3(motionHorizontal.x, motionVertical, motionHorizontal.z);
-
-		controller.Move(newDir * Time.deltaTime);
-
 		if (isGrounded && motionVertical <= 0)
 		{
-			TransitionToState(movingState);
-			combat.CanAttack = true;
+			isJumping = false;
+			return false;
 		}
-
-		motionVertical += -Gravity * Time.deltaTime;
+		return true;
 	}
 
 	#endregion
 
 	private void OnDrawGizmosSelected()
 	{
-		if (UnityEditor.EditorApplication.isPlaying)
-		{
-			Util.DrawWireCapsule(transform.position + center, Quaternion.identity, controller.radius, height, Color.green);
-		}
-		else
-		{
-			var cc = GetComponent<CharacterController>();
-			Util.DrawWireCapsule(transform.position + center, Quaternion.identity, cc.radius, height, Color.green);
-		}
+		Util.DrawWireCapsule(transform.position + center, Quaternion.identity, radius, height, Color.green);
 	}
 
 }

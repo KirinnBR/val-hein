@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerInputSystem : MonoBehaviour
 {
-
     public bool Jump => Input.GetKeyDown(KeyCode.Space) && !isPaused;
     public bool Run => Input.GetKey(KeyCode.LeftShift) && !isPaused;
     public bool Dodge => Input.GetKeyDown(KeyCode.LeftControl) && !isPaused;

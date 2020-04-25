@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b47134e7f277a243841c258d97abd10, type: 3}
+  m_Name: PlayerController
+  m_EditorClassIdentifier: 
+  m_states:
+  - m_name: Moving State
+    m_transitions:
+    - m_targetStateID: 44c9f0a3c6f39f344a7ad1f25667d89a
+      m_trigger: Jump
+    - m_targetStateID: 305f9275236dd78438a3d560938045a3
+      m_trigger: Attack
+    m_stateBehaviour: {fileID: 11400000, guid: a23a3003a78742b4d9af55c59a5e1215, type: 2}
+    m_id: 83b4e6f1404e2c84b80b89bef60250e5
+  - m_name: Jumping State
+    m_transitions:
+    - m_targetStateID: 83b4e6f1404e2c84b80b89bef60250e5
+      m_trigger: 
+    m_stateBehaviour: {fileID: 11400000, guid: c673bb24d48882d479aa307765086754, type: 2}
+    m_id: 44c9f0a3c6f39f344a7ad1f25667d89a
+  - m_name: Attacking State
+    m_transitions:
+    - m_targetStateID: 83b4e6f1404e2c84b80b89bef60250e5
+      m_trigger: 
+    m_stateBehaviour: {fileID: 11400000, guid: ae794fd1c206f6840a4a5dde2280387e, type: 2}
+    m_id: 305f9275236dd78438a3d560938045a3
+  m_anyStateTransitions: []
+  m_persistentBehaviours: []
+  m_entryStateID: 83b4e6f1404e2c84b80b89bef60250e5
